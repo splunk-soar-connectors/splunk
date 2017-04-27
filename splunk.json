@@ -1,0 +1,316 @@
+{
+    "appid": "91883aa8-9c81-470b-97a1-5d8f7995f560",
+    "name": "Splunk", 
+    "description": "This app integrates with a Splunk device to implement investigative actions like 'run query' and 'get host events'.", 
+    "publisher": "Phantom", 
+    "type": "siem", 
+    "main_module": "splunk_connector.pyc", 
+    "app_version": "1.2.18",
+    "utctime_updated": "2016-10-13T06:09:41.000000Z",
+    "package_name": "phantom_splunk",
+    "product_name": "Splunk Enterprise", 
+    "product_vendor": "Splunk Inc.", 
+    "product_version_regex": ".*",
+    "min_phantom_version": "1.2.236",
+    "logo": "splunk.png",
+    "license": "Copyright (c) Phantom Cyber Corporation 2015-2016",
+    "configuration": {
+      "device": {
+        "description": "Device IP/Hostname", 
+        "data_type": "string",
+        "order": 0,
+        "required": true
+      }, 
+      "port": {
+        "description": "Port", 
+        "data_type": "numeric", 
+        "order": 1,
+        "value": "8089"
+      }, 
+      "username": {
+        "description": "Username", 
+        "order": 2,
+        "data_type": "string"
+      },
+      "password": {
+        "description": "Password", 
+        "order": 3,
+        "data_type": "password"
+      },
+      "timezone": {
+        "data_type": "timezone",
+        "order": 5,
+        "description": "Splunk server timezone",
+        "required": true
+      }
+    },
+    "required_config": [ "machine_ip_name" ], 
+    "actions": [
+      {
+        "action": "test connectivity",
+        "description": "Validate the asset configuration for connectivity. This action logs into the device to check the connection and credentials.",
+        "type": "test",
+        "identifier": "test_asset_connectivity",
+        "read_only": true,
+        "parameters": {
+        },
+        "output": [],
+        "versions":"EQ(*)"
+      },
+      {
+        "action": "get host events", 
+        "description": "Gets events pertaining to a host that have occured in the last 'N' days.", 
+        "type": "investigate", 
+        "identifier": "get_host_events",
+        "read_only": true, 
+        "parameters": {
+          "ip_hostname": {
+            "description": "Hostname/IP to search the events of", 
+            "data_type": "string",
+            "order": 0,
+            "contains": [ "ip", "host name" ],
+            "required": true,
+            "primary": true
+          }, 
+          "last_n_days": {
+            "description": "Number of days ago", 
+            "data_type": "numeric",
+            "order": 1,
+            "required": true
+          }
+        }, 
+        "render": {
+          "type": "table",
+          "width": 12,
+          "height": 5,
+          "title": "Search Results"
+        },
+        "output": [
+          {
+            "data_path": "action_result.data.*.host",
+            "column_name": "Host",
+            "column_order": "0",
+            "data_type": "string",
+            "contains": ["host name"]
+          },
+          {
+            "data_path": "action_result.data.*._time",
+            "column_name": "Time",
+            "column_order": "1",
+            "data_type": "string"
+          },
+          {
+            "data_path": "action_result.data.*._raw",
+            "column_name": "Raw",
+            "column_order": "2",
+            "data_type": "string"
+          },
+          {
+            "data_path": "action_result.data.*._cd",
+            "data_type": "string"
+          },
+          {
+            "data_path": "action_result.data.*._si",
+            "data_type": "string"
+          },
+          {
+            "data_path": "action_result.data.*._bkt",
+            "data_type": "string"
+          },
+          {
+            "data_path": "action_result.data.*.index",
+            "data_type": "string"
+          },
+          {
+            "data_path": "action_result.data.*.source",
+            "data_type": "string"
+          },
+          {
+            "data_path": "action_result.data.*._serial",
+            "data_type": "string"
+          },
+          {
+            "data_path": "action_result.data.*.linecount",
+            "data_type": "string"
+          },
+          {
+            "data_path": "action_result.data.*._indextime",
+            "data_type": "string"
+          },
+          {
+            "data_path": "action_result.data.*.sourcetype",
+            "data_type": "string"
+          },
+          {
+            "data_path": "action_result.data.*._sourcetype",
+            "data_type": "string"
+          },
+          {
+            "data_path": "action_result.data.*.splunk_server",
+            "data_type": "string",
+            "contains": ["host name"]
+          },
+          {
+            "data_path": "action_result.status",
+            "data_type": "string"
+          },
+          {
+            "data_path": "action_result.message",
+            "data_type": "string"
+          },
+          {
+            "data_path": "action_result.summary.total_events",
+            "data_type": "numeric"
+          },
+          {
+            "data_path": "action_result.parameter.ip_hostname",
+            "data_type": "string",
+            "contains": [ "ip", "host name" ]
+          },
+          {
+            "data_path": "action_result.parameter.last_n_days",
+            "data_type": "numeric"
+          },
+          {
+            "data_path": "summary.total_objects",
+            "data_type": "numeric"
+          },
+          {
+            "data_path": "summary.total_objects_successful",
+            "data_type": "numeric"
+          }
+        ],
+        "versions": "EQ(*)"
+      }, 
+      {
+        "action": "run query", 
+        "description": "Run a search query on the Splunk device. Please escape any quotes that are part of the query string.",
+        "verbose": "By default the widget for the &quot;run query&quot; action will show the host, time and raw fields. If you would like to see specific fields parsed out, they can be listed in a comma separated format in the &quot;display&quot; parameter.<br><br>Please keep in mind that Splunk does not always return all possible fields. Splunk may not return fields that are calculated or not present in the event.<br><br>To work around this you can force Splunk to return specific fields by using the &quot;fields&quot;. This works by appending &quot;| fields + *&quot; to your query. This will return every field, you can replace the asterisk with a comma separated list of fields.<br><br>Finally, some searches (such as those based on data models) can contain name-spaced fields. If I have a data model &quot;my_model&quot; with a search &quot;my_search&quot; that has a field &quot;hash&quot; then the field will be named &quot;my_search.hash&quot; and that is what must be used in the Splunk fields command and the display parameter.",
+        "type": "investigate", 
+        "identifier": "execute_search",
+        "read_only": true, 
+        "parameters": {
+          "query": {
+            "description": "Query to run (in Splunk search language)", 
+            "data_type": "string",
+            "order": 0,
+            "required": true,
+            "primary": true,
+            "contains": [ "splunk query" ]
+          },
+          "display": {
+            "description": "Display fields (comma separated)", 
+            "data_type": "string",
+            "order": 1,
+            "required": false,
+            "primary": false
+          }
+        }, 
+        "render": {
+          "type": "custom",
+          "width": 10,
+          "height": 5,
+          "view": "splunk_views.run_query",
+          "title": "Search Results"
+        },
+        "output": [
+          {
+            "data_path": "action_result.data.*.host",
+            "column_name": "Host",
+            "column_order": "0",
+            "data_type": "string",
+            "contains": ["host name"]
+          },
+          {
+            "data_path": "action_result.data.*._time",
+            "column_name": "Time",
+            "column_order": "1",
+            "data_type": "string",
+            "contains": []
+          },
+          {
+            "data_path": "action_result.data.*._raw",
+            "column_name": "Raw",
+            "column_order": "2",
+            "data_type": "string",
+            "contains": []
+          },
+          {
+            "data_path": "action_result.data.*._cd",
+            "data_type": "string"
+          },
+          {
+            "data_path": "action_result.data.*._si",
+            "data_type": "string"
+          },
+          {
+            "data_path": "action_result.data.*._bkt",
+            "data_type": "string"
+          },
+          {
+            "data_path": "action_result.data.*.index",
+            "data_type": "string"
+          },
+          {
+            "data_path": "action_result.data.*.source",
+            "data_type": "string"
+          },
+          {
+            "data_path": "action_result.data.*._serial",
+            "data_type": "string"
+          },
+          {
+            "data_path": "action_result.data.*.linecount",
+            "data_type": "string"
+          },
+          {
+            "data_path": "action_result.data.*._indextime",
+            "data_type": "string"
+          },
+          {
+            "data_path": "action_result.data.*.sourcetype",
+            "data_type": "string"
+          },
+          {
+            "data_path": "action_result.data.*._sourcetype",
+            "data_type": "string"
+          },
+          {
+            "data_path": "action_result.data.*.splunk_server",
+            "data_type": "string",
+            "contains": ["host name"]
+          },
+          {
+            "data_path": "action_result.status",
+            "data_type": "string"
+          },
+          {
+            "data_path": "action_result.message",
+            "data_type": "string"
+          },
+          {
+            "data_path": "action_result.summary.total_events",
+            "data_type": "numeric"
+          },
+          {
+            "data_path": "action_result.parameter.query",
+            "data_type": "string",
+            "contains": [ "splunk query" ]
+          },
+          {
+            "data_path": "action_result.parameter.display",
+            "data_type": "string"
+          },
+          {
+            "data_path": "summary.total_objects",
+            "data_type": "numeric"
+          },
+          {
+            "data_path": "summary.total_objects_successful",
+            "data_type": "numeric"
+          }
+        ],
+        "versions": "EQ(*)"
+      }
+    ]
+}
