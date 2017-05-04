@@ -90,22 +90,25 @@ class SplunkConnector(phantom.BaseConnector):
         except Exception as e:
             return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_CONNECTION_FAILED, e), None
 
-        if endpoint in ['receivers/simple', 'apps/local']:
-            if response.status_code == 200:
-                return phantom.APP_SUCCESS, response.text
-            if consts.SPLUNK_POST_DATA_WARN in response.text:
-                return action_result.set_status(phantom.APP_ERROR, response.text[
-                    re.search(consts.SPLUNK_POST_DATA_WARN, response.text).end(): re.search('</msg>', response.text).start()]), None
+        # store the r_text in debug data, it will get dumped in the logs if an error occurs
+        if hasattr(action_result, 'add_debug_data'):
+            if (response is not None):
+                action_result.add_debug_data({'r_status_code': response.status_code})
+                action_result.add_debug_data({'r_text': response.text})
+                action_result.add_debug_data({'r_headers': response.headers})
             else:
-                return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_NOT_200.format(response.status_code, 'Unknown Error')), None
+                action_result.add_debug_data({'r_text': 'r is None'})
+
+        if response.status_code != 200:
+            return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_NOT_200), None
+
+        if endpoint != 'notable_update':
+            return phantom.APP_SUCCESS, response.text
 
         try:
             resp_json = response.json()
         except:
             return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_NOT_JSON), None
-
-        if response.status_code != 200:
-            return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_NOT_200.format(response.status_code, resp_json.get('message', 'Unknown Error'))), None
 
         return phantom.APP_SUCCESS, resp_json
 
@@ -118,9 +121,9 @@ class SplunkConnector(phantom.BaseConnector):
             return 'UNKNOWN'
 
         begin_version = re.search(consts.SPLUNK_SERVER_VERSION, resp_data).end()
-        end_version = re.search(consts.SPLUNK_SERVER_VERSION, resp_data[begin_version:]).start()
+        end_version = re.search('</s:key>', resp_data[begin_version:]).start()
 
-        return resp_data[begin_version:end_version]
+        return resp_data[begin_version:begin_version + end_version]
 
     def _check_for_es(self, action_result):
 
@@ -312,8 +315,9 @@ class SplunkConnector(phantom.BaseConnector):
             return self.append_to_message(consts.SPLUNK_ERR_CONNECTIVITY_TEST)
 
         is_es = self._check_for_es(self)
+        version = self._get_server_version(self)
 
-        self.save_progress("Splunk server {0} ES".format("has" if  else "does not have"))
+        self.save_progress("Detected Splunk {0}server version {1}".format("ES " if is_es else "", version))
 
         self.debug_print("connect passed")
         return self.set_status_save_progress(phantom.APP_SUCCESS, consts.SPLUNK_SUCC_CONNECTIVITY_TEST)
