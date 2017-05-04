@@ -23,8 +23,8 @@ SPLUNK_ERR_CONNECTION_FAILED = "Failed to connect to splunk server"
 SPLUNK_ERR_UNABLE_TO_CREATE_JOB = "Failed to get a job id from splunk server"
 SPLUNK_ERR_GET_EVENTS = "Error getting events for alert '{ss_name}' having sid '{sid}'"
 SPLUNK_ERR_NOT_200 = "Splunk server return error from API call. Code: {0}. Message: {1}"
+SPLUNK_ERR_NOT_ES = "This instance does not seem to be Splunk ES. This action cannot be run"
 SPLUNK_ERR_CONNECTION_NOT_PRE_ESTABLISHED = "Connection to splunk server not yet established"
-SPLUNK_ERR_NOT_ES = "This Splunk instance does not have ES available. This action cannot be run"
 SPLUNK_ERR_INVALID_TIME_RANGE = "Invalid Time range specified, where the end time is less than start time"
 SPLUNK_ERR_NEED_PARAM = "One of comment, status, urgency, or owner parameters needs to be supplied to run this action"
 
@@ -67,6 +67,7 @@ SPLUNK_DEFAULT_SOURCE_TYPE = "Automation/Orchestration Platform"
 
 # HTML search strings:
 SPLUNK_POST_DATA_WARN = '<msg type="WARN">'
+SPLUNK_SERVER_VERSION = '<s:key name="version">'
 SPLUNK_ES_NAME = '<title>SA-EndpointProtection</title>'
 
 # Numeric constants

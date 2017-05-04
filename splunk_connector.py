@@ -109,6 +109,19 @@ class SplunkConnector(phantom.BaseConnector):
 
         return phantom.APP_SUCCESS, resp_json
 
+    def _get_server_version(self, action_result):
+
+        endpoint = 'server/info'
+        ret_val, resp_data = self._make_rest_call(action_result, endpoint, {}, method=requests.get)
+
+        if consts.SPLUNK_SERVER_VERSION not in resp_data:
+            return 'UNKNOWN'
+
+        begin_version = re.search(consts.SPLUNK_SERVER_VERSION, resp_data).end()
+        end_version = re.search(consts.SPLUNK_SERVER_VERSION, resp_data[begin_version:]).start()
+
+        return resp_data[begin_version:end_version]
+
     def _check_for_es(self, action_result):
 
         endpoint = 'apps/local'
@@ -298,7 +311,9 @@ class SplunkConnector(phantom.BaseConnector):
             self.save_progress(consts.SPLUNK_ERR_CONNECTIVITY_TEST)
             return self.append_to_message(consts.SPLUNK_ERR_CONNECTIVITY_TEST)
 
-        self.save_progress("Splunk server {0} ES".format("has" if self._check_for_es(self) else "does not have"))
+        is_es = self._check_for_es(self)
+
+        self.save_progress("Splunk server {0} ES".format("has" if  else "does not have"))
 
         self.debug_print("connect passed")
         return self.set_status_save_progress(phantom.APP_SUCCESS, consts.SPLUNK_SUCC_CONNECTIVITY_TEST)
