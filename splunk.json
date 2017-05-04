@@ -1,50 +1,56 @@
 {
     "appid": "91883aa8-9c81-470b-97a1-5d8f7995f560",
-    "name": "Splunk", 
-    "description": "This app integrates with a Splunk device to implement investigative actions like 'run query' and 'get host events'.", 
-    "publisher": "Phantom", 
-    "type": "siem", 
-    "main_module": "splunk_connector.pyc", 
-    "app_version": "1.2.19",
-    "utctime_updated": "2017-04-29T02:30:57.000000Z",
+    "name": "Splunk",
+    "description": "This app integrates with a Splunk device to implement investigative actions like 'run query' and 'get host events'.",
+    "publisher": "Phantom",
+    "type": "siem",
+    "main_module": "splunk_connector.pyc",
+    "app_version": "1.2.18",
+    "utctime_updated": "2016-10-13T06:09:41.000000Z",
     "package_name": "phantom_splunk",
-    "product_name": "Splunk Enterprise", 
-    "product_vendor": "Splunk Inc.", 
+    "product_name": "Splunk Enterprise",
+    "product_vendor": "Splunk Inc.",
     "product_version_regex": ".*",
     "min_phantom_version": "1.2.236",
     "logo": "splunk.png",
-    "license": "Copyright (c) Phantom Cyber Corporation 2015-2016",
+    "license": "Copyright (c) Phantom Cyber Corporation 2015-2017",
     "configuration": {
       "device": {
-        "description": "Device IP/Hostname", 
+        "description": "Device IP/Hostname",
         "data_type": "string",
         "order": 0,
         "required": true
-      }, 
+      },
       "port": {
-        "description": "Port", 
-        "data_type": "numeric", 
+        "description": "Port",
+        "data_type": "numeric",
         "order": 1,
-        "value": "8089"
-      }, 
+        "default": "8089"
+      },
       "username": {
-        "description": "Username", 
+        "description": "Username",
         "order": 2,
         "data_type": "string"
       },
       "password": {
-        "description": "Password", 
+        "description": "Password",
         "order": 3,
         "data_type": "password"
       },
       "timezone": {
         "data_type": "timezone",
-        "order": 5,
+        "order": 4,
         "description": "Splunk server timezone",
         "required": true
+      },
+      "verify_server_cert": {
+        "data_type": "boolean",
+        "order": 5,
+        "description": "Verify server certificate",
+        "required": true,
+        "default": false
       }
     },
-    "required_config": [ "machine_ip_name" ], 
     "actions": [
       {
         "action": "test connectivity",
@@ -58,27 +64,27 @@
         "versions":"EQ(*)"
       },
       {
-        "action": "get host events", 
-        "description": "Gets events pertaining to a host that have occured in the last 'N' days.", 
-        "type": "investigate", 
+        "action": "get host events",
+        "description": "Gets events pertaining to a host that have occured in the last 'N' days.",
+        "type": "investigate",
         "identifier": "get_host_events",
-        "read_only": true, 
+        "read_only": true,
         "parameters": {
           "ip_hostname": {
-            "description": "Hostname/IP to search the events of", 
+            "description": "Hostname/IP to search the events of",
             "data_type": "string",
             "order": 0,
             "contains": [ "ip", "host name" ],
             "required": true,
             "primary": true
-          }, 
+          },
           "last_n_days": {
-            "description": "Number of days ago", 
+            "description": "Number of days ago",
             "data_type": "numeric",
             "order": 1,
             "required": true
           }
-        }, 
+        },
         "render": {
           "type": "table",
           "width": 12,
@@ -181,17 +187,17 @@
           }
         ],
         "versions": "EQ(*)"
-      }, 
+      },
       {
-        "action": "run query", 
+        "action": "run query",
         "description": "Run a search query on the Splunk device. Please escape any quotes that are part of the query string.",
         "verbose": "By default the widget for the &quot;run query&quot; action will show the host, time and raw fields. If you would like to see specific fields parsed out, they can be listed in a comma separated format in the &quot;display&quot; parameter.<br><br>Please keep in mind that Splunk does not always return all possible fields. Splunk may not return fields that are calculated or not present in the event.<br><br>To work around this you can force Splunk to return specific fields by using the &quot;fields&quot;. This works by appending &quot;| fields + *&quot; to your query. This will return every field, you can replace the asterisk with a comma separated list of fields.<br><br>Finally, some searches (such as those based on data models) can contain name-spaced fields. If I have a data model &quot;my_model&quot; with a search &quot;my_search&quot; that has a field &quot;hash&quot; then the field will be named &quot;my_search.hash&quot; and that is what must be used in the Splunk fields command and the display parameter.",
-        "type": "investigate", 
+        "type": "investigate",
         "identifier": "execute_search",
-        "read_only": true, 
+        "read_only": true,
         "parameters": {
           "query": {
-            "description": "Query to run (in Splunk search language)", 
+            "description": "Query to run (in Splunk search language)",
             "data_type": "string",
             "order": 0,
             "required": true,
@@ -199,13 +205,13 @@
             "contains": [ "splunk query" ]
           },
           "display": {
-            "description": "Display fields (comma separated)", 
+            "description": "Display fields (comma separated)",
             "data_type": "string",
             "order": 1,
             "required": false,
             "primary": false
           }
-        }, 
+        },
         "render": {
           "type": "custom",
           "width": 10,
@@ -299,6 +305,203 @@
           },
           {
             "data_path": "action_result.parameter.display",
+            "data_type": "string"
+          },
+          {
+            "data_path": "summary.total_objects",
+            "data_type": "numeric"
+          },
+          {
+            "data_path": "summary.total_objects_successful",
+            "data_type": "numeric"
+          }
+        ],
+        "versions": "EQ(*)"
+      },
+      {
+        "action": "update event",
+        "description": "Update a notable event",
+        "verbose": "NOTE: This action only works with Splunk ES",
+        "type": "generic",
+        "identifier": "update_event",
+        "read_only": false,
+        "parameters": {
+          "events": {
+            "description": "IDs of notable events to update",
+            "data_type": "string",
+            "contains": [ "splunk notable event id" ],
+            "required": true,
+            "order": 0,
+            "primary": true
+          },
+          "comment": {
+            "description": "New comment for the event",
+            "data_type": "string",
+            "required": false,
+            "order": 4
+          },
+          "status": {
+            "description": "New status for the event",
+            "data_type": "string",
+            "value_list": [
+              "",
+              "unassigned",
+              "new",
+              "in progress",
+              "pending",
+              "resolved",
+              "closed"
+            ],
+            "required": false,
+            "order": 2
+          },
+          "urgency": {
+            "description": "New urgency for the event",
+            "data_type": "string",
+            "value_list": [
+              "",
+              "informational",
+              "low",
+              "medium",
+              "high",
+              "critical"
+            ],
+            "required": false,
+            "order": 3
+          },
+          "owner": {
+            "description": "New owner for the event",
+            "data_type": "string",
+            "required": false,
+            "order": 1
+          }
+        },
+        "output": [
+          {
+            "data_path": "action_result.data.*.message",
+            "data_type": "string"
+          },
+          {
+            "data_path": "action_result.data.*.success",
+            "data_type": "boolean"
+          },
+          {
+            "data_path": "action_result.data.*.failure_count",
+            "data_type": "numeric"
+          },
+          {
+            "data_path": "action_result.data.*.success_count",
+            "data_type": "numeric"
+          },
+          {
+            "data_path": "action_result.status",
+            "data_type": "string"
+          },
+          {
+            "data_path": "action_result.message",
+            "data_type": "string"
+          },
+          {
+            "data_path": "action_result.parameter.events",
+            "data_type": "string",
+            "contains": [ "splunk notable event id" ]
+          },
+          {
+            "data_path": "action_result.parameter.owner",
+            "data_type": "string"
+          },
+          {
+            "data_path": "action_result.parameter.status",
+            "data_type": "string"
+          },
+          {
+            "data_path": "action_result.parameter.urgency",
+            "data_type": "string"
+          },
+          {
+            "data_path": "action_result.parameter.comment",
+            "data_type": "string"
+          },
+          {
+            "data_path": "summary.total_objects",
+            "data_type": "numeric"
+          },
+          {
+            "data_path": "summary.total_objects_successful",
+            "data_type": "numeric"
+          }
+        ],
+        "versions": "EQ(*)"
+      },
+      {
+        "action": "post data",
+        "description": "Post data to Splunk",
+        "verbose": "This action creates an event on Splunk with the data incleded in the <b>data</b> parameter. If not specified the parameters will default to the following:<ul><li><b>host</b> - The IP of the Phantom instance running the action</li><li><b>index</b> - The default index configured on the Splunk instance</li><li><b>source</b> - &quot;Phantom&quot;</li><li><b>source_type</b> - &quot;Automation/Orchestration Platform&quot;</li></ul>",
+        "type": "generic",
+        "identifier": "post_data",
+        "read_only": false,
+        "parameters": {
+          "data": {
+            "description": "Data to post",
+            "data_type": "string",
+            "required": true,
+            "order": 0,
+            "primary": true
+          },
+          "host": {
+            "description": "Host for event",
+            "data_type": "string",
+            "required": false,
+            "order": 1
+          },
+          "index": {
+            "description": "Index to send event to",
+            "data_type": "string",
+            "required": false,
+            "order": 4
+          },
+          "source": {
+            "description": "Source for event",
+            "data_type": "string",
+            "required": false,
+            "default": "Phantom",
+            "order": 2
+          },
+          "source_type": {
+            "description": "Type of source for event",
+            "data_type": "string",
+            "required": false,
+            "default": "Automation/Orchestration Platform",
+            "order": 3
+          }
+        },
+        "output": [
+          {
+            "data_path": "action_result.status",
+            "data_type": "string"
+          },
+          {
+            "data_path": "action_result.message",
+            "data_type": "string"
+          },
+          {
+            "data_path": "action_result.parameter.data",
+            "data_type": "string"
+          },
+          {
+            "data_path": "action_result.parameter.host",
+            "data_type": "string"
+          },
+          {
+            "data_path": "action_result.parameter.index",
+            "data_type": "string"
+          },
+          {
+            "data_path": "action_result.parameter.source",
+            "data_type": "string"
+          },
+          {
+            "data_path": "action_result.parameter.source_type",
             "data_type": "string"
           },
           {
