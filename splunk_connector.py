@@ -162,8 +162,8 @@ class SplunkConnector(phantom.BaseConnector):
 
         action_result = self.add_action_result(phantom.ActionResult(dict(param)))
 
-        if not self._check_for_es(action_result):
-            return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_NOT_ES)
+        # if not self._check_for_es(action_result):
+        #     return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_NOT_ES)
 
         ids = param.get(consts.SPLUNK_JSON_EVENTS)
         owner = param.get(consts.SPLUNK_JSON_OWNER)
