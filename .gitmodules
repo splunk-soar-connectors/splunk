@@ -1,0 +1,4 @@
+[submodule "splunk_sdk_wheel"]
+        spath = splunk_sdk_wheel
+        url = ssh://git@prod-bb-1.phantom.local:7999/per/splunk_sdk_wheel.git
+        signore = dirty
