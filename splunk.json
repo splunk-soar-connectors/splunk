@@ -11,9 +11,14 @@
     "product_name": "Splunk Enterprise",
     "product_vendor": "Splunk Inc.",
     "product_version_regex": ".*",
-    "min_phantom_version": "2.0.264",
+    "min_phantom_version": "2.1.478",
     "logo": "splunk.png",
     "license": "Copyright (c) Phantom Cyber Corporation 2015-2017",
+    "pip_dependencies": {
+      "wheel": [
+        {"module": "splunk-sdk", "input_file": "splunk_sdk_wheel/splunk_sdk-1.6.2-py2-none-any.whl"}
+      ]
+    },  
     "configuration": {
       "device": {
         "description": "Device IP/Hostname",
@@ -65,7 +70,7 @@
       },
       {
         "action": "get host events",
-        "description": "Gets events pertaining to a host that have occured in the last 'N' days.",
+        "description": "Gets events pertaining to a host that have occurred in the last 'N' days.",
         "type": "investigate",
         "identifier": "get_host_events",
         "read_only": true,
