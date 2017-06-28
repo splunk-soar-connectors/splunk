@@ -165,8 +165,8 @@ class SplunkConnector(phantom.BaseConnector):
         if not self._check_for_es(action_result):
             return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_NOT_ES)
 
-        ids = param.get(consts.SPLUNK_JSON_EVENTS)
         owner = param.get(consts.SPLUNK_JSON_OWNER)
+        ids = param.get(consts.SPLUNK_JSON_EVENT_IDS)
         status = param.get(consts.SPLUNK_JSON_STATUS)
         comment = param.get(consts.SPLUNK_JSON_COMMENT)
         urgency = param.get(consts.SPLUNK_JSON_URGENCY)
@@ -206,12 +206,18 @@ class SplunkConnector(phantom.BaseConnector):
         if (phantom.is_fail(self._connect())):
             return self.get_status()
 
-        ip_hostname = param[phantom.APP_JSON_IP_HOSTNAME]
-        last_n_days = param[consts.SPLUNK_JSON_LAST_N_DAYS]
-
-        search_query = 'search {} earliest=-{}d'.format(ip_hostname, last_n_days)
-
         action_result = self.add_action_result(phantom.ActionResult(dict(param)))
+
+        ip_hostname = param[phantom.APP_JSON_IP_HOSTNAME]
+        last_n_days = param.get(consts.SPLUNK_JSON_LAST_N_DAYS)
+
+        try:
+            if last_n_days and int(last_n_days) <= 0:
+                return action_result.set_status(phantom.APP_ERROR, "last_n_days parameter must be greater than 0")
+        except Exception as e:
+            return action_result.set_status(phantom.APP_ERROR, "Error parsing last_n_days paramter: {0}".format(e))
+
+        search_query = 'search host={0}{1}'.format(ip_hostname, ' earliest=-{0}d'.format(last_n_days) if last_n_days else '')
 
         return self._run_query(search_query, action_result)
 

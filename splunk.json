@@ -70,7 +70,8 @@
       },
       {
         "action": "get host events",
-        "description": "Gets events pertaining to a host that have occurred in the last 'N' days.",
+        "description": "Get events pertaining to a host that have occurred in the last 'N' days.",
+        "verbose": "The <b>last_n_days</b> parameter must be greater than 0",
         "type": "investigate",
         "identifier": "get_host_events",
         "read_only": true,
@@ -87,7 +88,7 @@
             "description": "Number of days ago",
             "data_type": "numeric",
             "order": 1,
-            "required": true
+            "required": false
           }
         },
         "render": {
@@ -196,7 +197,7 @@
       {
         "action": "run query",
         "description": "Run a search query on the Splunk device. Please escape any quotes that are part of the query string.",
-        "verbose": "By default the widget for the &quot;run query&quot; action will show the host, time and raw fields. If you would like to see specific fields parsed out, they can be listed in a comma separated format in the &quot;display&quot; parameter.<br><br>Please keep in mind that Splunk does not always return all possible fields. Splunk may not return fields that are calculated or not present in the event.<br><br>To work around this you can force Splunk to return specific fields by using the &quot;fields&quot;. This works by appending &quot;| fields + *&quot; to your query. This will return every field, you can replace the asterisk with a comma separated list of fields.<br><br>Finally, some searches (such as those based on data models) can contain name-spaced fields. If I have a data model &quot;my_model&quot; with a search &quot;my_search&quot; that has a field &quot;hash&quot; then the field will be named &quot;my_search.hash&quot; and that is what must be used in the Splunk fields command and the display parameter.",
+        "verbose": "By default the widget for the &quot;run query&quot; action will show the host, time and raw fields. If you would like to see specific fields parsed out, they can be listed in a comma separated format in the &quot;display&quot; parameter.<br><br>Please keep in mind that Splunk does not always return all possible fields. Splunk may not return fields that are calculated or not present in the event.<br><br>To work around this you can force Splunk to return specific fields by using the &quot;fields&quot;. This works by appending &quot;| fields + *&quot; to your query. This will return every field, you can replace the asterisk with a comma separated list of fields.<br><br>Finally, some searches (such as those based on data models) can contain name-spaced fields. If a data model &quot;my_model&quot; with a search &quot;my_search&quot; that has a field &quot;hash&quot; then the field will be named &quot;my_search.hash&quot; and that is what must be used in the Splunk fields command and the display parameter.",
         "type": "investigate",
         "identifier": "execute_search",
         "read_only": true,
@@ -326,13 +327,13 @@
       {
         "action": "update event",
         "description": "Update a notable event",
-        "verbose": "NOTE: This action only works with Splunk ES",
+        "verbose": "The <b>event_ids</b> parameter takes a comma separated list of notable event IDs, which have the format: 68E08B8B-A853-3A20-9768-231C97B7EE76@@notable@@a4bd78810ae8e03e285e552fac0ddb23<br><br>NOTE: This action only works with notable events on Splunk ES",
         "type": "generic",
         "identifier": "update_event",
         "read_only": false,
         "parameters": {
-          "events": {
-            "description": "IDs of notable events to update",
+          "event_ids": {
+            "description": "Events IDs to update",
             "data_type": "string",
             "contains": [ "splunk notable event id" ],
             "required": true,
@@ -407,7 +408,7 @@
             "data_type": "string"
           },
           {
-            "data_path": "action_result.parameter.events",
+            "data_path": "action_result.parameter.event_ids",
             "data_type": "string",
             "contains": [ "splunk notable event id" ]
           },
