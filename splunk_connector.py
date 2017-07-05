@@ -117,7 +117,7 @@ class SplunkConnector(phantom.BaseConnector):
         endpoint = 'server/info'
         ret_val, resp_data = self._make_rest_call(action_result, endpoint, {}, method=requests.get)
 
-        if not ret_val:
+        if phantom.is_fail(ret_val):
             return 'FAILURE'
 
         if consts.SPLUNK_SERVER_VERSION not in resp_data:
@@ -159,7 +159,7 @@ class SplunkConnector(phantom.BaseConnector):
         endpoint = 'receivers/simple'
         ret_val, resp_data = self._make_rest_call(action_result, endpoint, param[consts.SPLUNK_JSON_DATA], params=get_params)
 
-        if not ret_val:
+        if phantom.is_fail(ret_val):
             return ret_val
 
         return action_result.set_status(phantom.APP_SUCCESS)
