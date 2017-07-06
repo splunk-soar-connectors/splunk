@@ -1,11 +1,11 @@
 {
     "appid": "91883aa8-9c81-470b-97a1-5d8f7995f560",
     "name": "Splunk",
-    "description": "This app integrates with a Splunk device to implement investigative actions like 'run query' and 'get host events'.",
+    "description": "This app integrates with a Splunk device to perform various investigative and data posting actions.",
     "publisher": "Phantom",
     "type": "siem",
     "main_module": "splunk_connector.pyc",
-    "app_version": "1.3.6",
+    "app_version": "1.3.7",
     "utctime_updated": "2017-06-29T00:12:27.000000Z",
     "package_name": "phantom_splunk",
     "product_name": "Splunk Enterprise",
