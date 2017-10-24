@@ -11,14 +11,14 @@
     "product_name": "Splunk Enterprise",
     "product_vendor": "Splunk Inc.",
     "product_version_regex": ".*",
-    "min_phantom_version": "2.1.478",
+    "min_phantom_version": "3.0.251",
     "logo": "splunk.png",
     "license": "Copyright (c) Phantom Cyber Corporation 2015-2017",
     "pip_dependencies": {
       "wheel": [
         {"module": "splunk-sdk", "input_file": "splunk_sdk_wheel/splunk_sdk-1.6.2-py2-none-any.whl"}
       ]
-    },  
+    },
     "configuration": {
       "device": {
         "description": "Device IP/Hostname",
@@ -54,6 +54,25 @@
         "description": "Verify server certificate",
         "required": true,
         "default": false
+      },
+      "on_poll_query": {
+        "data_type": "string",
+        "order": 6,
+        "description": "Query to use with On Poll",
+        "required": false
+      },
+      "on_poll_display": {
+        "data_type": "string",
+        "order": 7,
+        "description": "Fields to save with On Poll",
+        "required": false
+      },
+      "max_container": {
+        "data_type": "numeric",
+        "order": 8,
+        "description": "Max events to ingest (Default: 100)",
+        "required": false,
+        "default": 100
       }
     },
     "actions": [
@@ -192,6 +211,39 @@
             "data_type": "numeric"
           }
         ],
+        "versions": "EQ(*)"
+      },
+      {
+        "action": "on poll",
+        "description": "Ingest logs from the Splunk instance",
+        "verbose": "The configured query is what will be used during ingestion. If you only wish to show certain fields, then you can specify these as a comma seperated list in the configuration. If left unspecified, all available fields will be added to each artifact. When limiting the amount of events to ingest, it will ingest the most recent events. By specifying the max count to 0, all events will be ingested",
+        "type": "ingestion",
+        "identifier": "on_poll",
+        "read_only": true,
+        "parameters": {
+            "container_id": {
+                "description": "Parameter ignored in this app",
+                "data_type": "numeric"
+            },
+            "start_time": {
+                "description": "Parameter ignored in this app",
+                "data_type": "numeric"
+            },
+            "end_time": {
+                "description": "Parameter ignored in this app",
+                "data_type": "numeric"
+            },
+            "container_count": {
+                "description": "Maximum number of events to query for",
+                "data_type": "numeric",
+                "default": 100
+            },
+            "artifact_count": {
+                "description": "Parameter ignored in this app",
+                "data_type": "numeric"
+            }
+        },
+        "output": [],
         "versions": "EQ(*)"
       },
       {
