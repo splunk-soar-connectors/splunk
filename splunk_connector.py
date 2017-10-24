@@ -26,6 +26,7 @@ from cim_cef import cim_cef_map
 import re
 import time
 import pytz
+import hashlib
 import requests
 import simplejson as json
 
@@ -288,10 +289,14 @@ class SplunkConnector(phantom.BaseConnector):
             else:
                 for k, v in item.iteritems():
                     cef[cim_cef_map.get(k, k)] = v
+            md5 = hashlib.md5()
+            md5.update(item.get('_raw'))
+            sdi = md5.hexdigest()
             container['artifacts'] = [
                 {
                     'cef': cef,
-                    'name': 'Field Values'
+                    'name': 'Field Values',
+                    'source_data_identifier': sdi
                 }
             ]
             time = item.get('_time')
@@ -300,7 +305,7 @@ class SplunkConnector(phantom.BaseConnector):
             else:
                 title = "Splunk Log Entry"
             container['name'] = title
-            container['sdi'] = item.get('_cd')
+            container['source_data_identifier'] = sdi
             ret_val, msg, cid = self.save_container(container)
             if phantom.is_fail(ret_val):
                 self.save_progress("Error saving container: {}".format(msg))
