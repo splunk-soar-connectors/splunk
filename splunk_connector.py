@@ -284,8 +284,13 @@ class SplunkConnector(phantom.BaseConnector):
             container = {}
             cef = {}
             if header_set:
+                name_mappings = {}
+                for k, v in item.iteritems():
+                    if k.lower() in header_set:
+                        # Use this to keep the orignal capitalization from splunk
+                        name_mappings[k.lower()] = k
                 for h in header_set:
-                    cef[cim_cef_map.get(h, h)] = item.get(h)
+                    cef[name_mappings.get(cim_cef_map.get(h, h), h)] = item.get(name_mappings.get(h, h))
             else:
                 for k, v in item.iteritems():
                     cef[cim_cef_map.get(k, k)] = v
