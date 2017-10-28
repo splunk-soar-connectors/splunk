@@ -137,15 +137,11 @@ class SplunkConnector(phantom.BaseConnector):
 
     def _check_for_es(self, action_result):
 
-        endpoint = 'apps/local'
+        endpoint = 'apps/local/SplunkEnterpriseSecuritySuite'
         ret_val, resp_data = self._make_rest_call(action_result, endpoint, {}, method=requests.get)
-
-        if not resp_data:
+        if phantom.is_fail(ret_val) or not resp_data:
             return False
-
-        if consts.SPLUNK_ES_NAME in resp_data:
-            return True
-        return False
+        return True
 
     def _post_data(self, param):
 
@@ -242,9 +238,8 @@ class SplunkConnector(phantom.BaseConnector):
         action_result = self.add_action_result(phantom.ActionResult(dict(param)))
         search_string = config.get('on_poll_query')
         if search_string is None:
-            return self.set_status(
-                phantom.APP_ERROR, "Need to specify Query String to use polling"
-            )
+            self.save_progress("Need to specify Query String to use polling")
+            return self.set_status(phantom.APP_ERROR)
 
         if (search_string[0] != '|') and (search_string.find('search', 0) != 0):
             search_string = 'search ' + search_string
@@ -264,9 +259,8 @@ class SplunkConnector(phantom.BaseConnector):
 
         ret_val = self._run_query(search_string, action_result, search_params)
         if phantom.is_fail(ret_val):
-            return self.set_status(
-                phantom.APP_ERROR, action_result.get_message()
-            )
+            self.save_progress(action_result.get_message())
+            return self.set_status(phantom.APP_ERROR)
 
         display = config.get('on_poll_display')
         header_set = None
