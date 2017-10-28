@@ -5,7 +5,7 @@
     "publisher": "Phantom",
     "type": "siem",
     "main_module": "splunk_connector.pyc",
-    "app_version": "1.3.9",
+    "app_version": "1.3.10",
     "utctime_updated": "2017-10-24T02:07:33.000000Z",
     "package_name": "phantom_splunk",
     "product_name": "Splunk Enterprise",
