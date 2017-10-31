@@ -271,7 +271,7 @@ class SplunkConnector(phantom.BaseConnector):
         data = list(reversed(action_result.get_data()))
         self.save_progress("Finished search")
 
-        if data:
+        if data and not self.is_poll_now():
             self._state['start_time'] = data[-1].get('_indextime')
 
         for item in data:
@@ -291,19 +291,17 @@ class SplunkConnector(phantom.BaseConnector):
             md5 = hashlib.md5()
             md5.update(item.get('_raw'))
             sdi = md5.hexdigest()
+            severity = self._get_splunk_severity(item)
             container['artifacts'] = [
                 {
                     'cef': cef,
                     'name': 'Field Values',
-                    'source_data_identifier': sdi
+                    'source_data_identifier': sdi,
+                    'severity': severity
                 }
             ]
-            time = item.get('_time')
-            if time:
-                title = "Splunk Log Entry on {}".format(time)
-            else:
-                title = "Splunk Log Entry"
-            container['name'] = title
+            container['name'] = self._get_splunk_title(item)
+            container['severity'] = severity
             container['source_data_identifier'] = sdi
             ret_val, msg, cid = self.save_container(container)
             if phantom.is_fail(ret_val):
@@ -311,6 +309,44 @@ class SplunkConnector(phantom.BaseConnector):
                 self.debug_print("Error saving container: {} -- CID: {}".format(msg, cid))
 
         return self.set_status(phantom.APP_SUCCESS)
+
+    def _get_splunk_title(self, item):
+        title = item.get('source')
+        if not title:
+            time = item.get('_time')
+            if time:
+                title = "Splunk Log Entry on {}".format(time)
+            else:
+                title = "Splunk Log Entry"
+        return title
+
+    def _get_splunk_severity(self, item):
+        low_severity = {'informational', 'low'}
+        medium_severity = {'medium'}
+        high_severity = {'high', 'critical'}
+        severity = item.get('severity')
+        if severity:
+            if severity in low_severity:
+                return 'low'
+            elif severity in medium_severity:
+                return 'medium'
+            elif severity in high_severity:
+                return 'high'
+            else:
+                self.debug_print("Found unknown severity: {}".format(severity))
+                return 'medium'
+        urgency = item.get('urgency')
+        if urgency:
+            if urgency in low_severity:
+                return 'low'
+            elif urgency in medium_severity:
+                return 'medium'
+            elif urgency in high_severity:
+                return 'high'
+            else:
+                self.debug_print("Found unknown urgency: {}".format(urgency))
+                return 'medium'
+        return 'medium'
 
     def _handle_run_query(self, param):
 
@@ -456,9 +492,9 @@ class SplunkConnector(phantom.BaseConnector):
             job.refresh()
             stats = {'is_done': job['isDone'],
                      'progress': float(job['doneProgress']) * 100,
-                      'scan_count': int(job['scanCount']),
-                      'event_count': int(job['eventCount']),
-                      'result_count': int(job['resultCount'])}
+                     'scan_count': int(job['scanCount']),
+                     'event_count': int(job['eventCount']),
+                     'result_count': int(job['resultCount'])}
             status = ("Progress: %(progress)03.1f%%   %(scan_count)d scanned   "
                       "%(event_count)d matched   %(result_count)d results") % stats
             self.send_progress(status)
