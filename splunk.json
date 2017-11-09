@@ -5,7 +5,7 @@
     "publisher": "Phantom",
     "type": "siem",
     "main_module": "splunk_connector.pyc",
-    "app_version": "1.3.11",
+    "app_version": "1.3.13",
     "utctime_updated": "2017-10-24T02:07:33.000000Z",
     "package_name": "phantom_splunk",
     "product_name": "Splunk Enterprise",
@@ -228,7 +228,7 @@
         {
             "action": "on poll",
             "description": "Ingest logs from the Splunk instance",
-            "verbose": "The configured query is what will be used during ingestion. If you only wish to show certain fields, then you can specify these as a comma seperated list in the configuration. If left unspecified, all available fields will be added to each artifact. When limiting the amount of events to ingest, it will ingest the most recent events. By specifying the max count to 0, all events will be ingested. This action uses the same logic as the run query action, so if an artifact is missing data you can try adding &quot;|fields + *&quot; to the end of your query",
+            "verbose": "The configured query is what will be used during ingestion. If you only wish to show certain fields, then you can specify these as a comma seperated list in the configuration. If left unspecified, all available fields will be added to each artifact. When limiting the amount of events to ingest, it will ingest the most recent events. By specifying the max count to 0, all events will be ingested",
             "type": "ingestion",
             "identifier": "on_poll",
             "read_only": true,

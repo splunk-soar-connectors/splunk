@@ -21,7 +21,6 @@ import splunk_consts as consts
 from splunklib.binding import HTTPError
 import splunklib.client as splunk_client
 import splunklib.results as splunk_results
-from cim_cef import cim_cef_map
 
 import re
 import time
@@ -284,10 +283,10 @@ class SplunkConnector(phantom.BaseConnector):
                         # Use this to keep the orignal capitalization from splunk
                         name_mappings[k.lower()] = k
                 for h in header_set:
-                    cef[name_mappings.get(cim_cef_map.get(h, h), h)] = item.get(name_mappings.get(h, h))
+                    cef[name_mappings.get(consts.CIM_CEF_MAP.get(h, h), h)] = item.get(name_mappings.get(h, h))
             else:
                 for k, v in item.iteritems():
-                    cef[cim_cef_map.get(k, k)] = v
+                    cef[consts.CIM_CEF_MAP.get(k, k)] = v
             md5 = hashlib.md5()
             md5.update(item.get('_raw'))
             sdi = md5.hexdigest()
