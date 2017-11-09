@@ -84,6 +84,15 @@ SPLUNK_STATUS_DICT = {
         "closed": 5
     }
 
+SPLUNK_SEVERITY_MAP = {
+    'informational': 'low',
+    'low': 'low',
+    'medium': 'medium',
+    'high': 'high',
+    'critical': 'high'
+}
+
+# This will map certain splunk CIM fields to their CEF equivalent
 CIM_CEF_MAP = {
     "action": "act",
     "action_name": "act",

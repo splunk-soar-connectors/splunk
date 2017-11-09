@@ -320,32 +320,13 @@ class SplunkConnector(phantom.BaseConnector):
         return title
 
     def _get_splunk_severity(self, item):
-        low_severity = {'informational', 'low'}
-        medium_severity = {'medium'}
-        high_severity = {'high', 'critical'}
         severity = item.get('severity')
-        if severity:
-            if severity in low_severity:
-                return 'low'
-            elif severity in medium_severity:
-                return 'medium'
-            elif severity in high_severity:
-                return 'high'
-            else:
-                self.debug_print("Found unknown severity: {}".format(severity))
-                return 'medium'
-        urgency = item.get('urgency')
-        if urgency:
-            if urgency in low_severity:
-                return 'low'
-            elif urgency in medium_severity:
-                return 'medium'
-            elif urgency in high_severity:
-                return 'high'
-            else:
-                self.debug_print("Found unknown urgency: {}".format(urgency))
-                return 'medium'
-        return 'medium'
+        severity = consts.SPLUNK_SEVERITY_MAP.get(severity)
+        if not severity:
+            # Check to see if urgency is set
+            urgency = item.get('urgency')
+            severity = consts.SPLUNK_SEVERITY_MAP.get(urgency, 'medium')
+        return severity
 
     def _handle_run_query(self, param):
 
