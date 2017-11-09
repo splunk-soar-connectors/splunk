@@ -21,7 +21,6 @@ import splunk_consts as consts
 from splunklib.binding import HTTPError
 import splunklib.client as splunk_client
 import splunklib.results as splunk_results
-from cim_cef import cim_cef_map
 
 import re
 import time
@@ -137,15 +136,11 @@ class SplunkConnector(phantom.BaseConnector):
 
     def _check_for_es(self, action_result):
 
-        endpoint = 'apps/local'
+        endpoint = 'apps/local/SplunkEnterpriseSecuritySuite'
         ret_val, resp_data = self._make_rest_call(action_result, endpoint, {}, method=requests.get)
-
-        if not resp_data:
+        if phantom.is_fail(ret_val) or not resp_data:
             return False
-
-        if consts.SPLUNK_ES_NAME in resp_data:
-            return True
-        return False
+        return True
 
     def _post_data(self, param):
 
@@ -242,9 +237,8 @@ class SplunkConnector(phantom.BaseConnector):
         action_result = self.add_action_result(phantom.ActionResult(dict(param)))
         search_string = config.get('on_poll_query')
         if search_string is None:
-            return self.set_status(
-                phantom.APP_ERROR, "Need to specify Query String to use polling"
-            )
+            self.save_progress("Need to specify Query String to use polling")
+            return self.set_status(phantom.APP_ERROR)
 
         if (search_string[0] != '|') and (search_string.find('search', 0) != 0):
             search_string = 'search ' + search_string
@@ -264,9 +258,8 @@ class SplunkConnector(phantom.BaseConnector):
 
         ret_val = self._run_query(search_string, action_result, search_params)
         if phantom.is_fail(ret_val):
-            return self.set_status(
-                phantom.APP_ERROR, action_result.get_message()
-            )
+            self.save_progress(action_result.get_message())
+            return self.set_status(phantom.APP_ERROR)
 
         display = config.get('on_poll_display')
         header_set = None
@@ -277,7 +270,7 @@ class SplunkConnector(phantom.BaseConnector):
         data = list(reversed(action_result.get_data()))
         self.save_progress("Finished search")
 
-        if data:
+        if data and not self.is_poll_now():
             self._state['start_time'] = data[-1].get('_indextime')
 
         for item in data:
@@ -290,26 +283,24 @@ class SplunkConnector(phantom.BaseConnector):
                         # Use this to keep the orignal capitalization from splunk
                         name_mappings[k.lower()] = k
                 for h in header_set:
-                    cef[name_mappings.get(cim_cef_map.get(h, h), h)] = item.get(name_mappings.get(h, h))
+                    cef[name_mappings.get(consts.CIM_CEF_MAP.get(h, h), h)] = item.get(name_mappings.get(h, h))
             else:
                 for k, v in item.iteritems():
-                    cef[cim_cef_map.get(k, k)] = v
+                    cef[consts.CIM_CEF_MAP.get(k, k)] = v
             md5 = hashlib.md5()
             md5.update(item.get('_raw'))
             sdi = md5.hexdigest()
+            severity = self._get_splunk_severity(item)
             container['artifacts'] = [
                 {
                     'cef': cef,
                     'name': 'Field Values',
-                    'source_data_identifier': sdi
+                    'source_data_identifier': sdi,
+                    'severity': severity
                 }
             ]
-            time = item.get('_time')
-            if time:
-                title = "Splunk Log Entry on {}".format(time)
-            else:
-                title = "Splunk Log Entry"
-            container['name'] = title
+            container['name'] = self._get_splunk_title(item)
+            container['severity'] = severity
             container['source_data_identifier'] = sdi
             ret_val, msg, cid = self.save_container(container)
             if phantom.is_fail(ret_val):
@@ -317,6 +308,25 @@ class SplunkConnector(phantom.BaseConnector):
                 self.debug_print("Error saving container: {} -- CID: {}".format(msg, cid))
 
         return self.set_status(phantom.APP_SUCCESS)
+
+    def _get_splunk_title(self, item):
+        title = item.get('source')
+        if not title:
+            time = item.get('_time')
+            if time:
+                title = "Splunk Log Entry on {}".format(time)
+            else:
+                title = "Splunk Log Entry"
+        return title
+
+    def _get_splunk_severity(self, item):
+        severity = item.get('severity')
+        severity = consts.SPLUNK_SEVERITY_MAP.get(severity)
+        if not severity:
+            # Check to see if urgency is set
+            urgency = item.get('urgency')
+            severity = consts.SPLUNK_SEVERITY_MAP.get(urgency, 'medium')
+        return severity
 
     def _handle_run_query(self, param):
 
@@ -462,9 +472,9 @@ class SplunkConnector(phantom.BaseConnector):
             job.refresh()
             stats = {'is_done': job['isDone'],
                      'progress': float(job['doneProgress']) * 100,
-                      'scan_count': int(job['scanCount']),
-                      'event_count': int(job['eventCount']),
-                      'result_count': int(job['resultCount'])}
+                     'scan_count': int(job['scanCount']),
+                     'event_count': int(job['eventCount']),
+                     'result_count': int(job['resultCount'])}
             status = ("Progress: %(progress)03.1f%%   %(scan_count)d scanned   "
                       "%(event_count)d matched   %(result_count)d results") % stats
             self.send_progress(status)
