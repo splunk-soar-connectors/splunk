@@ -1,7 +1,7 @@
 {
     "appid": "91883aa8-9c81-470b-97a1-5d8f7995f560",
     "name": "Splunk",
-    "description": "This app integrates with a Splunk device to perform various investigative and data posting actions.",
+    "description": "This app integrates with a Splunk device to perform various investigative and data posting actions",
     "publisher": "Phantom",
     "type": "siem",
     "main_module": "splunk_connector.pyc",
@@ -81,7 +81,7 @@
     "actions": [
         {
             "action": "test connectivity",
-            "description": "Validate the asset configuration for connectivity. This action logs into the device to check the connection and credentials.",
+            "description": "Validate the asset configuration for connectivity. This action logs into the device to check the connection and credentials",
             "type": "test",
             "identifier": "test_asset_connectivity",
             "read_only": true,
@@ -91,7 +91,7 @@
         },
         {
             "action": "get host events",
-            "description": "Get events pertaining to a host that have occurred in the last 'N' days.",
+            "description": "Get events pertaining to a host that have occurred in the last 'N' days",
             "verbose": "The <b>last_n_days</b> parameter must be greater than 0",
             "type": "investigate",
             "identifier": "get_host_events",
@@ -260,7 +260,7 @@
         },
         {
             "action": "run query",
-            "description": "Run a search query on the Splunk device. Please escape any quotes that are part of the query string.",
+            "description": "Run a search query on the Splunk device. Please escape any quotes that are part of the query string",
             "verbose": "By default the widget for the &quot;run query&quot; action will show the host, time and raw fields. If you would like to see specific fields parsed out, they can be listed in a comma separated format in the &quot;display&quot; parameter.<br><br>Please keep in mind that Splunk does not always return all possible fields. Splunk may not return fields that are calculated or not present in the event.<br><br>To work around this you can force Splunk to return specific fields by using the &quot;fields&quot;. This works by appending &quot;| fields + *&quot; to your query. This will return every field, you can replace the asterisk with a comma separated list of fields.<br><br>Finally, some searches (such as those based on data models) can contain name-spaced fields. If a data model called &quot;my_model&quot; with a search &quot;my_search&quot; has a field &quot;hash&quot; then the field will be named &quot;my_search.hash&quot; and that is what must be used in the Splunk fields command and the display parameter.",
             "type": "investigate",
             "identifier": "execute_search",
