@@ -76,6 +76,22 @@
             "description": "Max events to ingest (Default: 100)",
             "required": false,
             "default": 100
+        },
+        "ph": {
+            "data_type": "ph",
+            "order": 9
+        },
+        "container_name_prefix": {
+            "data_type": "string",
+            "order": 10,
+            "description": "Name to give containers created via ingestion",
+            "required": false
+        },
+        "container_name_values": {
+            "data_type": "string",
+            "order": 11,
+            "description": "Values to append to container name",
+            "required": false
         }
     },
     "actions": [
