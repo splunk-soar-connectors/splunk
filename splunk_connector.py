@@ -54,6 +54,13 @@ class SplunkConnector(phantom.BaseConnector):
         self._base_url = 'https://{0}:{1}/'.format(config[phantom.APP_JSON_DEVICE], config[phantom.APP_JSON_PORT])
         self._state = self.load_state()
 
+        self._container_name_prefix = config.get('container_name_prefix', '')
+        container_name_values = config.get('container_name_values')
+        if container_name_values:
+            self._container_name_values = [x.strip() for x in container_name_values.split(',')]
+        else:
+            self._container_name_values = []
+
         return phantom.APP_SUCCESS
 
     def finalize(self):
@@ -310,13 +317,21 @@ class SplunkConnector(phantom.BaseConnector):
         return self.set_status(phantom.APP_SUCCESS)
 
     def _get_splunk_title(self, item):
-        title = item.get('source')
+        title = self._container_name_prefix
+        if not title and not self._container_name_values:
+            self._container_name_values.append('source')
+        for v in self._container_name_values:
+            value = item.get(v)
+            if value:
+                title += "{}{} = {}".format(', ' if title else '', v, value)
+
         if not title:
             time = item.get('_time')
             if time:
                 title = "Splunk Log Entry on {}".format(time)
             else:
                 title = "Splunk Log Entry"
+
         return title
 
     def _get_splunk_severity(self, item):
