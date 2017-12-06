@@ -25,6 +25,7 @@ import splunklib.results as splunk_results
 import re
 import time
 import pytz
+import hashlib
 import requests
 import simplejson as json
 
@@ -51,7 +52,19 @@ class SplunkConnector(phantom.BaseConnector):
         config = self.get_config()
 
         self._base_url = 'https://{0}:{1}/'.format(config[phantom.APP_JSON_DEVICE], config[phantom.APP_JSON_PORT])
+        self._state = self.load_state()
 
+        self._container_name_prefix = config.get('container_name_prefix', '')
+        container_name_values = config.get('container_name_values')
+        if container_name_values:
+            self._container_name_values = [x.strip() for x in container_name_values.split(',')]
+        else:
+            self._container_name_values = []
+
+        return phantom.APP_SUCCESS
+
+    def finalize(self):
+        self.save_state(self._state)
         return phantom.APP_SUCCESS
 
     def _connect(self):
@@ -130,15 +143,11 @@ class SplunkConnector(phantom.BaseConnector):
 
     def _check_for_es(self, action_result):
 
-        endpoint = 'apps/local'
+        endpoint = 'apps/local/SplunkEnterpriseSecuritySuite'
         ret_val, resp_data = self._make_rest_call(action_result, endpoint, {}, method=requests.get)
-
-        if not resp_data:
+        if phantom.is_fail(ret_val) or not resp_data:
             return False
-
-        if consts.SPLUNK_ES_NAME in resp_data:
-            return True
-        return False
+        return True
 
     def _post_data(self, param):
 
@@ -226,6 +235,113 @@ class SplunkConnector(phantom.BaseConnector):
         search_query = 'search host={0}{1}'.format(ip_hostname, ' earliest=-{0}d'.format(last_n_days) if last_n_days else '')
 
         return self._run_query(search_query, action_result)
+
+    def _on_poll(self, param):
+        if (phantom.is_fail(self._connect())):
+            return self.get_status()
+
+        config = self.get_config()
+        action_result = self.add_action_result(phantom.ActionResult(dict(param)))
+        search_string = config.get('on_poll_query')
+        if search_string is None:
+            self.save_progress("Need to specify Query String to use polling")
+            return self.set_status(phantom.APP_ERROR)
+
+        if (search_string[0] != '|') and (search_string.find('search', 0) != 0):
+            search_string = 'search ' + search_string
+
+        search_params = {}
+        start_time = self._state.get('start_time')
+        if start_time:
+            search_params['index_earliest'] = start_time
+
+        if self.is_poll_now():
+            search_params['max_count'] = param.get('container_count', 100)
+        else:
+            search_params['max_count'] = config.get('max_container', 100)
+
+        if search_params['max_count'] <= 0:
+            search_params.pop('max_count')
+
+        ret_val = self._run_query(search_string, action_result, search_params)
+        if phantom.is_fail(ret_val):
+            self.save_progress(action_result.get_message())
+            return self.set_status(phantom.APP_ERROR)
+
+        display = config.get('on_poll_display')
+        header_set = None
+        if display:
+            header_set = {x.strip().lower() for x in display.split(',')}
+
+        # Set the most recent event to data[0]
+        data = list(reversed(action_result.get_data()))
+        self.save_progress("Finished search")
+
+        if data and not self.is_poll_now():
+            self._state['start_time'] = data[-1].get('_indextime')
+
+        for item in data:
+            container = {}
+            cef = {}
+            if header_set:
+                name_mappings = {}
+                for k, v in item.iteritems():
+                    if k.lower() in header_set:
+                        # Use this to keep the orignal capitalization from splunk
+                        name_mappings[k.lower()] = k
+                for h in header_set:
+                    cef[name_mappings.get(consts.CIM_CEF_MAP.get(h, h), h)] = item.get(name_mappings.get(h, h))
+            else:
+                for k, v in item.iteritems():
+                    cef[consts.CIM_CEF_MAP.get(k, k)] = v
+            md5 = hashlib.md5()
+            md5.update(item.get('_raw'))
+            sdi = md5.hexdigest()
+            severity = self._get_splunk_severity(item)
+            container['artifacts'] = [
+                {
+                    'cef': cef,
+                    'name': 'Field Values',
+                    'source_data_identifier': sdi,
+                    'severity': severity
+                }
+            ]
+            container['name'] = self._get_splunk_title(item)
+            container['severity'] = severity
+            container['source_data_identifier'] = sdi
+            ret_val, msg, cid = self.save_container(container)
+            if phantom.is_fail(ret_val):
+                self.save_progress("Error saving container: {}".format(msg))
+                self.debug_print("Error saving container: {} -- CID: {}".format(msg, cid))
+
+        return self.set_status(phantom.APP_SUCCESS)
+
+    def _get_splunk_title(self, item):
+        title = self._container_name_prefix
+        if not title and not self._container_name_values:
+            self._container_name_values.append('source')
+        for name in self._container_name_values:
+            value = item.get(consts.CIM_CEF_MAP.get(name, name))
+            if value:
+                title += "{}{} = {}".format(', ' if title else '', name, value)
+
+        if not title:
+            time = item.get('_time')
+            if time:
+                title = "Splunk Log Entry on {}".format(time)
+            else:
+                title = "Splunk Log Entry"
+
+        return title
+
+    def _get_splunk_severity(self, item):
+        severity = item.get('severity')
+        severity = consts.SPLUNK_SEVERITY_MAP.get(severity)
+        if not severity:
+            # Check to see if urgency is set
+            urgency = item.get('urgency')
+            severity = consts.SPLUNK_SEVERITY_MAP.get(urgency, 'medium')
+        return severity
 
     def _handle_run_query(self, param):
 
@@ -371,9 +487,9 @@ class SplunkConnector(phantom.BaseConnector):
             job.refresh()
             stats = {'is_done': job['isDone'],
                      'progress': float(job['doneProgress']) * 100,
-                      'scan_count': int(job['scanCount']),
-                      'event_count': int(job['eventCount']),
-                      'result_count': int(job['resultCount'])}
+                     'scan_count': int(job['scanCount']),
+                     'event_count': int(job['eventCount']),
+                     'result_count': int(job['resultCount'])}
             status = ("Progress: %(progress)03.1f%%   %(scan_count)d scanned   "
                       "%(event_count)d matched   %(result_count)d results") % stats
             self.send_progress(status)
@@ -398,7 +514,6 @@ class SplunkConnector(phantom.BaseConnector):
                 self.send_progress(status)
 
         action_result.update_summary({consts.SPLUNK_JSON_TOTAL_EVENTS: result_index})
-
         return action_result.set_status(phantom.APP_SUCCESS)
 
     def handle_action(self, param):
@@ -425,6 +540,8 @@ class SplunkConnector(phantom.BaseConnector):
             result = self._get_host_events(param)
         elif action == phantom.ACTION_ID_TEST_ASSET_CONNECTIVITY:
             result = self._test_asset_connectivity(param)
+        elif action == "on_poll":
+            result = self._on_poll(param)
 
         return result
 
@@ -432,10 +549,51 @@ class SplunkConnector(phantom.BaseConnector):
 if __name__ == '__main__':
 
     import sys
-    # import pudb
+    import pudb
+    import argparse
+    import requests
 
-    # Breakpoint at runtime
-    # pudb.set_trace()
+    pudb.set_trace()
+
+    argparser = argparse.ArgumentParser()
+
+    argparser.add_argument('input_test_json', help='Input Test JSON file')
+    argparser.add_argument('-u', '--username', help='username', required=False)
+    argparser.add_argument('-p', '--password', help='password', required=False)
+
+    args = argparser.parse_args()
+    session_id = None
+
+    username = args.username
+    password = args.password
+
+    if (username is not None and password is None):
+
+        # User specified a username but not a password, so ask
+        import getpass
+        password = getpass.getpass("Password: ")
+
+    if (username and password):
+        try:
+            print ("Accessing the Login page")
+            r = requests.get("https://127.0.0.1/login", verify=False)
+            csrftoken = r.cookies['csrftoken']
+
+            data = dict()
+            data['username'] = username
+            data['password'] = password
+            data['csrfmiddlewaretoken'] = csrftoken
+
+            headers = dict()
+            headers['Cookie'] = 'csrftoken=' + csrftoken
+            headers['Referer'] = 'https://127.0.0.1/login'
+
+            print ("Logging into Platform to get the session id")
+            r2 = requests.post("https://127.0.0.1/login", verify=False, data=data, headers=headers)
+            session_id = r2.cookies['sessionid']
+        except Exception as e:
+            print ("Unable to get session id from the platfrom. Error: " + str(e))
+            exit(1)
 
     if (len(sys.argv) < 2):
         print "No test json specified as input"
@@ -445,8 +603,13 @@ if __name__ == '__main__':
         in_json = f.read()
         in_json = json.loads(in_json)
         print(json.dumps(in_json, indent=4))
+
         connector = SplunkConnector()
         connector.print_progress_message = True
+
+        if (session_id is not None):
+            in_json['user_session_token'] = session_id
+
         ret_val = connector._handle_action(json.dumps(in_json), None)
         print (json.dumps(json.loads(ret_val), indent=4))
 

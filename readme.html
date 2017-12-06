@@ -1,0 +1,21 @@
+<!--
+    File: readme.html
+
+    Copyright (c) Phantom Cyber Corporation, 2017
+
+    This unpublished material is proprietary to Phantom Cyber.
+    All rights reserved. The methods and
+    techniques described herein are considered trade secrets
+    and/or confidential. Reproduction or distribution, in whole
+    or in part, is forbidden except by express written permission
+    of Phantom Cyber.
+-->
+<h1>Naming Ingested Containers</h1>
+<p>
+By default, the "source" field is used to name the ingested containers.
+To customize the container names, use the two settings in the asset configuration.
+For example, if a host name is expected in the container name, the "Name to give containers created via ingestion" parameter
+can be set to "Notable Splunk Event" and "Values to append to container name" parameter can be set to "host".
+This will set the container name to "Notable Splunk Event, host=my.sample.host".
+The appended values can be a comma separated list.
+</p>
