@@ -320,10 +320,10 @@ class SplunkConnector(phantom.BaseConnector):
         title = self._container_name_prefix
         if not title and not self._container_name_values:
             self._container_name_values.append('source')
-        for v in self._container_name_values:
-            value = item.get(v)
+        for name in self._container_name_values:
+            value = item.get(consts.CIM_CEF_MAP.get(name, name))
             if value:
-                title += "{}{} = {}".format(', ' if title else '', v, value)
+                title += "{}{} = {}".format(', ' if title else '', name, value)
 
         if not title:
             time = item.get('_time')
