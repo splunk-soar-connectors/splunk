@@ -12,10 +12,10 @@
 -->
 <h1>Naming Ingested Containers</h1>
 <p>
-You can change how the containers are named using two settings in the configuration.
-First, you can specify a name prefix. It could for example be "Notable Splunk Event".
-You can also specify values to append to this name. For example, if you expect for there
-to be a "host" in the created artifact, and set that to the value, then the name of the created
-container will be "Notable Splunk Event, host = &lt;host&gt;". This field accepts a comma seperated list.
-If no name is specified, it will default to naming from the "source" field.
+By default, the "source" field is used to name the ingested containers.
+To customize the container names, use the two settings in the asset configuration.
+For example, if a host name is expected in the container name, the "Name to give containers created via ingestion" parameter
+can be set to "Notable Splunk Event" and "Values to append to container name" parameter can be set to "host".
+This will set the container name to "Notable Splunk Event, host=my.sample.host".
+The appended values can be a comma separated list.
 </p>
