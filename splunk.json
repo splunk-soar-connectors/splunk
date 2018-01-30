@@ -5,8 +5,8 @@
     "publisher": "Phantom",
     "type": "siem",
     "main_module": "splunk_connector.pyc",
-    "app_version": "1.3.18",
-    "utctime_updated": "2018-01-26T00:50:39.000000Z",
+    "app_version": "1.3.19",
+    "utctime_updated": "2018-01-30T01:06:55.000000Z",
     "package_name": "phantom_splunk",
     "product_name": "Splunk Enterprise",
     "product_vendor": "Splunk Inc.",
@@ -14,7 +14,7 @@
     "min_phantom_version": "3.0.251",
     "logo": "logo_splunk.svg",
     "logo_dark": "logo_splunk_dark.svg",
-    "license": "Copyright (c) Phantom Cyber Corporation, 2015-2018",
+    "license": "Copyright (c) Phantom Cyber Corporation, 2014-2018",
     "pip_dependencies": {
         "wheel": [
             {
