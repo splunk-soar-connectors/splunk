@@ -14,7 +14,7 @@
     "min_phantom_version": "3.0.251",
     "logo": "logo_splunk.svg",
     "logo_dark": "logo_splunk_dark.svg",
-    "license": "Copyright (c) Phantom Cyber Corporation, 2015-2018",
+    "license": "Copyright (c) Phantom Cyber Corporation, 2014-2018",
     "pip_dependencies": {
         "wheel": [
             {
