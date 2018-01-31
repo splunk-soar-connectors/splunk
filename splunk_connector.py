@@ -501,7 +501,13 @@ class SplunkConnector(phantom.BaseConnector):
         self.send_progress("Parsing results...")
         result_index = 0
         ten_percent = float(result_count) * 0.10
-        for result in splunk_results.ResultsReader(job.results(count=0)):
+
+        try:
+            results = splunk_results.ResultsReader(job.results(count=0))
+        except Exception as e:
+            return action_result.set_status(phantom.APP_ERROR, "Error retrieving results", e)
+
+        for result in results:
 
             if isinstance(result, dict):
 
