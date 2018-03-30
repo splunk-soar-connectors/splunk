@@ -25,7 +25,7 @@ def run_query(provides, all_results, context):
         for result in action_results:
             parameters = result.get_param()
             if parameters.get('display'):
-                headers_set.update([ x.strip().lower() for x in parameters['display'].split(',') ])
+                headers_set.update([ x.strip() for x in parameters['display'].split(',') ])
     if not headers_set:
         headers_set.update(headers)
     headers = sorted(headers_set)
