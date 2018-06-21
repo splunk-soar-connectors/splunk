@@ -1,4 +1,4 @@
 [submodule "splunk_sdk_wheel"]
         path = splunk_sdk_wheel
-        url = ssh://git@prod-bb-1.phantom.local:7999/per/splunk_sdk_wheel.git
+        url = ssh://git@bitbucket.phantom.us:7999/per/splunk_sdk_wheel.git
         ignore = dirty
