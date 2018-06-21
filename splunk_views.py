@@ -17,22 +17,21 @@ import json
 
 
 def run_query(provides, all_results, context):
-    headers_set = set()
+    # Assumes valid all_results
+    result = all_results[0][1][0]
+    parameters = result.get_param()
 
-    for summary, action_results in all_results:
-        for result in action_results:
-            parameters = result.get_param()
-            if parameters.get('display'):
-                headers_set.update([x.strip() for x in parameters['display'].split(',')])
-
-    if not headers_set:
+    # If empty display, gathers fields from each row to be used as columns
+    if parameters.get('display') is None:
+        headers_set = set()
         for summary, action_results in all_results:
             for result in action_results:
                 data = result.get_data()
                 for row in data:
                     headers_set.update([key for key in row.keys() if key[0] != '_'])
-
-    headers = sorted(headers_set)
+        headers = sorted(headers_set)
+    else:
+        headers = [x.strip() for x in parameters['display'].split(',')]
 
     context['ajax'] = True
     if 'start' not in context['QS']:
