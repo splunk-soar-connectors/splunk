@@ -17,10 +17,17 @@ import json
 
 
 def run_query(provides, all_results, context):
-    # Assumes valid all_results
-    result = all_results[0][1][0]
-    parameters = result.get_param()
+    try:
+        result = all_results[0][1][0]
+    except IndexError:
+        content = {
+          "data": [],
+          "recordsTotal": 0,
+          "recordsFiltered": 0,
+        }
+        return HttpResponse(json.dumps(content), content_type='text/javascript')
 
+    parameters = result.get_param()
     # If empty display, gathers fields from each row to be used as columns
     if parameters.get('display') is None:
         headers_set = set()
