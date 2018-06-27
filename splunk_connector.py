@@ -94,8 +94,6 @@ class SplunkConnector(phantom.BaseConnector):
         if params is None:
             params = {}
 
-        # params.update({'timeout': params.get('timeout', TIMEOUT)}) # api doesnt work this way
-
         RETRY_LIMIT = int(self.get_config()['retry_count'])
 
         for attempt_count in range(0, RETRY_LIMIT):
