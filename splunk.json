@@ -93,6 +93,12 @@
             "order": 11,
             "description": "Values to append to container name",
             "required": false
+        },
+        "retry_count": {
+            "description": "Number of retries",
+            "data_type": "numeric",
+            "order": 12,
+            "default": "3"
         }
     },
     "actions": [
