@@ -96,11 +96,12 @@ class SplunkConnector(phantom.BaseConnector):
 
         RETRY_LIMIT = int(self.get_config()['retry_count'])
 
-        for attempt_count in range(0, RETRY_LIMIT):
+        for _ in range(0, RETRY_LIMIT):
             ret_val, resp_data = self._make_rest_call(action_result, endpoint, data, params, method)
 
-            if not phantom.is_fail(ret_val) or attempt_count == RETRY_LIMIT - 1:
-                return ret_val, resp_data
+            if not phantom.is_fail(ret_val):
+                break
+        return ret_val, resp_data
 
     def _make_rest_call(self, action_result, endpoint, data, params=None, method=requests.post):
         if params is None:
@@ -482,7 +483,7 @@ class SplunkConnector(phantom.BaseConnector):
                 return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_INVALID_QUERY, e, query=search_query)
             except Exception as e:
                 if attempt_count == RETRY_LIMIT - 1:
-                    raise
+                    return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_CONNECTION_FAILED, e)
 
         self.debug_print(consts.SPLUNK_PROG_CREATED_QUERY.format(query=search_query))
 
@@ -513,7 +514,7 @@ class SplunkConnector(phantom.BaseConnector):
                     break
                 except Exception as e:
                     if attempt_count == RETRY_LIMIT - 1:
-                        raise
+                        return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_CONNECTION_FAILED, e)
 
             stats = {'is_done': job['isDone'],
                      'progress': float(job['doneProgress']) * 100,
