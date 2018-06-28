@@ -90,7 +90,22 @@ class SplunkConnector(phantom.BaseConnector):
         # Must return success if we want handle_action to be called
         return phantom.APP_SUCCESS
 
-    def _make_rest_call(self, action_result, endpoint, data, params={}, method=requests.post):
+    def _make_rest_call_retry(self, action_result, endpoint, data, params=None, method=requests.post):
+        if params is None:
+            params = {}
+
+        RETRY_LIMIT = int(self.get_config()['retry_count'])
+
+        for _ in range(0, RETRY_LIMIT):
+            ret_val, resp_data = self._make_rest_call(action_result, endpoint, data, params, method)
+
+            if not phantom.is_fail(ret_val):
+                break
+        return ret_val, resp_data
+
+    def _make_rest_call(self, action_result, endpoint, data, params=None, method=requests.post):
+        if params is None:
+            params = {}
 
         config = self.get_config()
         url = '{0}services/{1}'.format(self._base_url, endpoint)
@@ -128,7 +143,7 @@ class SplunkConnector(phantom.BaseConnector):
     def _get_server_version(self, action_result):
 
         endpoint = 'server/info'
-        ret_val, resp_data = self._make_rest_call(action_result, endpoint, {}, method=requests.get)
+        ret_val, resp_data = self._make_rest_call_retry(action_result, endpoint, {}, method=requests.get)
 
         if phantom.is_fail(ret_val):
             return 'FAILURE'
@@ -144,7 +159,7 @@ class SplunkConnector(phantom.BaseConnector):
     def _check_for_es(self, action_result):
 
         endpoint = 'apps/local/SplunkEnterpriseSecuritySuite'
-        ret_val, resp_data = self._make_rest_call(action_result, endpoint, {}, method=requests.get)
+        ret_val, resp_data = self._make_rest_call_retry(action_result, endpoint, {}, method=requests.get)
         if phantom.is_fail(ret_val) or not resp_data:
             return False
         return True
@@ -166,7 +181,7 @@ class SplunkConnector(phantom.BaseConnector):
             get_params['index'] = index
 
         endpoint = 'receivers/simple'
-        ret_val, resp_data = self._make_rest_call(action_result, endpoint, param[consts.SPLUNK_JSON_DATA], params=get_params)
+        ret_val, resp_data = self._make_rest_call_retry(action_result, endpoint, param[consts.SPLUNK_JSON_DATA], params=get_params)
 
         if phantom.is_fail(ret_val):
             return ret_val
@@ -203,7 +218,7 @@ class SplunkConnector(phantom.BaseConnector):
             request_body['comment'] = comment
 
         endpoint = 'notable_update'
-        ret_val, resp_data = self._make_rest_call(action_result, endpoint, request_body)
+        ret_val, resp_data = self._make_rest_call_retry(action_result, endpoint, request_body)
 
         if not ret_val:
             return ret_val
@@ -436,7 +451,6 @@ class SplunkConnector(phantom.BaseConnector):
         return action_result.get_status()
 
     def _test_asset_connectivity(self, param):
-
         if (phantom.is_fail(self._connect())):
             self.debug_print("connect failed")
             self.save_progress(consts.SPLUNK_ERR_CONNECTIVITY_TEST)
@@ -458,11 +472,18 @@ class SplunkConnector(phantom.BaseConnector):
 
         # self.debug_print('Search Query:', search_query)
 
+        RETRY_LIMIT = int(self.get_config()['retry_count'])
+
         # Validate the search query
-        try:
-            self._service.parse(search_query, parse_only=True)
-        except HTTPError as e:
-            return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_INVALID_QUERY, e, query=search_query)
+        for attempt_count in range(0, RETRY_LIMIT):
+            try:
+                self._service.parse(search_query, parse_only=True)
+                break
+            except HTTPError as e:
+                return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_INVALID_QUERY, e, query=search_query)
+            except Exception as e:
+                if attempt_count == RETRY_LIMIT - 1:
+                    return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_CONNECTION_FAILED, e)
 
         self.debug_print(consts.SPLUNK_PROG_CREATED_QUERY.format(query=search_query))
 
@@ -475,16 +496,26 @@ class SplunkConnector(phantom.BaseConnector):
         self.debug_print("kwargs_create", kwargs_create)
 
         # Create the job
-        try:
-            job = self._service.jobs.create(search_query, **kwargs_create)
-        except Exception as e:
-            return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_UNABLE_TO_CREATE_JOB, e)
+        for attempt_count in range(0, RETRY_LIMIT):
+            try:
+                job = self._service.jobs.create(search_query, **kwargs_create)
+                break
+            except Exception as e:
+                if attempt_count == RETRY_LIMIT - 1:
+                    return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_UNABLE_TO_CREATE_JOB, e)
 
         result_count = 0
         while True:
-            while not job.is_ready():
-                pass
-            job.refresh()
+            for attempt_count in range(0, RETRY_LIMIT):
+                try:
+                    while not job.is_ready():
+                        pass
+                    job.refresh()
+                    break
+                except Exception as e:
+                    if attempt_count == RETRY_LIMIT - 1:
+                        return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_CONNECTION_FAILED, e)
+
             stats = {'is_done': job['isDone'],
                      'progress': float(job['doneProgress']) * 100,
                      'scan_count': int(job['scanCount']),
