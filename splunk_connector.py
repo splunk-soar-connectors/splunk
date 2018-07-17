@@ -94,7 +94,7 @@ class SplunkConnector(phantom.BaseConnector):
         if params is None:
             params = {}
 
-        RETRY_LIMIT = int(self.get_config()['retry_count'])
+        RETRY_LIMIT = int(self.get_config().get('retry_count', 3))
 
         for _ in range(0, RETRY_LIMIT):
             ret_val, resp_data = self._make_rest_call(action_result, endpoint, data, params, method)
@@ -472,7 +472,7 @@ class SplunkConnector(phantom.BaseConnector):
 
         # self.debug_print('Search Query:', search_query)
 
-        RETRY_LIMIT = int(self.get_config()['retry_count'])
+        RETRY_LIMIT = int(self.get_config().get('retry_count', 3))
 
         # Validate the search query
         for attempt_count in range(0, RETRY_LIMIT):
