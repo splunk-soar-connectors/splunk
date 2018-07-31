@@ -55,6 +55,8 @@ SPLUNK_JSON_LAST_N_DAYS = "last_n_days"
 SPLUNK_JSON_TOTAL_EVENTS = "total_events"
 SPLUNK_JSON_TOTAL_ALERTS = "total_alerts"
 SPLUNK_JSON_HOST_IP_NAME = "host_ip_name"
+SPLUNK_JSON_EARLIEST = "earliest"
+SPLUNK_JSON_LATEST = "latest"
 
 # Default values
 SPLUNK_DEFAULT_EVENT_COUNT = 10
