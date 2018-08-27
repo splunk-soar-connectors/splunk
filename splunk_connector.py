@@ -169,12 +169,13 @@ class SplunkConnector(phantom.BaseConnector):
         # self.debug_print('Search Query:', search_query)
         search_query = 'search [| makeresults | eval myfield = "' + sidandrid + '" | rex field=myfield "^(?<sid>.*)\+(?<rid>\d*)"'
         search_query += ' | eval search = "( (sid::" . sid . " OR orig_sid::" . sid . ") (rid::" . rid . " OR orig_rid::" . rid . ") )" | table search] `notable` | table event_id'
-        self.send_progress("In _resolve_eventid.. here's my search: " + search_query)
+        self.send_progress("Running search_query: " + search_query)
+
         result = self._return_first_row_from_query(search_query, action_result)
         if 'event_id' in result:
             return result['event_id']
-        else:
-            return action_result.set_status(phantom.APP_ERROR)
+
+        return action_result.set_status(phantom.APP_ERROR, ")
 
     def _return_first_row_from_query(self, search_query, action_result, kwargs_create=dict()):
         """Function that executes the query on splunk"""
@@ -708,7 +709,7 @@ class SplunkConnector(phantom.BaseConnector):
 
         # Get the action that we are supposed to carry out, set it in the connection result object
         action = self.get_action_identifier()
-        self.send_progress("Here is my status:" + action)
+        self.send_progress("executing action: " + action)
         if action == self.ACTION_ID_RUN_QUERY:
             result = self._handle_run_query(param)
         elif action == self.ACTION_ID_POST_DATA:
@@ -718,7 +719,6 @@ class SplunkConnector(phantom.BaseConnector):
         elif action == self.ACTION_ID_GET_HOST_EVENTS:
             result = self._get_host_events(param)
         elif action == self.ACTION_ID_GET_CONTRIB_EVENTS:
-            self.send_progress("Kicking it")
             result = self._get_contributing_events(param)
         elif action == phantom.ACTION_ID_TEST_ASSET_CONNECTIVITY:
             result = self._test_asset_connectivity(param)
