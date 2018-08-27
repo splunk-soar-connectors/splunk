@@ -31,6 +31,11 @@ from datetime import datetime
 from calendar import timegm
 
 
+class RetVal(tuple):
+    def __new__(cls, val1, val2=None):
+        return tuple.__new__(RetVal, (val1, val2))
+
+
 class SplunkConnector(phantom.BaseConnector):
 
     ACTION_ID_POST_DATA = "post_data"
@@ -163,7 +168,7 @@ class SplunkConnector(phantom.BaseConnector):
             return False
         return True
 
-    def _resolve_eventid(self, sidandrid, action_result, kwargs_create=dict()):
+    def _resolve_event_id(self, sidandrid, action_result, kwargs_create=dict()):
         """Function that executes the query on splunk"""
 
         # self.debug_print('Search Query:', search_query)
@@ -173,9 +178,9 @@ class SplunkConnector(phantom.BaseConnector):
 
         result = self._return_first_row_from_query(search_query, action_result)
         if 'event_id' in result:
-            return result['event_id']
+            return RetVal(phantom.APP_SUCCESS, result['event_id'])
 
-        return action_result.set_status(phantom.APP_ERROR, ")
+        return RetVal(action_result.set_status(phantom.APP_ERROR, "could not find event_id of splunk event"), None)
 
     def _return_first_row_from_query(self, search_query, action_result, kwargs_create=dict()):
         """Function that executes the query on splunk"""
@@ -296,8 +301,10 @@ class SplunkConnector(phantom.BaseConnector):
         regexp = re.compile(r"\+\d{1,3}[\"$]")
         if regexp.search(json.dumps(ids)):
             self.send_progress("This looks like an SID + RID combo, pulling the actual event_id.")
-            eventid = self._resolve_eventid(ids, param)
-            ids = eventid
+            ret_val, event_id = self._resolve_event_id(ids, param)
+            if phantom.is_fail(ret_val):
+                return action_result.set_status(phantom.APP_ERROR, "Unable to find underlying event_id from SID + RID combo")
+            ids = event_id
         else:
             self.send_progress("This looks like a notable event_id. Proceeding untouched.")
 
@@ -371,8 +378,10 @@ class SplunkConnector(phantom.BaseConnector):
         regexp = re.compile(r"\+\d{1,3}[\"$]")
         if regexp.search(json.dumps(ids)):
             self.send_progress("This looks like an SID + RID combo, pulling the actual event_id.")
-            eventid = self._resolve_eventid(ids, param)
-            ids = eventid
+            ret_val, event_id = self._resolve_event_id(ids, param)
+            if phantom.is_fail(ret_val):
+                return action_result.set_status(phantom.APP_ERROR, "Unable to find underlying event_id from SID + RID combo")
+            ids = event_id
         else:
             self.send_progress("This looks like a notable event_id. Proceeding untouched.")
 
