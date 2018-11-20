@@ -254,13 +254,18 @@ class SplunkConnector(phantom.BaseConnector):
 
         config = self.get_config()
         action_result = self.add_action_result(phantom.ActionResult(dict(param)))
+        search_command = config.get('on_poll_command')
         search_string = config.get('on_poll_query')
+        po = config.get('on_poll_parse_only')
+
+        if search_command is None:
+            self.save_progress("Need to specify Command for query String to use polling")
+            return self.set_status(phantom.APP_ERROR)
         if search_string is None:
             self.save_progress("Need to specify Query String to use polling")
             return self.set_status(phantom.APP_ERROR)
 
-        if (search_string[0] != '|') and (search_string.find('search', 0) != 0):
-            search_string = 'search ' + search_string
+        search_query = search_command.strip() + " " + search_string.strip()
 
         search_params = {}
         start_time = self._state.get('start_time')
@@ -275,7 +280,7 @@ class SplunkConnector(phantom.BaseConnector):
         if search_params['max_count'] <= 0:
             search_params.pop('max_count')
 
-        ret_val = self._run_query(search_string, action_result, search_params)
+        ret_val = self._run_query(search_query, action_result, search_params, parse_only=po)
         if phantom.is_fail(ret_val):
             self.save_progress(action_result.get_message())
             return self.set_status(phantom.APP_ERROR)
