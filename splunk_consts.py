@@ -35,6 +35,8 @@ SPLUNK_PROG_CHECKING_STATUS_OF_JOB_ID = "Checking status of job id '{job_id}'"
 SPLUNK_PROG_JOB_ID_DONE_RETRIEVING_RESULTS = "Retrieving results for job id '{job_id}'"
 
 # Json keys
+SPLUNK_JSON_COMMAND = "command"
+SPLUNK_JSON_PARSE_ONLY = "parse_only"
 SPLUNK_JSON_HOST = "host"
 SPLUNK_JSON_DATA = "data"
 SPLUNK_JSON_INDEX = "index"

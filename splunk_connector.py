@@ -361,15 +361,15 @@ class SplunkConnector(phantom.BaseConnector):
         if (phantom.is_fail(self._connect())):
             return self.get_status()
 
+        search_command = param.get(consts.SPLUNK_JSON_COMMAND)
         search_string = param.get(consts.SPLUNK_JSON_QUERY)
+        po = param.get(consts.SPLUNK_JSON_PARSE_ONLY)
 
         action_result = self.add_action_result(phantom.ActionResult(dict(param)))
 
-        # Check if we need to add the search keyword in the start
-        if (search_string[0] != '|') and (search_string.find('search', 0) != 0):
-            search_string = 'search ' + search_string
+        search_query = search_command.strip() + " " + search_string.strip()
 
-        return self._run_query(search_string, action_result)
+        return self._run_query(search_query, action_result, parse_only=po)
 
     def _get_tz_str_from_epoch(self, time_format_str, epoch_milli):
 
@@ -464,7 +464,7 @@ class SplunkConnector(phantom.BaseConnector):
         self.debug_print("connect passed")
         return self.set_status_save_progress(phantom.APP_SUCCESS, consts.SPLUNK_SUCC_CONNECTIVITY_TEST)
 
-    def _run_query(self, search_query, action_result, kwargs_create=dict()):
+    def _run_query(self, search_query, action_result, kwargs_create=dict(), parse_only=True):
         """Function that executes the query on splunk"""
 
         # self.debug_print('Search Query:', search_query)
@@ -474,7 +474,7 @@ class SplunkConnector(phantom.BaseConnector):
         # Validate the search query
         for attempt_count in range(0, RETRY_LIMIT):
             try:
-                self._service.parse(search_query, parse_only=True)
+                self._service.parse(search_query, parse_only=parse_only)
                 break
             except HTTPError as e:
                 return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_INVALID_QUERY, e, query=search_query)

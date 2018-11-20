@@ -290,10 +290,26 @@
             "identifier": "execute_search",
             "read_only": true,
             "parameters": {
+                "command": {
+                    "description": "Beginning command (in Splunk search language)",
+                    "data_type": "string",
+                    "order": 0,
+                    "required": true,
+                    "primary": true,
+                    "value_list": [
+                        "search",
+                        "eval",
+                        "savedsearch",
+                        "stats",
+                        "table",
+                        "tstats"
+                    ],
+                    "default": "search"
+                },
                 "query": {
                     "description": "Query to run (in Splunk search language)",
                     "data_type": "string",
-                    "order": 0,
+                    "order": 1,
                     "required": true,
                     "primary": true,
                     "contains": [
@@ -303,8 +319,16 @@
                 "display": {
                     "description": "Display fields (comma separated)",
                     "data_type": "string",
-                    "order": 1,
+                    "order": 2,
                     "required": false,
+                    "primary": false
+                },
+                "parse_only": {
+                    "description": "Parse Only",
+                    "data_type": "boolean",
+                    "order": 3,
+                    "required": true,
+                    "default": true,
                     "primary": false
                 }
             },
@@ -323,21 +347,22 @@
                     "data_type": "string",
                     "contains": [
                         "host name"
+                    ],
+                    "example_values": [
+                        "10.1.67.187:8088"
                     ]
                 },
                 {
                     "data_path": "action_result.data.*._time",
                     "column_name": "Time",
                     "column_order": "1",
-                    "data_type": "string",
-                    "contains": []
+                    "data_type": "string"
                 },
                 {
                     "data_path": "action_result.data.*._raw",
                     "column_name": "Raw",
                     "column_order": "2",
-                    "data_type": "string",
-                    "contains": []
+                    "data_type": "string"
                 },
                 {
                     "data_path": "action_result.data.*._cd",
@@ -388,21 +413,33 @@
                 },
                 {
                     "data_path": "action_result.status",
-                    "data_type": "string"
+                    "data_type": "string",
+                    "example_values": [
+                        "success"
+                    ]
                 },
                 {
                     "data_path": "action_result.message",
-                    "data_type": "string"
+                    "data_type": "string",
+                    "example_values": [
+                        "Total events: 2"
+                    ]
                 },
                 {
                     "data_path": "action_result.summary.total_events",
-                    "data_type": "numeric"
+                    "data_type": "numeric",
+                    "example_values": [
+                        2
+                    ]
                 },
                 {
                     "data_path": "action_result.parameter.query",
                     "data_type": "string",
                     "contains": [
                         "splunk query"
+                    ],
+                    "example_values": [
+                        "\"Send to Phantom\""
                     ]
                 },
                 {
@@ -411,11 +448,32 @@
                 },
                 {
                     "data_path": "summary.total_objects",
-                    "data_type": "numeric"
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
                 },
                 {
                     "data_path": "summary.total_objects_successful",
-                    "data_type": "numeric"
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
+                },
+                {
+                    "data_path": "action_result.parameter.command",
+                    "data_type": "string",
+                    "example_values": [
+                        "savedsearch"
+                    ]
+                },
+                {
+                    "data_path": "action_result.parameter.parse_only",
+                    "data_type": "boolean",
+                    "example_values": [
+                        true,
+                        false
+                    ]
                 }
             ],
             "versions": "EQ(*)"
