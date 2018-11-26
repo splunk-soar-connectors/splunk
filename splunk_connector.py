@@ -28,7 +28,6 @@ import simplejson as json
 
 from pytz import timezone
 from datetime import datetime
-from calendar import timegm
 
 
 class RetVal(tuple):
@@ -42,7 +41,6 @@ class SplunkConnector(phantom.BaseConnector):
     ACTION_ID_RUN_QUERY = "execute_search"
     ACTION_ID_UPDATE_EVENT = "update_event"
     ACTION_ID_GET_HOST_EVENTS = "get_host_events"
-    ACTION_ID_GET_CONTRIB_EVENTS = "pull_contrib_events"
 
     def __init__(self):
 
@@ -169,7 +167,7 @@ class SplunkConnector(phantom.BaseConnector):
         return True
 
     def _resolve_event_id(self, sidandrid, action_result, kwargs_create=dict()):
-        """Function that executes the query on splunk"""
+        """Query the splunk instance using the SID+RID of the notable to find the notable ID"""
 
         # self.debug_print('Search Query:', search_query)
         search_query = 'search [| makeresults | eval myfield = "' + sidandrid + '" | rex field=myfield "^(?<sid>.*)\+(?<rid>\d*)"'
@@ -297,16 +295,13 @@ class SplunkConnector(phantom.BaseConnector):
         comment = param.get(consts.SPLUNK_JSON_COMMENT)
         urgency = param.get(consts.SPLUNK_JSON_URGENCY)
 
-        self.send_progress("ruleUIDs: " + ids)
         regexp = re.compile(r"\+\d{1,3}[\"$]")
         if regexp.search(json.dumps(ids)):
-            self.send_progress("This looks like an SID + RID combo, pulling the actual event_id.")
-            ret_val, event_id = self._resolve_event_id(ids, param)
+            self.send_progress("Interpreting the event ID as an SID + RID combo; querying for the actual event_id...")
+            ret_val, event_id = self._resolve_event_id(ids, action_result, param)
             if phantom.is_fail(ret_val):
                 return action_result.set_status(phantom.APP_ERROR, "Unable to find underlying event_id from SID + RID combo")
             ids = event_id
-        else:
-            self.send_progress("This looks like a notable event_id. Proceeding untouched.")
 
         if not comment and not status and not urgency and not owner:
             return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_NEED_PARAM)
@@ -331,7 +326,7 @@ class SplunkConnector(phantom.BaseConnector):
             return ret_val
 
         action_result.add_data(resp_data)
-
+        action_result.update_summary({consts.SPLUNK_JSON_UPDATED_EVENT_ID: ids})
         return action_result.set_status(phantom.APP_SUCCESS)
 
     def _get_host_events(self, param):
@@ -356,51 +351,6 @@ class SplunkConnector(phantom.BaseConnector):
 
         search_query = 'search host={0}{1}'.format(ip_hostname, ' earliest=-{0}d'.format(last_n_days) if last_n_days else '')
 
-        return self._run_query(search_query, action_result)
-
-    def _get_contributing_events(self, param):
-        """Executes the query to get events pertaining to a host
-            Gets the events for a host for the last 'N' number of days
-        """
-        # Connect
-        if (phantom.is_fail(self._connect())):
-            return self.get_status()
-
-        action_result = self.add_action_result(phantom.ActionResult(dict(param)))
-
-        ids = param.get(consts.SPLUNK_JSON_EVENT_IDS)
-        earliest = param.get(consts.SPLUNK_JSON_EARLIEST)
-        latest = param.get(consts.SPLUNK_JSON_LATEST)
-        utc_time = time.strptime(earliest, "%m/%d/%Y %H:%M:%S")
-        earliest = str(timegm(utc_time) - 3600)
-        utc_time = time.strptime(latest, "%m/%d/%Y %H:%M:%S")
-        latest = str(timegm(utc_time) + 3600)
-        regexp = re.compile(r"\+\d{1,3}[\"$]")
-        if regexp.search(json.dumps(ids)):
-            self.send_progress("This looks like an SID + RID combo, pulling the actual event_id.")
-            ret_val, event_id = self._resolve_event_id(ids, param)
-            if phantom.is_fail(ret_val):
-                return action_result.set_status(phantom.APP_ERROR, "Unable to find underlying event_id from SID + RID combo")
-            ids = event_id
-        else:
-            self.send_progress("This looks like a notable event_id. Proceeding untouched.")
-
-        self.send_progress("Proceeding with this event_id: " + ids)
-
-        # Yes, I know...
-        search_query = 'search earliest=' + earliest + ' latest=' + latest + ' `notable` | search event_id=' + ids + ' | table _time  drilldown_* info_*time src_ip '
-        search_query += '| rex field=drilldown_search mode=sed "s/\\$(\\S*)\\$/$token_\\1$/g" | rex field=drilldown_search max_match=12 "\\$(?<tokens>\\S*)\\$" | foreach 1 2'
-        search_query += ' 3 4 5 6 7 8 9 10 11 12 [| eval dvtemp="token_<<FIELD>>", dvtemp2="token_" . mvindex(tokens, <<FIELD>> - 1, <<FIELD>> - 1), "{dvtemp2}"="placeholder",'
-        search_query += '"{dvtemp}"=mvindex(tokens, <<FIELD>> - 1, <<FIELD>> - 1) | fields - dvtemp*] | foreach * [| eval "token_<<FIELD>>"=<<FIELD>>] | foreach token_*'
-        search_query += '[eval drilldown_search=if(isnotnull(<<FIELD>>) AND isnotnull(token_<<FIELD>>), replace(drilldown_search, "\\$<<FIELD>>\\$", <<FIELD>>), drilldown_search)]'
-        search_query += '| fields - token* | table drilldown_search drilldown_earliest drilldown_latest '
-
-        result = self._return_first_row_from_query(search_query, action_result)
-        regexp = re.compile(r"^\s*\|")
-        if regexp.search(result['drilldown_search']):
-            search_query = result['drilldown_search']
-        else:
-            search_query = "search earliest=" + result['drilldown_earliest'] + " latest=" + result['drilldown_latest'] + " " + result['drilldown_search']
         return self._run_query(search_query, action_result)
 
     def _on_poll(self, param):
@@ -727,8 +677,6 @@ class SplunkConnector(phantom.BaseConnector):
             result = self._update_event(param)
         elif action == self.ACTION_ID_GET_HOST_EVENTS:
             result = self._get_host_events(param)
-        elif action == self.ACTION_ID_GET_CONTRIB_EVENTS:
-            result = self._get_contributing_events(param)
         elif action == phantom.ACTION_ID_TEST_ASSET_CONNECTIVITY:
             result = self._test_asset_connectivity(param)
         elif action == "on_poll":
