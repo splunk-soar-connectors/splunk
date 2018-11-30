@@ -423,13 +423,13 @@
         {
             "action": "update event",
             "description": "Update a notable event",
-            "verbose": "The <b>event_ids</b> parameter takes a comma separated list of notable event IDs, which have the format: 68E08B8B-A853-3A20-9768-231C97B7EE76@@notable@@a4bd78810ae8e03e285e552fac0ddb23<br><br>NOTE: This action only works with notable events on Splunk ES",
+            "verbose": "The <b>event_ids</b> parameter takes a single event_id (which has the format: 68E08B8B-A853-3A20-9768-231C97B7EE76@@notable@@a4bd78810ae8e03e285e552fac0ddb23) or an adaptive response SID + RID combo (which has the format: scheduler__admin__SplunkEnterpriseSecuritySuite__RMD515d4671130158e57_at_1532441220_4982+0).<br><br>NOTE: This action only works with a notable event from Splunk ES.",
             "type": "generic",
             "identifier": "update_event",
             "read_only": false,
             "parameters": {
                 "event_ids": {
-                    "description": "Events IDs to update",
+                    "description": "Event ID to update",
                     "data_type": "string",
                     "contains": [
                         "splunk notable event id"
@@ -483,33 +483,55 @@
             "output": [
                 {
                     "data_path": "action_result.data.*.message",
-                    "data_type": "string"
+                    "data_type": "string",
+                    "example_values": [
+                        "1 event updated successfully"
+                    ]
                 },
                 {
                     "data_path": "action_result.data.*.success",
-                    "data_type": "boolean"
+                    "data_type": "boolean",
+                    "example_values": [
+                        false,
+                        true
+                    ]
                 },
                 {
                     "data_path": "action_result.data.*.failure_count",
-                    "data_type": "numeric"
+                    "data_type": "numeric",
+                    "example_values": [
+                        0
+                    ]
                 },
                 {
                     "data_path": "action_result.data.*.success_count",
-                    "data_type": "numeric"
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
                 },
                 {
                     "data_path": "action_result.status",
-                    "data_type": "string"
+                    "data_type": "string",
+                    "example_values": [
+                        "success"
+                    ]
                 },
                 {
                     "data_path": "action_result.message",
-                    "data_type": "string"
+                    "data_type": "string",
+                    "example_values": [
+                        "Updated event id: 2CF264EE-6016-4F6A-BCC3-4B7251E113F7@@notable@@035142b19c09ab645c6bbfb847e866f4"
+                    ]
                 },
                 {
                     "data_path": "action_result.parameter.event_ids",
                     "data_type": "string",
                     "contains": [
                         "splunk notable event id"
+                    ],
+                    "example_values": [
+                        "1542751027.136723+0"
                     ]
                 },
                 {
@@ -526,18 +548,40 @@
                 },
                 {
                     "data_path": "action_result.parameter.comment",
-                    "data_type": "string"
+                    "data_type": "string",
+                    "example_values": [
+                        "test comment"
+                    ]
                 },
                 {
                     "data_path": "summary.total_objects",
-                    "data_type": "numeric"
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
                 },
                 {
                     "data_path": "summary.total_objects_successful",
-                    "data_type": "numeric"
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
+                },
+                {
+                    "data_path": "action_result.summary.updated_event_id",
+                    "data_type": "string",
+                    "example_values": [
+                        "2CF264EE-6016-4F6A-BCC3-4B7251E113F7@@notable@@035142b19c09ab645c6bbfb847e866f4"
+                    ]
                 }
             ],
-            "versions": "EQ(*)"
+            "versions": "EQ(*)",
+            "render": {
+                "width": 12,
+                "title": "Update Event",
+                "type": "table",
+                "height": 5
+            }
         },
         {
             "action": "post data",
