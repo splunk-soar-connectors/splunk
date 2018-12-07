@@ -5,10 +5,10 @@ services:
     image: repo.splunk.com/splunk/infra/phantom_apps_tester:${IMAGE_TAG:-latest}
     environment:
       BUILD_USER_ID: ${USER:-localbuild}
-      test_branch: ${TEST_BRANCH:-master}
-      WORKSPACE: /build
+      TEST_BRANCH: ${TEST_BRANCH:-master}
+      WORKSPACE: /builds/phantom-apps
     volumes:
-    - ..:/build
+    - ..:/builds/phantom-apps/${APP_REPO_NAME}
     command: sleep 28800
     secrets:
     - artifactory_token
