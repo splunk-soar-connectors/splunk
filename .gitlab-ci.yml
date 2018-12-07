@@ -1,0 +1,33 @@
+stages:
+  - Test And Build App
+  - Release App
+
+image: repo.splunk.com/splunk/infra/phantom_apps_tester:latest
+
+before_script:
+  - mkdir -p -m 700 ~/.ssh && echo -e $APP_DEPLOY_KEY > ~/.ssh/app_deploy_key
+
+test:
+  stage: Test And Build App
+  script: make test
+  after_script:
+    - make upload
+
+build:
+  stage: Test And Build App
+  script: make build
+  image: repo.splunk.com/splunk/infra/phantom_apps_builder:latest
+  only:
+    - next
+    - /^beta\/.+/
+    - master
+  except:
+    variables:
+      - $CI_COMMIT_MESSAGE =~ /^Bumped up the version/
+      - $CI_COMMIT_MESSAGE =~ /^\[no-build\]/
+
+release:
+  stage: Release App
+  script: make release
+  only:
+    - master
