@@ -32,3 +32,7 @@ release:
   script: make release
   only:
     - master
+  except:
+    variables:
+      - $CI_COMMIT_MESSAGE =~ /^Bumped up the version/
+      - $CI_COMMIT_MESSAGE =~ /^\[no-build\]/
