@@ -442,10 +442,11 @@ class SplunkConnector(phantom.BaseConnector):
         title = self._container_name_prefix
         if not title and not self._container_name_values:
             self._container_name_values.append('source')
-        for name in self._container_name_values:
-            value = item.get(consts.CIM_CEF_MAP.get(name, name))
+        values = ''
+        for i in range(len(self._container_name_values)):
+            value = consts.CIM_CEF_MAP.get(self._container_name_values[i], self._container_name_values[i])
             if value:
-                title += "{}{} = {}".format(', ' if title else '', name, value)
+                values += "{}{}".format(value, '' if i == len(self._container_name_values) - 1 else ', ')
 
         if not title:
             time = item.get('_time')
@@ -453,8 +454,10 @@ class SplunkConnector(phantom.BaseConnector):
                 title = "Splunk Log Entry on {}".format(time)
             else:
                 title = "Splunk Log Entry"
+        else:
+            title = item.get(title, title)
 
-        return title
+        return "{}: {}".format(title, values)
 
     def _get_splunk_severity(self, item):
         severity = item.get('severity')
