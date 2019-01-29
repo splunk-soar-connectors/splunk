@@ -1,12 +1,8 @@
-# --
 # File: splunk_connector.py
+# Copyright (c) 2014-2019 Splunk Inc.
 #
-# Copyright (c) 2014-2018 Splunk Inc.
-#
-# SPLUNK CONFIDENTIAL – Use or disclosure of this material in whole or in part
+# SPLUNK CONFIDENTIAL - Use or disclosure of this material in whole or in part
 # without a valid written license from Splunk Inc. is PROHIBITED.
-#
-#
 # --
 
 # Phantom imports
@@ -442,10 +438,11 @@ class SplunkConnector(phantom.BaseConnector):
         title = self._container_name_prefix
         if not title and not self._container_name_values:
             self._container_name_values.append('source')
-        for name in self._container_name_values:
-            value = item.get(consts.CIM_CEF_MAP.get(name, name))
+        values = ''
+        for i in range(len(self._container_name_values)):
+            value = consts.CIM_CEF_MAP.get(self._container_name_values[i], self._container_name_values[i])
             if value:
-                title += "{}{} = {}".format(', ' if title else '', name, value)
+                values += "{}{}".format(value, '' if i == len(self._container_name_values) - 1 else ', ')
 
         if not title:
             time = item.get('_time')
@@ -453,8 +450,10 @@ class SplunkConnector(phantom.BaseConnector):
                 title = "Splunk Log Entry on {}".format(time)
             else:
                 title = "Splunk Log Entry"
+        else:
+            title = item.get(title, title)
 
-        return title
+        return "{}: {}".format(title, values)
 
     def _get_splunk_severity(self, item):
         severity = item.get('severity')
