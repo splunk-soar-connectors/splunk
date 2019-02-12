@@ -30,11 +30,11 @@ export APP_BRANCH         ?= $(CI_COMMIT_REF_NAME)
 export TEST_BRANCH        ?= master
 
 # Pipeline secrets
-SECRETS = artifactory_token gitlab_api_token app_deploy_key
+SECRETS = app_artf_token gitlab_api_token app_deploy_key
 ifneq ($(wildcard /run/secrets/.),)
  # Load secrets if specified in filesystem rather than variables
  export GITLAB_API_TOKEN  ?= $(shell cat /run/secrets/gitlab_api_token)
- export ARTIFACTORY_TOKEN ?= $(shell cat /run/secrets/artifactory_token)
+ export APP_ARTF_TOKEN    ?= $(shell cat /run/secrets/app_artf_token)
  export APP_DEPLOY_KEY    ?= $(shell cat /run/secrets/app_deploy_key)
 endif
 
@@ -66,12 +66,12 @@ local: secrets
 	@eval $(shell ssh-agent -s >$@)
 	@if [ -s /run/secrets/app_deploy_key ]; then \
 	  cp /run/secrets/app_deploy_key ~/.ssh/id_rsa && \
-		/bin/bash -c "source $@ && ssh-add ~/.ssh/id_rsa"; \
+		source $@ && ssh-add ~/.ssh/id_rsa; \
 	else \
 	  cp ~/.ssh/app_deploy_key ~/.ssh/id_rsa && \
 	  chmod 600 ~/.ssh/id_rsa && \
 		cat $@ && \
-		/bin/bash -c "source $@ && ssh-add ~/.ssh/id_rsa"; \
+		source $@ && ssh-add ~/.ssh/id_rsa; \
 	fi
 
 SECRET_FILES = $(foreach I,$(SECRETS),~/.docker/secrets/$I)
