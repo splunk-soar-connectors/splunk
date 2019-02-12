@@ -1,5 +1,5 @@
 # Makefile for Phantom apps CI
-#  created oct-2018 by rbraun at splunk
+#  created oct-2018 by michellel & jacobd at splunk
 #
 # Usage:
 #   make local     - to bring up docker for local dev
@@ -30,15 +30,16 @@ export APP_BRANCH         ?= $(CI_COMMIT_REF_NAME)
 export TEST_BRANCH        ?= master
 
 # Pipeline secrets
-SECRETS = artifactory_token gitlab_api_token app_deploy_key
+SECRETS = app_artf_token gitlab_api_token app_deploy_key
 ifneq ($(wildcard /run/secrets/.),)
  # Load secrets if specified in filesystem rather than variables
  export GITLAB_API_TOKEN  ?= $(shell cat /run/secrets/gitlab_api_token)
- export ARTIFACTORY_TOKEN ?= $(shell cat /run/secrets/artifactory_token)
+ export APP_ARTF_TOKEN    ?= $(shell cat /run/secrets/app_artf_token)
  export APP_DEPLOY_KEY    ?= $(shell cat /run/secrets/app_deploy_key)
 endif
 
-.PHONY: checkout test upload build release local secrets list_secrets
+APP_RELEASE_TARGETS = test upload build release
+.PHONY: checkout local secrets list_secrets $(APP_RELEASE_TARGETS)
 
 checkout: $(RELEASE_DIR)
 $(RELEASE_DIR): /tmp/ssh-agent
@@ -47,16 +48,7 @@ $(RELEASE_DIR): /tmp/ssh-agent
 	$(info Checkout the test branch: $(TEST_BRANCH))
 	@cd $(RELEASE_DIR) && git checkout $(TEST_BRANCH)
 
-test: checkout
-	@cd $(RELEASE_DIR) && make $@
-
-upload: checkout
-	@cd $(RELEASE_DIR) && make $@
-
-build: checkout
-	@cd $(RELEASE_DIR) && make $@
-
-release: checkout
+$(APP_RELEASE_TARGETS): checkout
 	@cd $(RELEASE_DIR) && make $@
 
 local: secrets
@@ -74,12 +66,12 @@ local: secrets
 	@eval $(shell ssh-agent -s >$@)
 	@if [ -s /run/secrets/app_deploy_key ]; then \
 	  cp /run/secrets/app_deploy_key ~/.ssh/id_rsa && \
-		/bin/bash -c "source $@ && ssh-add ~/.ssh/id_rsa"; \
+		source $@ && ssh-add ~/.ssh/id_rsa; \
 	else \
 	  cp ~/.ssh/app_deploy_key ~/.ssh/id_rsa && \
 	  chmod 600 ~/.ssh/id_rsa && \
 		cat $@ && \
-		/bin/bash -c "source $@ && ssh-add ~/.ssh/id_rsa"; \
+		source $@ && ssh-add ~/.ssh/id_rsa; \
 	fi
 
 SECRET_FILES = $(foreach I,$(SECRETS),~/.docker/secrets/$I)
