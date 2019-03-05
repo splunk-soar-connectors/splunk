@@ -288,6 +288,7 @@ class SplunkConnector(phantom.BaseConnector):
         owner = param.get(consts.SPLUNK_JSON_OWNER)
         ids = param.get(consts.SPLUNK_JSON_EVENT_IDS)
         status = param.get(consts.SPLUNK_JSON_STATUS)
+        integer_status = param.get("integer_status")
         comment = param.get(consts.SPLUNK_JSON_COMMENT)
         urgency = param.get(consts.SPLUNK_JSON_URGENCY)
 
@@ -306,10 +307,15 @@ class SplunkConnector(phantom.BaseConnector):
 
         if owner:
             request_body['newOwner'] = owner
-        if status:
+        if integer_status != None:
+                request_body['status'] = str(integer_status)
+        elif status:
             if status not in consts.SPLUNK_STATUS_DICT:
-                return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_BAD_STATUS)
-            request_body['status'] = consts.SPLUNK_STATUS_DICT[status]
+                if not status.isdigit():
+                    return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_BAD_STATUS)
+                request_body['status'] = status
+            else:
+                request_body['status'] = consts.SPLUNK_STATUS_DICT[status]
         if urgency:
             request_body['urgency'] = urgency
         if comment:
