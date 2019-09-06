@@ -5,7 +5,7 @@
     "publisher": "Phantom",
     "type": "siem",
     "main_module": "splunk_connector.pyc",
-    "app_version": "1.3.31",
+    "app_version": "1.3.32",
     "utctime_updated": "2019-01-30T02:20:35.000000Z",
     "package_name": "phantom_splunk",
     "product_name": "Splunk Enterprise",
@@ -499,7 +499,7 @@
         {
             "action": "update event",
             "description": "Update a notable event",
-            "verbose": "The <b>event_ids</b> parameter takes a single event_id (which has the format: 68E08B8B-A853-3A20-9768-231C97B7EE76@@notable@@a4bd78810ae8e03e285e552fac0ddb23) or an adaptive response SID + RID combo (which has the format: scheduler__admin__SplunkEnterpriseSecuritySuite__RMD515d4671130158e57_at_1532441220_4982+0).<br><br>NOTE: This action only works with a notable event from Splunk ES.",
+            "verbose": "The <b>event_ids</b> parameter takes a single event_id (which has the format: 68E08B8B-A853-3A20-9768-231C97B7EE76@@notable@@a4bd78810ae8e03e285e552fac0ddb23) or an adaptive response SID + RID combo (which has the format: scheduler__admin__SplunkEnterpriseSecuritySuite__RMD515d4671130158e57_at_1532441220_4982+0).<br><br>NOTE: This action only works with a notable event from Splunk ES.<br><br><Second Note: The <b>status</b> parameter takes a string value, but custom status values are unique to an installation and not available at app creation. The <b>integer_status</b> parameter take a positive integer denoting the custom value desired. This integer must be determined by the customer on site. If set it will override <b>status</b>.",
             "type": "generic",
             "identifier": "update_event",
             "read_only": false,
@@ -518,7 +518,7 @@
                     "description": "New comment for the event",
                     "data_type": "string",
                     "required": false,
-                    "order": 4
+                    "order": 5
                 },
                 "status": {
                     "description": "New status for the event",
@@ -535,6 +535,12 @@
                     "required": false,
                     "order": 2
                 },
+                "integer_status": {
+                    "description": "Integer representing custom status value",
+                    "data_type": "numeric",
+                    "required": false,
+                    "order": 3
+                },
                 "urgency": {
                     "description": "New urgency for the event",
                     "data_type": "string",
@@ -547,7 +553,7 @@
                         "critical"
                     ],
                     "required": false,
-                    "order": 3
+                    "order": 4
                 },
                 "owner": {
                     "description": "New owner for the event",
