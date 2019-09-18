@@ -74,9 +74,11 @@ class SplunkConnector(phantom.BaseConnector):
         splunk_server = config[phantom.APP_JSON_DEVICE]
         kwargs_config_flags = {
                 'host': splunk_server,
-                'port': int(phantom.get_value(config, phantom.APP_JSON_PORT, '8089')),
-                'username': phantom.get_value(config, phantom.APP_JSON_USERNAME, None),
-                'password': phantom.get_value(config, phantom.APP_JSON_PASSWORD, None)}
+                'port': int(config.get('port', '8089')),
+                'username': config.get('username', None),
+                'password': config.get('password', None),
+                'owner': config.get('splunk_owner', None),
+                'app': config.get('splunk_app', None)}
 
         self.save_progress(phantom.APP_PROG_CONNECTING_TO_ELLIPSES, splunk_server)
 
@@ -482,7 +484,10 @@ class SplunkConnector(phantom.BaseConnector):
 
         action_result = self.add_action_result(phantom.ActionResult(dict(param)))
 
-        search_query = search_command.strip() + " " + search_string.strip()
+        if search_command is None:
+            search_query = search_string.strip()
+        else:
+            search_query = search_command.strip() + " " + search_string.strip()
 
         return self._run_query(search_query, action_result, parse_only=po)
 

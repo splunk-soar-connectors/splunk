@@ -46,22 +46,32 @@
             "order": 3,
             "data_type": "password"
         },
+        "splunk_owner": {
+            "description": "Splunk Owner",
+            "order": 4,
+            "data_type": "string"
+        },
+        "splunk_app": {
+            "description": "Splunk App",
+            "order": 5,
+            "data_type": "string"
+        },
         "timezone": {
             "data_type": "timezone",
-            "order": 4,
+            "order": 6,
             "description": "Splunk server timezone",
             "required": true
         },
         "verify_server_cert": {
             "data_type": "boolean",
-            "order": 5,
+            "order": 7,
             "description": "Verify server certificate",
             "required": true,
             "default": false
         },
         "on_poll_command": {
             "data_type": "string",
-            "order": 6,
+            "order": 8,
             "description": "Command for query to use with On Poll",
             "required": true,
             "value_list": [
@@ -76,46 +86,46 @@
         },
         "on_poll_query": {
             "data_type": "string",
-            "order": 7,
+            "order": 9,
             "description": "Query to use with On Poll",
             "required": false
         },
         "on_poll_display": {
             "data_type": "string",
-            "order": 8,
+            "order": 10,
             "description": "Fields to save with On Poll",
             "required": false
         },
         "on_poll_parse_only": {
             "data_type": "boolean",
-            "order": 9,
+            "order": 11,
             "description": "Parse Only",
             "required": false,
             "default": true
         },
         "max_container": {
             "data_type": "numeric",
-            "order": 10,
+            "order": 12,
             "description": "Max events to ingest (Default: 100)",
             "required": false,
             "default": 100
         },
         "container_name_prefix": {
             "data_type": "string",
-            "order": 11,
+            "order": 13,
             "description": "Name to give containers created via ingestion",
             "required": false
         },
         "container_name_values": {
             "data_type": "string",
-            "order": 12,
+            "order": 14,
             "description": "Values to append to container name",
             "required": false
         },
         "retry_count": {
             "description": "Number of retries",
             "data_type": "numeric",
-            "order": 13,
+            "order": 15,
             "default": "3",
             "required": false
         }
@@ -303,7 +313,7 @@
         {
             "action": "run query",
             "description": "Run a search query on the Splunk device. Please escape any quotes that are part of the query string",
-            "verbose": "By default the widget for the &quot;run query&quot; action will show the host, time and raw fields. If you would like to see specific fields parsed out, they can be listed in a comma separated format in the &quot;display&quot; parameter.<br><br>Please keep in mind that Splunk does not always return all possible fields. Splunk may not return fields that are calculated or not present in the event.<br><br>To work around this you can force Splunk to return specific fields by using the &quot;fields&quot;. This works by appending &quot;| fields + *&quot; to your query. This will return every field, you can replace the asterisk with a comma separated list of fields.<br><br>Finally, some searches (such as those based on data models) can contain name-spaced fields. If a data model called &quot;my_model&quot; with a search &quot;my_search&quot; has a field &quot;hash&quot; then the field will be named &quot;my_search.hash&quot; and that is what must be used in the Splunk fields command and the display parameter.",
+            "verbose": "By default the widget for the &quot;run query&quot; action will show the host, time and raw fields. If you would like to see specific fields parsed out, they can be listed in a comma separated format in the &quot;display&quot; parameter.<br><br>Please keep in mind that Splunk does not always return all possible fields. Splunk may not return fields that are calculated or not present in the event.<br><br>To work around this you can force Splunk to return specific fields by using the &quot;fields&quot;. This works by appending &quot;| fields + *&quot; to your query. This will return every field, you can replace the asterisk with a comma separated list of fields.<br><br>Finally, some searches (such as those based on data models) can contain name-spaced fields. If a data model called &quot;my_model&quot; with a search &quot;my_search&quot; has a field &quot;hash&quot; then the field will be named &quot;my_search.hash&quot; and that is what must be used in the Splunk fields command and the display parameter. If using a non-global lookup file that is only accessible by a specific Splunk App, make sure to note the specific Splunk App in your asset configuration.",
             "type": "investigate",
             "identifier": "execute_search",
             "read_only": true,
@@ -312,7 +322,7 @@
                     "description": "Beginning command (in Splunk search language)",
                     "data_type": "string",
                     "order": 0,
-                    "required": true,
+                    "required": false,
                     "primary": true,
                     "value_list": [
                         "search",
