@@ -319,7 +319,7 @@
             "read_only": true,
             "parameters": {
                 "command": {
-                    "description": "Beginning command (in Splunk search language)",
+                    "description": "Beginning command (in Splunk Processing Language)",
                     "data_type": "string",
                     "order": 0,
                     "required": false,
@@ -335,7 +335,7 @@
                     "default": "search"
                 },
                 "query": {
-                    "description": "Query to run (in Splunk search language)",
+                    "description": "Query to run (in Splunk Processing Language)",
                     "data_type": "string",
                     "order": 1,
                     "required": true,
