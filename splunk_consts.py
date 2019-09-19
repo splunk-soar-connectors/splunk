@@ -1,12 +1,8 @@
-# --
 # File: splunk_consts.py
+# Copyright (c) 2014-2019 Splunk Inc.
 #
-# Copyright (c) 2014-2018 Splunk Inc.
-#
-# SPLUNK CONFIDENTIAL – Use or disclosure of this material in whole or in part
+# SPLUNK CONFIDENTIAL - Use or disclosure of this material in whole or in part
 # without a valid written license from Splunk Inc. is PROHIBITED.
-#
-#
 # --
 
 # Success/Error status and messages
@@ -35,6 +31,8 @@ SPLUNK_PROG_CHECKING_STATUS_OF_JOB_ID = "Checking status of job id '{job_id}'"
 SPLUNK_PROG_JOB_ID_DONE_RETRIEVING_RESULTS = "Retrieving results for job id '{job_id}'"
 
 # Json keys
+SPLUNK_JSON_COMMAND = "command"
+SPLUNK_JSON_PARSE_ONLY = "parse_only"
 SPLUNK_JSON_HOST = "host"
 SPLUNK_JSON_DATA = "data"
 SPLUNK_JSON_INDEX = "index"
@@ -53,8 +51,7 @@ SPLUNK_JSON_START_TIME = "start_time"
 SPLUNK_JSON_SOURCE_TYPE = "source_type"
 SPLUNK_JSON_LAST_N_DAYS = "last_n_days"
 SPLUNK_JSON_TOTAL_EVENTS = "total_events"
-SPLUNK_JSON_TOTAL_ALERTS = "total_alerts"
-SPLUNK_JSON_HOST_IP_NAME = "host_ip_name"
+SPLUNK_JSON_UPDATED_EVENT_ID = "updated_event_id"
 
 # Default values
 SPLUNK_DEFAULT_EVENT_COUNT = 10

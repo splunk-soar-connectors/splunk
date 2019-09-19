@@ -1,12 +1,8 @@
-# --
 # File: splunk_connector.py
+# Copyright (c) 2014-2019 Splunk Inc.
 #
-# Copyright (c) 2014-2018 Splunk Inc.
-#
-# SPLUNK CONFIDENTIAL – Use or disclosure of this material in whole or in part
+# SPLUNK CONFIDENTIAL - Use or disclosure of this material in whole or in part
 # without a valid written license from Splunk Inc. is PROHIBITED.
-#
-#
 # --
 
 # Phantom imports
@@ -28,6 +24,11 @@ import simplejson as json
 
 from pytz import timezone
 from datetime import datetime
+
+
+class RetVal(tuple):
+    def __new__(cls, val1, val2=None):
+        return tuple.__new__(RetVal, (val1, val2))
 
 
 class SplunkConnector(phantom.BaseConnector):
@@ -73,9 +74,11 @@ class SplunkConnector(phantom.BaseConnector):
         splunk_server = config[phantom.APP_JSON_DEVICE]
         kwargs_config_flags = {
                 'host': splunk_server,
-                'port': int(phantom.get_value(config, phantom.APP_JSON_PORT, '8089')),
-                'username': phantom.get_value(config, phantom.APP_JSON_USERNAME, None),
-                'password': phantom.get_value(config, phantom.APP_JSON_PASSWORD, None)}
+                'port': int(config.get('port', '8089')),
+                'username': config.get('username', None),
+                'password': config.get('password', None),
+                'owner': config.get('splunk_owner', None),
+                'app': config.get('splunk_app', None)}
 
         self.save_progress(phantom.APP_PROG_CONNECTING_TO_ELLIPSES, splunk_server)
 
@@ -161,6 +164,98 @@ class SplunkConnector(phantom.BaseConnector):
             return False
         return True
 
+    def _resolve_event_id(self, sidandrid, action_result, kwargs_create=dict()):
+        """Query the splunk instance using the SID+RID of the notable to find the notable ID"""
+
+        # self.debug_print('Search Query:', search_query)
+        search_query = 'search [| makeresults | eval myfield = "' + sidandrid + '" | rex field=myfield "^(?<sid>.*)\+(?<rid>\d*)"'
+        search_query += ' | eval search = "( (sid::" . sid . " OR orig_sid::" . sid . ") (rid::" . rid . " OR orig_rid::" . rid . ") )" | table search] `notable` | table event_id'
+        self.send_progress("Running search_query: " + search_query)
+
+        result = self._return_first_row_from_query(search_query, action_result)
+        if 'event_id' in result:
+            return RetVal(phantom.APP_SUCCESS, result['event_id'])
+
+        return RetVal(action_result.set_status(phantom.APP_ERROR, "could not find event_id of splunk event"), None)
+
+    def _return_first_row_from_query(self, search_query, action_result, kwargs_create=dict()):
+        """Function that executes the query on splunk"""
+
+        self.debug_print('Search Query:', search_query)
+        RETRY_LIMIT = int(self.get_config().get('retry_count', 3))
+
+        if (phantom.is_fail(self._connect())):
+            return self.get_status()
+
+        # Validate the search query
+        for attempt_count in range(0, RETRY_LIMIT):
+            try:
+                self._service.parse(search_query, parse_only=True)
+                break
+            except HTTPError as e:
+                return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_INVALID_QUERY, e, query=search_query)
+            except Exception as e:
+                if attempt_count == RETRY_LIMIT - 1:
+                    return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_CONNECTION_FAILED, e)
+
+        self.debug_print(consts.SPLUNK_PROG_CREATED_QUERY.format(query=search_query))
+
+        # Creating search job
+        self.save_progress(consts.SPLUNK_PROG_CREATING_SEARCH_JOB)
+
+        # Set any search creation flags here
+        kwargs_create.update({'exec_mode': 'normal'})
+
+        self.debug_print("kwargs_create", kwargs_create)
+
+        # Create the job
+
+        for search_attempt_count in range(0, RETRY_LIMIT):
+            for attempt_count in range(0, RETRY_LIMIT):
+                try:
+                    job = self._service.jobs.create(search_query, **kwargs_create)
+                    break
+                except Exception as e:
+                    if attempt_count == RETRY_LIMIT - 1:
+                        return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_UNABLE_TO_CREATE_JOB, e)
+
+            while True:
+                for attempt_count in range(0, RETRY_LIMIT):
+                    try:
+                        while not job.is_ready():
+                            pass
+                        job.refresh()
+                        break
+                    except Exception as e:
+                        if attempt_count == RETRY_LIMIT - 1:
+                            return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_CONNECTION_FAILED, e)
+
+                stats = {'is_done': job['isDone'],
+                        'progress': float(job['doneProgress']) * 100,
+                        'scan_count': int(job['scanCount']),
+                        'event_count': int(job['eventCount']),
+                        'result_count': int(job['resultCount'])}
+                status = ("Progress: %(progress)03.1f%%   %(scan_count)d scanned   "
+                        "%(event_count)d matched   %(result_count)d results") % stats
+                self.send_progress(status)
+                if stats['is_done'] == '1':
+                    break
+                time.sleep(2)
+
+            self.send_progress("Parsing results...")
+
+            try:
+                results = splunk_results.ResultsReader(job.results(count=0))
+            except Exception as e:
+                return action_result.set_status(phantom.APP_ERROR, "Error retrieving results", e)
+
+            for result in results:
+                if isinstance(result, dict):
+                    return result
+            time.sleep(20)
+
+        return action_result.set_status(phantom.APP_ERROR)
+
     def _post_data(self, param):
 
         action_result = self.add_action_result(phantom.ActionResult(dict(param)))
@@ -195,8 +290,17 @@ class SplunkConnector(phantom.BaseConnector):
         owner = param.get(consts.SPLUNK_JSON_OWNER)
         ids = param.get(consts.SPLUNK_JSON_EVENT_IDS)
         status = param.get(consts.SPLUNK_JSON_STATUS)
+        integer_status = param.get("integer_status")
         comment = param.get(consts.SPLUNK_JSON_COMMENT)
         urgency = param.get(consts.SPLUNK_JSON_URGENCY)
+
+        regexp = re.compile(r"\+\d{1,3}[\"$]")
+        if regexp.search(json.dumps(ids)):
+            self.send_progress("Interpreting the event ID as an SID + RID combo; querying for the actual event_id...")
+            ret_val, event_id = self._resolve_event_id(ids, action_result, param)
+            if phantom.is_fail(ret_val):
+                return action_result.set_status(phantom.APP_ERROR, "Unable to find underlying event_id from SID + RID combo")
+            ids = event_id
 
         if not comment and not status and not urgency and not owner:
             return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_NEED_PARAM)
@@ -205,10 +309,15 @@ class SplunkConnector(phantom.BaseConnector):
 
         if owner:
             request_body['newOwner'] = owner
-        if status:
+        if integer_status != None:
+                request_body['status'] = str(integer_status)
+        elif status:
             if status not in consts.SPLUNK_STATUS_DICT:
-                return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_BAD_STATUS)
-            request_body['status'] = consts.SPLUNK_STATUS_DICT[status]
+                if not status.isdigit():
+                    return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_BAD_STATUS)
+                request_body['status'] = status
+            else:
+                request_body['status'] = consts.SPLUNK_STATUS_DICT[status]
         if urgency:
             request_body['urgency'] = urgency
         if comment:
@@ -221,7 +330,7 @@ class SplunkConnector(phantom.BaseConnector):
             return ret_val
 
         action_result.add_data(resp_data)
-
+        action_result.update_summary({consts.SPLUNK_JSON_UPDATED_EVENT_ID: ids})
         return action_result.set_status(phantom.APP_SUCCESS)
 
     def _get_host_events(self, param):
@@ -254,13 +363,18 @@ class SplunkConnector(phantom.BaseConnector):
 
         config = self.get_config()
         action_result = self.add_action_result(phantom.ActionResult(dict(param)))
+        search_command = config.get('on_poll_command')
         search_string = config.get('on_poll_query')
+        po = config.get('on_poll_parse_only')
+
+        if search_command is None:
+            self.save_progress("Need to specify Command for query String to use polling")
+            return self.set_status(phantom.APP_ERROR)
         if search_string is None:
             self.save_progress("Need to specify Query String to use polling")
             return self.set_status(phantom.APP_ERROR)
 
-        if (search_string[0] != '|') and (search_string.find('search', 0) != 0):
-            search_string = 'search ' + search_string
+        search_query = search_command.strip() + " " + search_string.strip()
 
         search_params = {}
         start_time = self._state.get('start_time')
@@ -275,7 +389,7 @@ class SplunkConnector(phantom.BaseConnector):
         if search_params['max_count'] <= 0:
             search_params.pop('max_count')
 
-        ret_val = self._run_query(search_string, action_result, search_params)
+        ret_val = self._run_query(search_query, action_result, search_params, parse_only=po)
         if phantom.is_fail(ret_val):
             self.save_progress(action_result.get_message())
             return self.set_status(phantom.APP_ERROR)
@@ -332,10 +446,11 @@ class SplunkConnector(phantom.BaseConnector):
         title = self._container_name_prefix
         if not title and not self._container_name_values:
             self._container_name_values.append('source')
-        for name in self._container_name_values:
-            value = item.get(consts.CIM_CEF_MAP.get(name, name))
+        values = ''
+        for i in range(len(self._container_name_values)):
+            value = consts.CIM_CEF_MAP.get(self._container_name_values[i], self._container_name_values[i])
             if value:
-                title += "{}{} = {}".format(', ' if title else '', name, value)
+                values += "{}{}".format(value, '' if i == len(self._container_name_values) - 1 else ', ')
 
         if not title:
             time = item.get('_time')
@@ -343,8 +458,10 @@ class SplunkConnector(phantom.BaseConnector):
                 title = "Splunk Log Entry on {}".format(time)
             else:
                 title = "Splunk Log Entry"
+        else:
+            title = item.get(title, title)
 
-        return title
+        return "{}: {}".format(title, values)
 
     def _get_splunk_severity(self, item):
         severity = item.get('severity')
@@ -361,15 +478,18 @@ class SplunkConnector(phantom.BaseConnector):
         if (phantom.is_fail(self._connect())):
             return self.get_status()
 
+        search_command = param.get(consts.SPLUNK_JSON_COMMAND)
         search_string = param.get(consts.SPLUNK_JSON_QUERY)
+        po = param.get(consts.SPLUNK_JSON_PARSE_ONLY)
 
         action_result = self.add_action_result(phantom.ActionResult(dict(param)))
 
-        # Check if we need to add the search keyword in the start
-        if (search_string[0] != '|') and (search_string.find('search', 0) != 0):
-            search_string = 'search ' + search_string
+        if search_command is None:
+            search_query = search_string.strip()
+        else:
+            search_query = search_command.strip() + " " + search_string.strip()
 
-        return self._run_query(search_string, action_result)
+        return self._run_query(search_query, action_result, parse_only=po)
 
     def _get_tz_str_from_epoch(self, time_format_str, epoch_milli):
 
@@ -464,7 +584,7 @@ class SplunkConnector(phantom.BaseConnector):
         self.debug_print("connect passed")
         return self.set_status_save_progress(phantom.APP_SUCCESS, consts.SPLUNK_SUCC_CONNECTIVITY_TEST)
 
-    def _run_query(self, search_query, action_result, kwargs_create=dict()):
+    def _run_query(self, search_query, action_result, kwargs_create=dict(), parse_only=True):
         """Function that executes the query on splunk"""
 
         # self.debug_print('Search Query:', search_query)
@@ -474,7 +594,7 @@ class SplunkConnector(phantom.BaseConnector):
         # Validate the search query
         for attempt_count in range(0, RETRY_LIMIT):
             try:
-                self._service.parse(search_query, parse_only=True)
+                self._service.parse(search_query, parse_only=parse_only)
                 break
             except HTTPError as e:
                 return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_INVALID_QUERY, e, query=search_query)
@@ -563,7 +683,7 @@ class SplunkConnector(phantom.BaseConnector):
 
         # Get the action that we are supposed to carry out, set it in the connection result object
         action = self.get_action_identifier()
-
+        self.send_progress("executing action: " + action)
         if action == self.ACTION_ID_RUN_QUERY:
             result = self._handle_run_query(param)
         elif action == self.ACTION_ID_POST_DATA:
