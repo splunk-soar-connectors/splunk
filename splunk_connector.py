@@ -48,8 +48,13 @@ class SplunkConnector(phantom.BaseConnector):
     def initialize(self):
 
         config = self.get_config()
+        try:
+            splunk_server = config[phantom.APP_JSON_DEVICE]
+            splunk_server = splunk_server.encode('ascii', 'ignore')
+        except:
+            return phantom.APP_ERROR
 
-        self._base_url = 'https://{0}:{1}/'.format(config[phantom.APP_JSON_DEVICE], config[phantom.APP_JSON_PORT])
+        self._base_url = 'https://{0}:{1}/'.format(splunk_server, config[phantom.APP_JSON_PORT])
         self._state = self.load_state()
 
         self._container_name_prefix = config.get('container_name_prefix', '')
@@ -71,11 +76,20 @@ class SplunkConnector(phantom.BaseConnector):
             return phantom.APP_SUCCESS
 
         config = self.get_config()
+
         splunk_server = config[phantom.APP_JSON_DEVICE]
+        username = config.get('username', None)
+
+        try:
+            splunk_server = splunk_server.encode('ascii')
+            username = username.encode('ascii')
+        except:
+            return self.set_status(phantom.APP_ERROR, "'ascii' character found. Enter the valid input parameter value")
+
         kwargs_config_flags = {
                 'host': splunk_server,
                 'port': int(config.get('port', '8089')),
-                'username': config.get('username', None),
+                'username': username,
                 'password': config.get('password', None),
                 'owner': config.get('splunk_owner', None),
                 'app': config.get('splunk_app', None)}
@@ -309,7 +323,7 @@ class SplunkConnector(phantom.BaseConnector):
 
         if owner:
             request_body['newOwner'] = owner
-        if integer_status != None:
+        if integer_status is not None:
                 request_body['status'] = str(integer_status)
         elif status:
             if status not in consts.SPLUNK_STATUS_DICT:
@@ -728,9 +742,10 @@ if __name__ == '__main__':
         password = getpass.getpass("Password: ")
 
     if (username and password):
+        login_url = BaseConnector._get_phantom_base_url() + "login"
         try:
             print ("Accessing the Login page")
-            r = requests.get("https://127.0.0.1/login", verify=False)
+            r = requests.get(login_url, verify=False)
             csrftoken = r.cookies['csrftoken']
 
             data = dict()
@@ -740,10 +755,10 @@ if __name__ == '__main__':
 
             headers = dict()
             headers['Cookie'] = 'csrftoken=' + csrftoken
-            headers['Referer'] = 'https://127.0.0.1/login'
+            headers['Referer'] = login_url
 
             print ("Logging into Platform to get the session id")
-            r2 = requests.post("https://127.0.0.1/login", verify=False, data=data, headers=headers)
+            r2 = requests.post(login_url, verify=False, data=data, headers=headers)
             session_id = r2.cookies['sessionid']
         except Exception as e:
             print ("Unable to get session id from the platfrom. Error: " + str(e))
