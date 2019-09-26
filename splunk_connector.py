@@ -200,7 +200,7 @@ class SplunkConnector(phantom.BaseConnector):
                 action_result.add_debug_data({'r_text': 'r is None'})
 
         if response.status_code != 200:
-            return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_NOT_200), None
+            return action_result.set_status(phantom.APP_ERROR, "{}. {}".format(consts.SPLUNK_ERR_NOT_200, response.text)), None
 
         if endpoint != 'notable_update':
             return phantom.APP_SUCCESS, response.text
@@ -267,6 +267,7 @@ class SplunkConnector(phantom.BaseConnector):
             except HTTPError as e:
                 return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_INVALID_QUERY, e, query=search_query)
             except Exception as e:
+                time.sleep(5)
                 if attempt_count == RETRY_LIMIT - 1:
                     return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_CONNECTION_FAILED, e)
 
@@ -299,6 +300,7 @@ class SplunkConnector(phantom.BaseConnector):
                         job.refresh()
                         break
                     except Exception as e:
+                        time.sleep(5)
                         if attempt_count == RETRY_LIMIT - 1:
                             return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_CONNECTION_FAILED, e)
 
@@ -420,8 +422,9 @@ class SplunkConnector(phantom.BaseConnector):
         last_n_days = param.get(consts.SPLUNK_JSON_LAST_N_DAYS)
 
         try:
-            if last_n_days and int(last_n_days) <= 0:
-                return action_result.set_status(phantom.APP_ERROR, "last_n_days parameter must be greater than 0")
+            if last_n_days == 0 or (last_n_days and (not str(last_n_days).isdigit() or last_n_days <= 0)):
+                return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_INVALID_PARAM.format(param="last_n_days"))
+
         except Exception as e:
             return action_result.set_status(phantom.APP_ERROR, "Error parsing last_n_days paramter: {0}".format(e))
 
@@ -675,6 +678,7 @@ class SplunkConnector(phantom.BaseConnector):
             except HTTPError as e:
                 return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_INVALID_QUERY, e, query=search_query)
             except Exception as e:
+                time.sleep(5)
                 if attempt_count == RETRY_LIMIT - 1:
                     return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_CONNECTION_FAILED, e)
 
@@ -706,6 +710,7 @@ class SplunkConnector(phantom.BaseConnector):
                     job.refresh()
                     break
                 except Exception as e:
+                    time.sleep(5)
                     if attempt_count == RETRY_LIMIT - 1:
                         return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_CONNECTION_FAILED, e)
 
