@@ -7,6 +7,7 @@
 
 # Phantom imports
 import phantom.app as phantom
+from phantom.base_connector import BaseConnector
 
 # THIS Connector imports
 import splunk_consts as consts
@@ -24,6 +25,11 @@ import simplejson as json
 
 from pytz import timezone
 from datetime import datetime
+
+import urllib2
+import ssl
+from io import BytesIO
+import sys
 
 
 class RetVal(tuple):
@@ -57,6 +63,13 @@ class SplunkConnector(phantom.BaseConnector):
         self._base_url = 'https://{0}:{1}/'.format(splunk_server, config[phantom.APP_JSON_PORT])
         self._state = self.load_state()
 
+        self._proxy = {}
+        env_vars = config.get('_reserved_environment_variables', {})
+        if 'HTTP_PROXY' in env_vars:
+            self._proxy['http'] = env_vars['HTTP_PROXY']['value']
+        if 'HTTPS_PROXY' in env_vars:
+            self._proxy['https'] = env_vars['HTTPS_PROXY']['value']
+
         self._container_name_prefix = config.get('container_name_prefix', '')
         container_name_values = config.get('container_name_values')
         if container_name_values:
@@ -69,6 +82,40 @@ class SplunkConnector(phantom.BaseConnector):
     def finalize(self):
         self.save_state(self._state)
         return phantom.APP_SUCCESS
+
+    def request(self, url, message, **kwargs):
+        ''' Splunk SDK Proxy handler
+        '''
+        method = message['method'].lower()
+        data = message.get('body', "") if method == 'post' else None
+        headers = dict(message.get('headers', []))
+        req = urllib2.Request(url, data, headers)
+        try:
+            response = urllib2.urlopen(req)
+            print response
+        except urllib2.URLError as response:
+            # If running Python 2.7.9+, disable SSL certificate validation and try again
+            if sys.version_info >= (2, 7, 9):
+                response = urllib2.urlopen(req, context=ssl._create_unverified_context())
+            else:
+                raise
+        except urllib2.error.HTTPError as response:
+            self.save_progress("Check the proxy settings")
+            pass  # Propagate HTTP errors via the returned response message
+        return {
+            'status': response.code,
+            'reason': response.msg,
+            'headers': dict(response.info()),
+            'body': BytesIO(response.read().encode('utf-8'))
+        }
+
+    def handler(self, proxy):
+        ''' Splunk SDK Proxy Request Handler
+        '''
+        proxy_handler = urllib2.ProxyHandler({'http': proxy, 'https': proxy})
+        opener = urllib2.build_opener(proxy_handler)
+        urllib2.install_opener(opener)
+        return self.request
 
     def _connect(self):
 
@@ -96,8 +143,19 @@ class SplunkConnector(phantom.BaseConnector):
 
         self.save_progress(phantom.APP_PROG_CONNECTING_TO_ELLIPSES, splunk_server)
 
+        proxy_param = None
+
+        if self._proxy.get('http', None) is not None:
+            proxy_param = self._proxy.get('http')
+        if self._proxy.get('https', None) is not None:
+            proxy_param = self._proxy.get('https')
+
         try:
-            self._service = splunk_client.connect(**kwargs_config_flags)
+            if proxy_param:
+                self.save_progress("[-] Engaging Proxy")
+                self._service = splunk_client.connect(handler=self.handler(proxy_param), **kwargs_config_flags)
+            else:
+                self._service = splunk_client.connect(**kwargs_config_flags)
         except Exception as e:
             return self.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_CONNECTION_FAILED, e)
 
@@ -292,7 +350,7 @@ class SplunkConnector(phantom.BaseConnector):
         if phantom.is_fail(ret_val):
             return ret_val
 
-        return action_result.set_status(phantom.APP_SUCCESS)
+        return action_result.set_status(phantom.APP_SUCCESS, "Successfully posted the data")
 
     def _update_event(self, param):
 
@@ -435,7 +493,11 @@ class SplunkConnector(phantom.BaseConnector):
                 for k, v in item.iteritems():
                     cef[consts.CIM_CEF_MAP.get(k, k)] = v
             md5 = hashlib.md5()
-            md5.update(item.get('_raw'))
+            try:
+                md5.update(item.get('_raw'))
+            except:
+                md5.update(str(item))
+
             sdi = md5.hexdigest()
             severity = self._get_splunk_severity(item)
             container['artifacts'] = [
@@ -716,7 +778,6 @@ class SplunkConnector(phantom.BaseConnector):
 
 if __name__ == '__main__':
 
-    import sys
     import pudb
     import argparse
     import requests

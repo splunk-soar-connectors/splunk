@@ -13,3 +13,10 @@ can be set to "Notable Splunk Event" and "Values to append to container name" pa
 This will set the container name to "Notable Splunk Event, host=my.sample.host".
 The appended values can be a comma separated list.
 </p>
+<h2>Helpful examples:</h2>
+<pre>
+For "on poll"
+- In case "on poll" returns any 4XX except 403, validate your search Query on Splunk.
+- Sample "Query" to use with On Poll: index=_internal | stats count by host, source sourcetype | head 5 | rename host as h0st |  rename source as devicehostname
+- Sample "Fields to save with On Poll" (if none given, "on poll" shall store all the fields): source,sourcetype,hostname
+</pre>

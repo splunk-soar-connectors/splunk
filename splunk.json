@@ -73,7 +73,7 @@
             "data_type": "string",
             "order": 8,
             "description": "Command for query to use with On Poll",
-            "required": true,
+            "required": false,
             "value_list": [
                 "search",
                 "eval",
@@ -720,11 +720,15 @@
             "output": [
                 {
                     "data_path": "action_result.status",
-                    "data_type": "string"
+                    "data_type": "string",
+                    "column_name": "Status",
+                    "column_order": 0
                 },
                 {
                     "data_path": "action_result.message",
-                    "data_type": "string"
+                    "data_type": "string",
+                    "column_name": "Message",
+                    "column_order": "1"
                 },
                 {
                     "data_path": "action_result.parameter.data",
@@ -755,7 +759,14 @@
                     "data_type": "numeric"
                 }
             ],
-            "versions": "EQ(*)"
+            "versions": "EQ(*)",
+            "render": {
+                "width": 12,
+                "title": "Post Data",
+                "type": "table",
+                "height": 5
+            }
+            
         }
     ]
 }
