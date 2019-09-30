@@ -525,6 +525,7 @@ class SplunkConnector(phantom.BaseConnector):
         title = self._container_name_prefix
         if not title and not self._container_name_values:
             self._container_name_values.append('source')
+
         values = ''
         for i in range(len(self._container_name_values)):
             value = consts.CIM_CEF_MAP.get(self._container_name_values[i], self._container_name_values[i])
@@ -557,11 +558,16 @@ class SplunkConnector(phantom.BaseConnector):
         if (phantom.is_fail(self._connect())):
             return self.get_status()
 
+        action_result = self.add_action_result(phantom.ActionResult(dict(param)))
+
         search_command = param.get(consts.SPLUNK_JSON_COMMAND)
         search_string = param.get(consts.SPLUNK_JSON_QUERY)
         po = param.get(consts.SPLUNK_JSON_PARSE_ONLY)
 
-        action_result = self.add_action_result(phantom.ActionResult(dict(param)))
+        command_list = ['eval', 'stats', 'table']
+
+        if search_command in command_list:
+            return action_result.set_status(phantom.APP_ERROR, "Streaming/Transforming command operates on the events returned by some search. So for using (eval, stats, table) commands, user should provide 'search' in 'command' parameter and provide whole query in the 'query' parameter")
 
         if search_command is None:
             search_query = search_string.strip()

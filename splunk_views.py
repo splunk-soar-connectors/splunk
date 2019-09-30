@@ -33,6 +33,9 @@ def run_query(provides, all_results, context):
     else:
         headers = [x.strip() for x in parameters['display'].split(',')]
 
+    if not headers:
+        headers = ["Result"]
+
     context['ajax'] = True
     if 'start' not in context['QS']:
         context['headers'] = headers
@@ -65,9 +68,16 @@ def run_query(provides, all_results, context):
                     row.append({ 'value': item.get(adjusted_names.get(h, h)) })
                 rows.append(row)
 
-    content = {
-      "data": rows,
-      "recordsTotal": total,
-      "recordsFiltered": total,
-    }
+    if len(rows) == 0:
+        content = {
+            "data": [[{"value": "No data found"}]],
+            "recordsTotal": 1,
+            "recordsFiltered": 1,
+        }
+    else:
+        content = {
+        "data": rows,
+        "recordsTotal": total,
+        "recordsFiltered": total,
+        }
     return HttpResponse(json.dumps(content), content_type='text/javascript')
