@@ -34,7 +34,7 @@
             "description": "Port",
             "data_type": "numeric",
             "order": 1,
-            "default": "8089"
+            "default": 8089
         },
         "username": {
             "description": "Username",
@@ -126,7 +126,7 @@
             "description": "Number of retries",
             "data_type": "numeric",
             "order": 15,
-            "default": "3",
+            "default": 3,
             "required": false
         }
     },
