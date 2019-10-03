@@ -25,6 +25,7 @@ import simplejson as json
 
 from pytz import timezone
 from datetime import datetime
+from bs4 import BeautifulSoup
 
 import urllib2
 import ssl
@@ -199,16 +200,28 @@ class SplunkConnector(phantom.BaseConnector):
             else:
                 action_result.add_debug_data({'r_text': 'r is None'})
 
+        try:
+            soup = BeautifulSoup(response.text, "html.parser")
+            error_text = soup.text
+            split_lines = error_text.split('\n')
+            split_lines = [x.strip() for x in split_lines if x.strip()]
+            error_text = '\n'.join(split_lines)
+        except:
+            error_text = response.text
+
         if response.status_code != 200:
-            return action_result.set_status(phantom.APP_ERROR, "{}. {}".format(consts.SPLUNK_ERR_NOT_200, response.text)), None
+            try:
+                return action_result.set_status(phantom.APP_ERROR, "{}. {}".format(consts.SPLUNK_ERR_NOT_200, error_text.encode('utf-8'))), None
+            except:
+                return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_NOT_200), None
 
         if endpoint != 'notable_update':
             return phantom.APP_SUCCESS, response.text
 
         try:
             resp_json = response.json()
-        except:
-            return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_NOT_JSON), None
+        except Exception as e:
+            return action_result.set_status(phantom.APP_ERROR, "{}. Error: {}".format(consts.SPLUNK_ERR_NOT_JSON, str(e))), None
 
         return phantom.APP_SUCCESS, resp_json
 
@@ -376,7 +389,7 @@ class SplunkConnector(phantom.BaseConnector):
                 return action_result.set_status(phantom.APP_ERROR, "Unable to find underlying event_id from SID + RID combo")
             ids = event_id
 
-        if not comment and not status and not urgency and not owner:
+        if not comment and not status and not urgency and not owner and not integer_status:
             return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_NEED_PARAM)
 
         request_body = {"ruleUIDs": ids}
@@ -384,7 +397,10 @@ class SplunkConnector(phantom.BaseConnector):
         if owner:
             request_body['newOwner'] = owner
         if integer_status is not None:
-                request_body['status'] = str(integer_status)
+            if int(integer_status) not in consts.SPLUNK_STATUS_DICT.values():
+                return action_result.set_status(phantom.APP_ERROR, "Please provide a valid value in 'integer_status' action parameter.\
+                    Valid values: {}".format((', '.join(map(str, consts.SPLUNK_STATUS_DICT.values()))) ))
+            request_body['status'] = str(integer_status)
         elif status:
             if status not in consts.SPLUNK_STATUS_DICT:
                 if not status.isdigit():
@@ -442,12 +458,12 @@ class SplunkConnector(phantom.BaseConnector):
         search_string = config.get('on_poll_query')
         po = config.get('on_poll_parse_only')
 
-        if search_command is None:
-            self.save_progress("Need to specify Command for query String to use polling")
-            return self.set_status(phantom.APP_ERROR)
-        if search_string is None:
-            self.save_progress("Need to specify Query String to use polling")
-            return self.set_status(phantom.APP_ERROR)
+        command_list = ['eval', 'stats', 'table']
+
+        if search_command in command_list:
+            self.debug_print(consts.SPLUNK_INVALID_COMMAND))
+            self.save_progress(consts.SPLUNK_INVALID_COMMAND))
+            return action_result.set_status(phantom.APP_ERROR)
 
         search_query = search_command.strip() + " " + search_string.strip()
 
@@ -461,7 +477,11 @@ class SplunkConnector(phantom.BaseConnector):
         else:
             search_params['max_count'] = config.get('max_container', 100)
 
-        if search_params['max_count'] <= 0:
+        self.debug_print(str(type(search_params['max_count'])))
+
+        if int(search_params['max_count']) <= 0:
+            self.debug_print("The value of 'container_count' parameter must be a positive integer. The value provided in the 'container_count' parameter is {}.\
+            Therefore, 'container_count' parameter will be ignored.".format(int(search_params['max_count'])))
             search_params.pop('max_count')
 
         ret_val = self._run_query(search_query, action_result, search_params, parse_only=po)
@@ -567,7 +587,7 @@ class SplunkConnector(phantom.BaseConnector):
         command_list = ['eval', 'stats', 'table']
 
         if search_command in command_list:
-            return action_result.set_status(phantom.APP_ERROR, "Streaming/Transforming command operates on the events returned by some search. So for using (eval, stats, table) commands, user should provide 'search' in 'command' parameter and provide whole query in the 'query' parameter")
+            return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_INVALID_COMMAND)
 
         if search_command is None:
             search_query = search_string.strip()
