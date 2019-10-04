@@ -389,7 +389,7 @@ class SplunkConnector(phantom.BaseConnector):
                 return action_result.set_status(phantom.APP_ERROR, "Unable to find underlying event_id from SID + RID combo")
             ids = event_id
 
-        if not comment and not status and not urgency and not owner and not integer_status:
+        if not comment and not status and not urgency and not owner and integer_status is None:
             return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_NEED_PARAM)
 
         request_body = {"ruleUIDs": ids}
@@ -461,11 +461,14 @@ class SplunkConnector(phantom.BaseConnector):
         command_list = ['eval', 'stats', 'table']
 
         if search_command in command_list:
-            self.debug_print(consts.SPLUNK_INVALID_COMMAND))
-            self.save_progress(consts.SPLUNK_INVALID_COMMAND))
+            self.debug_print(consts.SPLUNK_INVALID_COMMAND)
+            self.save_progress(consts.SPLUNK_INVALID_COMMAND)
             return action_result.set_status(phantom.APP_ERROR)
 
-        search_query = search_command.strip() + " " + search_string.strip()
+        if not search_command:
+            search_query = search_string.strip()
+        else:
+            search_query = search_command.strip() + " " + search_string.strip()
 
         search_params = {}
         start_time = self._state.get('start_time')
@@ -476,8 +479,6 @@ class SplunkConnector(phantom.BaseConnector):
             search_params['max_count'] = param.get('container_count', 100)
         else:
             search_params['max_count'] = config.get('max_container', 100)
-
-        self.debug_print(str(type(search_params['max_count'])))
 
         if int(search_params['max_count']) <= 0:
             self.debug_print("The value of 'container_count' parameter must be a positive integer. The value provided in the 'container_count' parameter is {}.\
@@ -583,6 +584,10 @@ class SplunkConnector(phantom.BaseConnector):
         search_command = param.get(consts.SPLUNK_JSON_COMMAND)
         search_string = param.get(consts.SPLUNK_JSON_QUERY)
         po = param.get(consts.SPLUNK_JSON_PARSE_ONLY)
+        if param.get('display'):
+            dispaly_fields_count = len([x.strip() for x in param.get('display').split(',')])
+        else:
+            dispaly_fields_count = None
 
         command_list = ['eval', 'stats', 'table']
 
@@ -594,7 +599,7 @@ class SplunkConnector(phantom.BaseConnector):
         else:
             search_query = search_command.strip() + " " + search_string.strip()
 
-        return self._run_query(search_query, action_result, parse_only=po)
+        return self._run_query(search_query, action_result, dispaly_fields_count=dispaly_fields_count, parse_only=po)
 
     def _get_tz_str_from_epoch(self, time_format_str, epoch_milli):
 
@@ -689,7 +694,7 @@ class SplunkConnector(phantom.BaseConnector):
         self.debug_print("connect passed")
         return self.set_status_save_progress(phantom.APP_SUCCESS, consts.SPLUNK_SUCC_CONNECTIVITY_TEST)
 
-    def _run_query(self, search_query, action_result, kwargs_create=dict(), parse_only=True):
+    def _run_query(self, search_query, action_result, dispaly_fields_count=None, kwargs_create=dict(), parse_only=True):
         """Function that executes the query on splunk"""
 
         # self.debug_print('Search Query:', search_query)
@@ -773,6 +778,15 @@ class SplunkConnector(phantom.BaseConnector):
             if (result_index % ten_percent) == 0:
                 status = "Finished parsing {0:.1%} of results".format((float(result_index) / float(result_count)))
                 self.send_progress(status)
+
+        if dispaly_fields_count is not None:
+            action_result.add_data({'end_col_index': dispaly_fields_count})
+        else:
+            headers_set = set()
+            if results:
+                for row in action_result.get_data():
+                    headers_set.update([key for key in row.keys() if key[0] != '_'])
+            action_result.add_data({'end_col_index': len(headers_set)})
 
         action_result.update_summary({consts.SPLUNK_JSON_TOTAL_EVENTS: result_index})
         return action_result.set_status(phantom.APP_SUCCESS)

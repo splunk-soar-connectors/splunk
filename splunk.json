@@ -66,7 +66,6 @@
             "data_type": "boolean",
             "order": 7,
             "description": "Verify server certificate",
-            "required": true,
             "default": false
         },
         "on_poll_command": {
@@ -75,14 +74,14 @@
             "description": "Command for query to use with On Poll",
             "required": false,
             "value_list": [
+                "",
                 "search",
                 "eval",
                 "savedsearch",
                 "stats",
                 "table",
                 "tstats"
-            ],
-            "default": "search"
+            ]
         },
         "on_poll_query": {
             "data_type": "string",
@@ -100,7 +99,6 @@
             "data_type": "boolean",
             "order": 11,
             "description": "Parse Only",
-            "required": false,
             "default": true
         },
         "max_container": {
@@ -355,7 +353,6 @@
                     "description": "Parse Only",
                     "data_type": "boolean",
                     "order": 3,
-                    "required": true,
                     "default": true,
                     "primary": false
                 }
