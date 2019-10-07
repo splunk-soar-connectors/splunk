@@ -358,7 +358,7 @@
                 "type": "custom",
                 "width": 10,
                 "height": 5,
-                "view": "splunk_views.run_query",
+                "view": "splunk_views.display_view",
                 "title": "Search Results"
             },
             "output": [

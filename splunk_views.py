@@ -5,86 +5,61 @@
 # without a valid written license from Splunk Inc. is PROHIBITED.
 # --
 
-from django.http import HttpResponse
-import json
+def _get_ctx_result(result, provides):
 
+    ctx_result = {}
+    headers = []
+    processed_data = []
 
-def run_query(provides, all_results, context):
-    all_headers = []
-    for summary, action_results in all_results:
-        for result in action_results:
-            parameters = result.get_param()
-            # If empty display, gathers fields from each row to be used as columns
-            if parameters.get('display') is None:
-                headers_set = set()
-                for summary, action_results in all_results:
-                    for result in action_results:
-                        data = result.get_data()
-                        for row in data:
-                            headers_set.update([key for key in row.keys() if key[0] != '_'])
-                headers = sorted(headers_set)
-            else:
-                headers = [x.strip() for x in parameters['display'].split(',')]
+    param = result.get_param()
+    summary = result.get_summary()
+    data = result.get_data()
 
-            if not headers:
-                all_headers.extend(["Result"])
-            else:
-                all_headers.extend(headers)
+    ctx_result['param'] = param
+    ctx_result["action_name"] = provides
+    if summary:
+        ctx_result['summary'] = summary
 
-    context['ajax'] = True
-    if 'start' not in context['QS']:
-        context['headers'] = all_headers
-        return '/widgets/generic_table.html'
+    if not data:
+        ctx_result['data'] = {}
+        return ctx_result
 
-    adjusted_names = {
-        'time': '_time',
-        'raw': '_raw',
-    }
+    if param.get("display"):
+        headers = [x.strip() for x in param['display'].split(',')]
 
-    start = int(context['QS']['start'][0])
-    length = int(context['QS'].get('length', ['5'])[0])
-    end = start + length
-    cur_pos = 0
-    rows = []
-    total = 0
-    start_col_index = 0
-    end_col_index = 0
-    for summary, action_results in all_results:
-        for result in action_results:
-            data = result.get_data()
-            end_col_index = data[-1].get('end_col_index')
-            total += len(data) - 1
-            for item in data[:len(data) - 1]:
-                cur_pos += 1
-                if (cur_pos - 1) < start:
-                    continue
-                if (cur_pos - 1) >= end:
-                    break
-                row = []
-
-                for h in all_headers[:start_col_index]:
-                    row.append({ 'value': None })
-
-                for h in all_headers[start_col_index:start_col_index + end_col_index]:
-                    row.append({ 'value': item.get(adjusted_names.get(h, h)) })
-
-                for h in all_headers[start_col_index + end_col_index:]:
-                    row.append({ 'value': None })
-
-                rows.append(row)
-
-            start_col_index = start_col_index + end_col_index
-
-    if len(rows) == 0:
-        content = {
-            "data": [[{"value": "No data found"}]],
-            "recordsTotal": 1,
-            "recordsFiltered": 1,
-        }
     else:
-        content = {
-        "data": rows,
-        "recordsTotal": total,
-        "recordsFiltered": total,
-        }
-    return HttpResponse(json.dumps(content), content_type='text/javascript')
+        for key in data[0].keys():
+            if key[0] != '_':
+                headers.append(key)
+
+    for item in data:
+        header_values = dict()
+        for header in headers:
+            header_values[header] = item.get(header)
+        processed_data.append(header_values)
+
+    ctx_result['data'] = data
+    ctx_result['processed_data'] = processed_data
+    ctx_result['headers'] = headers
+
+    return ctx_result
+
+
+def display_view(provides, all_app_runs, context):
+
+    context['results'] = results = []
+    for summary, action_results in all_app_runs:
+        for result in action_results:
+            ctx_result = _get_ctx_result(result, provides)
+            if not ctx_result:
+                continue
+            results.append(ctx_result)
+
+    f = open("/tmp/check_ctx_result.txt", "w")
+    f.write("hello")
+    f.write("\n")
+    f.write(str(ctx_result))
+    f.close()
+
+    return 'splunk_run_query.html'
+
