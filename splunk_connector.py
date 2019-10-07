@@ -391,6 +391,24 @@ class SplunkConnector(phantom.BaseConnector):
         if not comment and not status and not urgency and not owner and integer_status is None:
             return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_NEED_PARAM)
 
+        # 1. Connect and validate whether the given Event IDs are valid or not
+        if (phantom.is_fail(self._connect())):
+            return self.get_status()
+
+        search_query = '|`incident_review` | search rule_id={0}'.format(ids)
+        ret_val = self._run_query(search_query, action_result)
+
+        if phantom.is_fail(ret_val):
+            return action_result.set_status(phantom.APP_ERROR, 'Error occurred while validating the provided event ID. Error: {0}'.format(action_result.get_message()))
+
+        if int(action_result.get_data_size()) <= 0:
+            return action_result.set_status(phantom.APP_ERROR, "Please provide a valid event ID")
+
+        # 2. Re-initialize the action_result object for update event
+        self.remove_action_result(action_result)
+        action_result = self.add_action_result(phantom.ActionResult(dict(param)))
+
+        # 3. Update the provided Events ID
         request_body = {"ruleUIDs": ids}
 
         if owner:
@@ -583,10 +601,6 @@ class SplunkConnector(phantom.BaseConnector):
         search_command = param.get(consts.SPLUNK_JSON_COMMAND)
         search_string = param.get(consts.SPLUNK_JSON_QUERY)
         po = param.get(consts.SPLUNK_JSON_PARSE_ONLY)
-        if param.get('display'):
-            dispaly_fields_count = len([x.strip() for x in param.get('display').split(',')])
-        else:
-            dispaly_fields_count = None
 
         command_list = ['eval', 'stats', 'table']
 
@@ -598,7 +612,7 @@ class SplunkConnector(phantom.BaseConnector):
         else:
             search_query = search_command.strip() + " " + search_string.strip()
 
-        return self._run_query(search_query, action_result, dispaly_fields_count=dispaly_fields_count, parse_only=po)
+        return self._run_query(search_query, action_result, parse_only=po)
 
     def _get_tz_str_from_epoch(self, time_format_str, epoch_milli):
 
@@ -693,7 +707,7 @@ class SplunkConnector(phantom.BaseConnector):
         self.debug_print("connect passed")
         return self.set_status_save_progress(phantom.APP_SUCCESS, consts.SPLUNK_SUCC_CONNECTIVITY_TEST)
 
-    def _run_query(self, search_query, action_result, kwargs_create=dict(), dispaly_fields_count=None, parse_only=True):
+    def _run_query(self, search_query, action_result, kwargs_create=dict(), parse_only=True):
         """Function that executes the query on splunk"""
 
         RETRY_LIMIT = int(self.get_config().get('retry_count', 3))
@@ -775,15 +789,6 @@ class SplunkConnector(phantom.BaseConnector):
             if (result_index % ten_percent) == 0:
                 status = "Finished parsing {0:.1%} of results".format((float(result_index) / float(result_count)))
                 self.send_progress(status)
-
-        if dispaly_fields_count is not None:
-            action_result.add_data({'end_col_index': dispaly_fields_count})
-        else:
-            headers_set = set()
-            if results:
-                for row in action_result.get_data():
-                    headers_set.update([key for key in row.keys() if key[0] != '_'])
-            action_result.add_data({'end_col_index': len(headers_set)})
 
         action_result.update_summary({consts.SPLUNK_JSON_TOTAL_EVENTS: result_index})
         return action_result.set_status(phantom.APP_SUCCESS)
