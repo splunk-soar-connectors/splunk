@@ -55,11 +55,5 @@ def display_view(provides, all_app_runs, context):
                 continue
             results.append(ctx_result)
 
-    f = open("/tmp/check_ctx_result.txt", "w")
-    f.write("hello")
-    f.write("\n")
-    f.write(str(ctx_result))
-    f.close()
-
     return 'splunk_run_query.html'
 
