@@ -252,7 +252,6 @@ class SplunkConnector(phantom.BaseConnector):
     def _resolve_event_id(self, sidandrid, action_result, kwargs_create=dict()):
         """Query the splunk instance using the SID+RID of the notable to find the notable ID"""
 
-        # self.debug_print('Search Query:', search_query)
         search_query = 'search [| makeresults | eval myfield = "' + sidandrid + '" | rex field=myfield "^(?<sid>.*)\+(?<rid>\d*)"'
         search_query += ' | eval search = "( (sid::" . sid . " OR orig_sid::" . sid . ") (rid::" . rid . " OR orig_rid::" . rid . ") )" | table search] `notable` | table event_id'
         self.send_progress("Running search_query: " + search_query)
@@ -696,8 +695,6 @@ class SplunkConnector(phantom.BaseConnector):
 
     def _run_query(self, search_query, action_result, dispaly_fields_count=None, kwargs_create=dict(), parse_only=True):
         """Function that executes the query on splunk"""
-
-        # self.debug_print('Search Query:', search_query)
 
         RETRY_LIMIT = int(self.get_config().get('retry_count', 3))
 

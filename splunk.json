@@ -1,7 +1,7 @@
 {
     "appid": "91883aa8-9c81-470b-97a1-5d8f7995f560",
     "name": "Splunk",
-    "description": "This app integrates with Splunk to update data on the device, in addition to investigative and ingestion actions",
+    "description": "This app integrates with Splunk to update data on the device, in addition to investigate and ingestion actions",
     "publisher": "Splunk",
     "type": "siem",
     "main_module": "splunk_connector.pyc",
@@ -59,13 +59,13 @@
         "timezone": {
             "data_type": "timezone",
             "order": 6,
-            "description": "Splunk server timezone",
+            "description": "Splunk Server Timezone",
             "required": true
         },
         "verify_server_cert": {
             "data_type": "boolean",
             "order": 7,
-            "description": "Verify server certificate",
+            "description": "Verify Server Certificate",
             "default": false
         },
         "on_poll_command": {
@@ -142,7 +142,7 @@
         {
             "action": "get host events",
             "description": "Get events pertaining to a host that have occurred in the last 'N' days",
-            "verbose": "The <b>last_n_days</b> parameter must be greater than 0",
+            "verbose": "The <b>last_n_days</b> parameter must be greater than 0.",
             "type": "investigate",
             "identifier": "get_host_events",
             "read_only": true,
@@ -173,84 +173,8 @@
             },
             "output": [
                 {
-                    "data_path": "action_result.data.*.host",
-                    "column_name": "Host",
-                    "column_order": "0",
-                    "data_type": "string",
-                    "contains": [
-                        "host name"
-                    ]
-                },
-                {
-                    "data_path": "action_result.data.*._time",
-                    "column_name": "Time",
-                    "column_order": "1",
-                    "data_type": "string"
-                },
-                {
-                    "data_path": "action_result.data.*._raw",
-                    "column_name": "Raw",
-                    "column_order": "2",
-                    "data_type": "string"
-                },
-                {
-                    "data_path": "action_result.data.*._cd",
-                    "data_type": "string"
-                },
-                {
-                    "data_path": "action_result.data.*._si",
-                    "data_type": "string"
-                },
-                {
-                    "data_path": "action_result.data.*._bkt",
-                    "data_type": "string"
-                },
-                {
-                    "data_path": "action_result.data.*.index",
-                    "data_type": "string"
-                },
-                {
-                    "data_path": "action_result.data.*.source",
-                    "data_type": "string"
-                },
-                {
-                    "data_path": "action_result.data.*._serial",
-                    "data_type": "string"
-                },
-                {
-                    "data_path": "action_result.data.*.linecount",
-                    "data_type": "string"
-                },
-                {
-                    "data_path": "action_result.data.*._indextime",
-                    "data_type": "string"
-                },
-                {
-                    "data_path": "action_result.data.*.sourcetype",
-                    "data_type": "string"
-                },
-                {
-                    "data_path": "action_result.data.*._sourcetype",
-                    "data_type": "string"
-                },
-                {
-                    "data_path": "action_result.data.*.splunk_server",
-                    "data_type": "string",
-                    "contains": [
-                        "host name"
-                    ]
-                },
-                {
                     "data_path": "action_result.status",
                     "data_type": "string"
-                },
-                {
-                    "data_path": "action_result.message",
-                    "data_type": "string"
-                },
-                {
-                    "data_path": "action_result.summary.total_events",
-                    "data_type": "numeric"
                 },
                 {
                     "data_path": "action_result.parameter.ip_hostname",
@@ -263,6 +187,82 @@
                 {
                     "data_path": "action_result.parameter.last_n_days",
                     "data_type": "numeric"
+                },
+                {
+                    "data_path": "action_result.data.*._bkt",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.data.*._cd",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.data.*._indextime",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.data.*._raw",
+                    "column_name": "Raw",
+                    "column_order": 2,
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.data.*._serial",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.data.*._si",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.data.*._sourcetype",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.data.*._time",
+                    "column_name": "Time",
+                    "column_order": 1,
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.data.*.host",
+                    "column_name": "Host",
+                    "column_order": 0,
+                    "data_type": "string",
+                    "contains": [
+                        "host name"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.index",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.data.*.linecount",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.data.*.source",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.data.*.sourcetype",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.data.*.splunk_server",
+                    "data_type": "string",
+                    "contains": [
+                        "host name"
+                    ]
+                },
+                {
+                    "data_path": "action_result.summary.total_events",
+                    "data_type": "numeric"
+                },
+                {
+                    "data_path": "action_result.message",
+                    "data_type": "string"
                 },
                 {
                     "data_path": "summary.total_objects",
@@ -278,7 +278,7 @@
         {
             "action": "on poll",
             "description": "Ingest logs from the Splunk instance",
-            "verbose": "The configured query is what will be used during ingestion. If you only wish to show certain fields, then you can specify these as a comma seperated list in the configuration. If left unspecified, all available fields will be added to each artifact. When limiting the amount of events to ingest, it will ingest the most recent events. By specifying the max count to 0, all events will be ingested.<br><br>",
+            "verbose": "The configured query is what will be used during ingestion. If you only wish to show certain fields, then you can specify these as a comma-seperated list in the configuration. If left unspecified, all available fields will be added to each artifact. When limiting the amount of events to ingest, it will ingest the most recent events. By specifying the max count to 0, all events will be ingested.<br><br>",
             "type": "ingest",
             "identifier": "on_poll",
             "read_only": true,
@@ -321,7 +321,6 @@
                     "data_type": "string",
                     "order": 0,
                     "required": false,
-                    "primary": true,
                     "value_list": [
                         "search",
                         "eval",
@@ -343,18 +342,16 @@
                     ]
                 },
                 "display": {
-                    "description": "Display fields (comma separated)",
+                    "description": "Display fields (comma-separated)",
                     "data_type": "string",
                     "order": 2,
-                    "required": false,
-                    "primary": false
+                    "required": false
                 },
                 "parse_only": {
-                    "description": "Parse Only",
+                    "description": "Parse only",
                     "data_type": "boolean",
                     "order": 3,
-                    "default": true,
-                    "primary": false
+                    "default": true
                 }
             },
             "render": {
@@ -366,95 +363,30 @@
             },
             "output": [
                 {
-                    "data_path": "action_result.data.*.host",
-                    "column_name": "Host",
-                    "column_order": "0",
-                    "data_type": "string",
-                    "contains": [
-                        "host name"
-                    ],
-                    "example_values": [
-                        "10.1.67.187:8088"
-                    ]
-                },
-                {
-                    "data_path": "action_result.data.*._time",
-                    "column_name": "Time",
-                    "column_order": "1",
-                    "data_type": "string"
-                },
-                {
-                    "data_path": "action_result.data.*._raw",
-                    "column_name": "Raw",
-                    "column_order": "2",
-                    "data_type": "string"
-                },
-                {
-                    "data_path": "action_result.data.*._cd",
-                    "data_type": "string"
-                },
-                {
-                    "data_path": "action_result.data.*._si",
-                    "data_type": "string"
-                },
-                {
-                    "data_path": "action_result.data.*._bkt",
-                    "data_type": "string"
-                },
-                {
-                    "data_path": "action_result.data.*.index",
-                    "data_type": "string"
-                },
-                {
-                    "data_path": "action_result.data.*.source",
-                    "data_type": "string"
-                },
-                {
-                    "data_path": "action_result.data.*._serial",
-                    "data_type": "string"
-                },
-                {
-                    "data_path": "action_result.data.*.linecount",
-                    "data_type": "string"
-                },
-                {
-                    "data_path": "action_result.data.*._indextime",
-                    "data_type": "string"
-                },
-                {
-                    "data_path": "action_result.data.*.sourcetype",
-                    "data_type": "string"
-                },
-                {
-                    "data_path": "action_result.data.*._sourcetype",
-                    "data_type": "string"
-                },
-                {
-                    "data_path": "action_result.data.*.splunk_server",
-                    "data_type": "string",
-                    "contains": [
-                        "host name"
-                    ]
-                },
-                {
                     "data_path": "action_result.status",
                     "data_type": "string",
                     "example_values": [
-                        "success"
+                        "success",
+                        "failed"
                     ]
                 },
                 {
-                    "data_path": "action_result.message",
+                    "data_path": "action_result.parameter.command",
                     "data_type": "string",
                     "example_values": [
-                        "Total events: 2"
+                        "savedsearch"
                     ]
                 },
                 {
-                    "data_path": "action_result.summary.total_events",
-                    "data_type": "numeric",
+                    "data_path": "action_result.parameter.display",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.parameter.parse_only",
+                    "data_type": "boolean",
                     "example_values": [
-                        2
+                        true,
+                        false
                     ]
                 },
                 {
@@ -468,8 +400,89 @@
                     ]
                 },
                 {
-                    "data_path": "action_result.parameter.display",
+                    "data_path": "action_result.data.*._bkt",
                     "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.data.*._cd",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.data.*._indextime",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.data.*._raw",
+                    "column_name": "Raw",
+                    "column_order": 2,
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.data.*._serial",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.data.*._si",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.data.*._sourcetype",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.data.*._time",
+                    "column_name": "Time",
+                    "column_order": 1,
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.data.*.host",
+                    "column_name": "Host",
+                    "column_order": 0,
+                    "data_type": "string",
+                    "contains": [
+                        "host name"
+                    ],
+                    "example_values": [
+                        "10.1.67.187:8088"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.index",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.data.*.linecount",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.data.*.source",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.data.*.sourcetype",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.data.*.splunk_server",
+                    "data_type": "string",
+                    "contains": [
+                        "host name"
+                    ]
+                },
+                {
+                    "data_path": "action_result.summary.total_events",
+                    "data_type": "numeric",
+                    "example_values": [
+                        2
+                    ]
+                },
+                {
+                    "data_path": "action_result.message",
+                    "data_type": "string",
+                    "example_values": [
+                        "Total events: 2"
+                    ]
                 },
                 {
                     "data_path": "summary.total_objects",
@@ -483,21 +496,6 @@
                     "data_type": "numeric",
                     "example_values": [
                         1
-                    ]
-                },
-                {
-                    "data_path": "action_result.parameter.command",
-                    "data_type": "string",
-                    "example_values": [
-                        "savedsearch"
-                    ]
-                },
-                {
-                    "data_path": "action_result.parameter.parse_only",
-                    "data_type": "boolean",
-                    "example_values": [
-                        true,
-                        false
                     ]
                 }
             ],
@@ -571,6 +569,56 @@
             },
             "output": [
                 {
+                    "data_path": "action_result.status",
+                    "data_type": "string",
+                    "example_values": [
+                        "success",
+                        "failed"
+                    ],
+                    "column_name": "Status",
+                    "column_order": 0
+                },
+                {
+                    "data_path": "action_result.parameter.comment",
+                    "data_type": "string",
+                    "example_values": [
+                        "test comment"
+                    ]
+                },
+                {
+                    "data_path": "action_result.parameter.event_ids",
+                    "data_type": "string",
+                    "contains": [
+                        "splunk notable event id"
+                    ],
+                    "example_values": [
+                        "1542751027.136723+0"
+                    ]
+                },
+                {
+                    "data_path": "action_result.parameter.integer_status",
+                    "data_type": "numeric"
+                },
+                {
+                    "data_path": "action_result.parameter.owner",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.parameter.status",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.parameter.urgency",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.data.*.failure_count",
+                    "data_type": "numeric",
+                    "example_values": [
+                        0
+                    ]
+                },
+                {
                     "data_path": "action_result.data.*.message",
                     "data_type": "string",
                     "example_values": [
@@ -586,13 +634,6 @@
                     ]
                 },
                 {
-                    "data_path": "action_result.data.*.failure_count",
-                    "data_type": "numeric",
-                    "example_values": [
-                        0
-                    ]
-                },
-                {
                     "data_path": "action_result.data.*.success_count",
                     "data_type": "numeric",
                     "example_values": [
@@ -600,14 +641,11 @@
                     ]
                 },
                 {
-                    "data_path": "action_result.status",
+                    "data_path": "action_result.summary.updated_event_id",
                     "data_type": "string",
                     "example_values": [
-                        "success",
-                        "failed"
-                    ],
-                    "column_name": "Status",
-                    "column_order": 0
+                        "2CF264EE-6016-4F6A-BCC3-4B7251E113F7@@notable@@035142b19c09ab645c6bbfb847e866f4"
+                    ]
                 },
                 {
                     "data_path": "action_result.message",
@@ -617,35 +655,6 @@
                     ],
                     "column_name": "Message",
                     "column_order": 1
-                },
-                {
-                    "data_path": "action_result.parameter.event_ids",
-                    "data_type": "string",
-                    "contains": [
-                        "splunk notable event id"
-                    ],
-                    "example_values": [
-                        "1542751027.136723+0"
-                    ]
-                },
-                {
-                    "data_path": "action_result.parameter.owner",
-                    "data_type": "string"
-                },
-                {
-                    "data_path": "action_result.parameter.status",
-                    "data_type": "string"
-                },
-                {
-                    "data_path": "action_result.parameter.urgency",
-                    "data_type": "string"
-                },
-                {
-                    "data_path": "action_result.parameter.comment",
-                    "data_type": "string",
-                    "example_values": [
-                        "test comment"
-                    ]
                 },
                 {
                     "data_path": "summary.total_objects",
@@ -659,13 +668,6 @@
                     "data_type": "numeric",
                     "example_values": [
                         1
-                    ]
-                },
-                {
-                    "data_path": "action_result.summary.updated_event_id",
-                    "data_type": "string",
-                    "example_values": [
-                        "2CF264EE-6016-4F6A-BCC3-4B7251E113F7@@notable@@035142b19c09ab645c6bbfb847e866f4"
                     ]
                 }
             ],
@@ -689,12 +691,15 @@
                     "description": "Data to post",
                     "data_type": "string",
                     "required": true,
-                    "order": 0,
-                    "primary": true
+                    "order": 0
                 },
                 "host": {
                     "description": "Host for event",
                     "data_type": "string",
+                    "contains": [
+                        "host name"
+                    ],
+                    "primary": true,
                     "required": false,
                     "order": 1
                 },
@@ -727,18 +732,15 @@
                     "column_order": 0
                 },
                 {
-                    "data_path": "action_result.message",
-                    "data_type": "string",
-                    "column_name": "Message",
-                    "column_order": "1"
-                },
-                {
                     "data_path": "action_result.parameter.data",
                     "data_type": "string"
                 },
                 {
                     "data_path": "action_result.parameter.host",
-                    "data_type": "string"
+                    "data_type": "string",
+                    "contains": [
+                        "host name"
+                    ]
                 },
                 {
                     "data_path": "action_result.parameter.index",
@@ -751,6 +753,20 @@
                 {
                     "data_path": "action_result.parameter.source_type",
                     "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.data",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.summary",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.message",
+                    "data_type": "string",
+                    "column_name": "Message",
+                    "column_order": 1
                 },
                 {
                     "data_path": "summary.total_objects",
@@ -768,7 +784,6 @@
                 "type": "table",
                 "height": 5
             }
-            
         }
     ]
 }
