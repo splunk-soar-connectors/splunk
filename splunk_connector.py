@@ -693,7 +693,7 @@ class SplunkConnector(phantom.BaseConnector):
         self.debug_print("connect passed")
         return self.set_status_save_progress(phantom.APP_SUCCESS, consts.SPLUNK_SUCC_CONNECTIVITY_TEST)
 
-    def _run_query(self, search_query, action_result, dispaly_fields_count=None, kwargs_create=dict(), parse_only=True):
+    def _run_query(self, search_query, action_result, kwargs_create=dict(), dispaly_fields_count=None, parse_only=True):
         """Function that executes the query on splunk"""
 
         RETRY_LIMIT = int(self.get_config().get('retry_count', 3))
