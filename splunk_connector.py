@@ -499,7 +499,7 @@ class SplunkConnector(phantom.BaseConnector):
 
         if int(search_params['max_count']) <= 0:
             self.debug_print("The value of 'container_count' parameter must be a positive integer. The value provided in the 'container_count' parameter is {}.\
-            Therefore, 'container_count' parameter will be ignored.".format(int(search_params['max_count'])))
+            Therefore, 'container_count' parameter will be ignored".format(int(search_params['max_count'])))
             search_params.pop('max_count')
 
         ret_val = self._run_query(search_query, action_result, search_params, parse_only=po)
