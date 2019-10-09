@@ -61,7 +61,7 @@ class SplunkConnector(phantom.BaseConnector):
         except:
             return phantom.APP_ERROR
 
-        self._base_url = 'https://{0}:{1}/'.format(splunk_server, config[phantom.APP_JSON_PORT])
+        self._base_url = 'https://{0}:{1}/'.format(splunk_server, config.get(phantom.APP_JSON_PORT, ""))
         self._state = self.load_state()
 
         self._proxy = {}
@@ -186,7 +186,7 @@ class SplunkConnector(phantom.BaseConnector):
 
         try:
             response = method(url, data=data, params=params,
-                    auth=(config[phantom.APP_JSON_USERNAME], config[phantom.APP_JSON_PASSWORD]),
+                    auth=(config.get(phantom.APP_JSON_USERNAME), config.get(phantom.APP_JSON_PASSWORD)),
                     verify=config[phantom.APP_JSON_VERIFY])
         except Exception as e:
             return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_CONNECTION_FAILED, e), None
