@@ -279,7 +279,6 @@ class SplunkConnector(phantom.BaseConnector):
             except HTTPError as e:
                 return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_INVALID_QUERY, e, query=search_query)
             except Exception as e:
-                time.sleep(5)
                 if attempt_count == RETRY_LIMIT - 1:
                     return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_CONNECTION_FAILED, e)
 
@@ -312,7 +311,6 @@ class SplunkConnector(phantom.BaseConnector):
                         job.refresh()
                         break
                     except Exception as e:
-                        time.sleep(5)
                         if attempt_count == RETRY_LIMIT - 1:
                             return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_CONNECTION_FAILED, e)
 
@@ -720,7 +718,6 @@ class SplunkConnector(phantom.BaseConnector):
             except HTTPError as e:
                 return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_INVALID_QUERY, e, query=search_query)
             except Exception as e:
-                time.sleep(5)
                 if attempt_count == RETRY_LIMIT - 1:
                     return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_CONNECTION_FAILED, e)
 
@@ -752,7 +749,6 @@ class SplunkConnector(phantom.BaseConnector):
                     job.refresh()
                     break
                 except Exception as e:
-                    time.sleep(5)
                     if attempt_count == RETRY_LIMIT - 1:
                         return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_CONNECTION_FAILED, e)
 
