@@ -61,7 +61,7 @@ class SplunkConnector(phantom.BaseConnector):
         except:
             return phantom.APP_ERROR
 
-        self._base_url = 'https://{0}:{1}/'.format(splunk_server, config.get(phantom.APP_JSON_PORT, ""))
+        self._base_url = 'https://{0}:{1}/'.format(splunk_server, config.get(phantom.APP_JSON_PORT, "8089"))
         self._state = self.load_state()
 
         self._proxy = {}
