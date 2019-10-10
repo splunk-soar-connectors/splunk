@@ -61,7 +61,7 @@ class SplunkConnector(phantom.BaseConnector):
         except:
             return phantom.APP_ERROR
 
-        self._base_url = 'https://{0}:{1}/'.format(splunk_server, config.get(phantom.APP_JSON_PORT, "8089"))
+        self._base_url = 'https://{0}:{1}/'.format(splunk_server, config.get(phantom.APP_JSON_PORT, 8089))
         self._state = self.load_state()
 
         self._proxy = {}
@@ -136,7 +136,7 @@ class SplunkConnector(phantom.BaseConnector):
 
         kwargs_config_flags = {
                 'host': splunk_server,
-                'port': int(config.get('port', '8089')),
+                'port': int(config.get('port', 8089)),
                 'username': username,
                 'password': config.get('password', None),
                 'owner': config.get('splunk_owner', None),
