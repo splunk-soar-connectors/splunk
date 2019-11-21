@@ -471,7 +471,7 @@ class SplunkConnector(phantom.BaseConnector):
         action_result = self.add_action_result(phantom.ActionResult(dict(param)))
         search_command = config.get('on_poll_command')
         search_string = config.get('on_poll_query')
-        po = config.get('on_poll_parse_only')
+        po = config.get('on_poll_parse_only', False)
 
         command_list = ['eval', 'stats', 'table']
 
@@ -598,7 +598,7 @@ class SplunkConnector(phantom.BaseConnector):
 
         search_command = param.get(consts.SPLUNK_JSON_COMMAND)
         search_string = param.get(consts.SPLUNK_JSON_QUERY)
-        po = param.get(consts.SPLUNK_JSON_PARSE_ONLY)
+        po = param.get(consts.SPLUNK_JSON_PARSE_ONLY, False)
 
         command_list = ['eval', 'stats', 'table']
 
@@ -606,6 +606,8 @@ class SplunkConnector(phantom.BaseConnector):
             return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_INVALID_COMMAND)
 
         if search_command is None:
+            if (search_string[0] != '|') and (search_string.find('search', 0) != 0):
+                search_string = 'search {}'.format(search_string)
             search_query = search_string.strip()
         else:
             search_query = search_command.strip() + " " + search_string.strip()

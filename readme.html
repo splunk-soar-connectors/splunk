@@ -19,4 +19,5 @@ For "on poll"
 - In case "on poll" returns any 4XX except 403, validate your search Query on Splunk.
 - Sample "Query" to use with On Poll: index=_internal | stats count by host, source sourcetype | head 5 | rename host as h0st |  rename source as devicehostname
 - Sample "Fields to save with On Poll" (if none given, "on poll" shall store all the fields): source,sourcetype,hostname
+- The <b>on_poll_parse_only</b> parameter, if <b>True</b>, it disables the expansion of search due to evaluation of sub-searches, time term expansion, lookups, tags, eventtypes, and sourcetype alias. This parameter is used for the validation of the Splunk query before fetching the results.
 </pre>
