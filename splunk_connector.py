@@ -25,7 +25,7 @@ import simplejson as json
 
 from pytz import timezone
 from datetime import datetime
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, UnicodeDammit
 
 import urllib2
 import ssl
@@ -52,6 +52,17 @@ class SplunkConnector(phantom.BaseConnector):
         self._service = None
         self._base_url = None
 
+    def _validate_numeric_parameter(self, value):
+        try:
+            if value:
+                value = int(value)
+            if value == 0 or (value and (not str(value).isdigit() or value <= 0)):
+                return phantom.APP_ERROR
+        except:
+            return phantom.APP_ERROR
+
+        return phantom.APP_SUCCESS
+
     def initialize(self):
 
         config = self.get_config()
@@ -77,6 +88,27 @@ class SplunkConnector(phantom.BaseConnector):
             self._container_name_values = [x.strip() for x in container_name_values.split(',')]
         else:
             self._container_name_values = []
+
+        # Validate retry_count
+        retry_count = config.get('retry_count')
+        ret_val = self._validate_numeric_parameter(retry_count)
+        if phantom.is_fail(ret_val):
+            self.set_status(phantom.APP_ERROR, "Please provide non-zero positive integer in the 'Number of retries' asset configuration parameter")
+            return phantom.APP_ERROR
+
+        # Validate port
+        port = config.get('port')
+        ret_val = self._validate_numeric_parameter(port)
+        if phantom.is_fail(ret_val):
+            self.set_status(phantom.APP_ERROR, "Please provide non-zero positive integer in the 'Port' asset configuration parameter")
+            return phantom.APP_ERROR
+
+        # Validate max_container
+        max_container = config.get('max_container')
+        ret_val = self._validate_numeric_parameter(max_container)
+        if phantom.is_fail(ret_val):
+            self.set_status(phantom.APP_ERROR, "Please provide non-zero positive integer in the 'Max events to ingest (Default: 100)' asset configuration parameter")
+            return phantom.APP_ERROR
 
         return phantom.APP_SUCCESS
 
@@ -473,17 +505,19 @@ class SplunkConnector(phantom.BaseConnector):
         search_string = config.get('on_poll_query')
         po = config.get('on_poll_parse_only', False)
 
-        command_list = ['eval', 'stats', 'table']
+        if not search_string:
+            self.save_progress("Need to specify Query String to use polling")
+            return self.set_status(phantom.APP_ERROR)
 
-        if search_command in command_list:
-            self.debug_print(consts.SPLUNK_INVALID_COMMAND)
-            self.save_progress(consts.SPLUNK_INVALID_COMMAND)
-            return action_result.set_status(phantom.APP_ERROR)
-
-        if not search_command:
-            search_query = search_string.strip()
-        else:
-            search_query = search_command.strip() + " " + search_string.strip()
+        try:
+            if not search_command:
+                if (search_string[0] != '|') and (search_string.find('search', 0) != 0):
+                    search_string = 'search {}'.format(UnicodeDammit(search_string.strip()).unicode_markup.encode('utf-8'))
+                search_query = search_string
+            else:
+                search_query = '{0} {1}'.format(search_command.strip(), UnicodeDammit(search_string.strip()).unicode_markup.encode('utf-8'))
+        except:
+            return action_result.set_status(phantom.APP_ERROR, "Error occurred while parsing the search query")
 
         search_params = {}
         start_time = self._state.get('start_time')
@@ -600,17 +634,15 @@ class SplunkConnector(phantom.BaseConnector):
         search_string = param.get(consts.SPLUNK_JSON_QUERY)
         po = param.get(consts.SPLUNK_JSON_PARSE_ONLY, False)
 
-        command_list = ['eval', 'stats', 'table']
-
-        if search_command in command_list:
-            return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_INVALID_COMMAND)
-
-        if search_command is None:
-            if (search_string[0] != '|') and (search_string.find('search', 0) != 0):
-                search_string = 'search {}'.format(search_string)
-            search_query = search_string.strip()
-        else:
-            search_query = search_command.strip() + " " + search_string.strip()
+        try:
+            if not search_command:
+                if (search_string[0] != '|') and (search_string.find('search', 0) != 0):
+                    search_string = 'search {}'.format(UnicodeDammit(search_string.strip()).unicode_markup.encode('utf-8'))
+                search_query = search_string
+            else:
+                search_query = '{0} {1}'.format(search_command.strip(), UnicodeDammit(search_string.strip()).unicode_markup.encode('utf-8'))
+        except:
+            return action_result.set_status(phantom.APP_ERROR, "Error occurred while parsing the search query")
 
         return self._run_query(search_query, action_result, parse_only=po)
 

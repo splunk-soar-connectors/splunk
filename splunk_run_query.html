@@ -90,6 +90,13 @@
     {% if not result.data %}
         <h4 class="wf-h4-style">No data found</h4>
 
+    {% elif not result.headers %}
+        <h4 class="wf-h4-style">No data found</h4>
+        <ul>
+            <li>Only system's default fields found in the output and they are ignored in the output view</li>
+            <li>Please see the JSON data below for the detailed output</li>
+        </ul>
+
     {% else %}
         <h4 class="wf-h3-style">Info</h4>
         <table class="wf-table-vertical">
