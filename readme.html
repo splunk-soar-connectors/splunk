@@ -17,10 +17,10 @@
     </ul>
   </li>
   <li>
-    If the on_poll_query( Query to use with On Poll ) parameter is not provided then, an error message will be returned<br>
+    If the on_poll_query(query to use with On Poll) parameter is not provided, then an error message will be returned<br>
   </li>
   <li>
-    If the on_poll_command( Command for query to use with On Poll ) parameter is not provided and if the on_poll_query does not starts with "|" or "search" then, "search" keyword is added in the beginning of the on_poll_query<br>
+    If the on_poll_command(command for query to use with On Poll) parameter is not provided and the on_poll_query does not starts with "|" or "search", then "search" keyword is added at the beginning of the on_poll_query<br>
     Example:
       <ul>
         <li>
@@ -31,7 +31,7 @@
       </ul>
   </li>
   <li>
-    If the on_poll_command parameter is not provided and if the on_poll_query starts with "|" or "search" then, the final query would be the same as the query provided in the on_poll_query parameter<br>
+    If the on_poll_command parameter is not provided and the on_poll_query starts with "|" or "search", then the final query would be the same as the query provided in the on_poll_query parameter<br>
     Example:
       <ul>
         <li>
@@ -42,7 +42,7 @@
       </ul>
   </li>
   <li>
-    If on_poll_command parameter is provided then, query is formed as : {on_poll_command} {on_poll_query}<br>
+    If on_poll_command parameter is provided, then query is formed as : {on_poll_command} {on_poll_query}<br>
     Example:
       <ul>
         <li>
@@ -66,10 +66,10 @@
       Sample "Query" to use with On Poll: index="_internal" | stats count by host, source, sourcetype | head 5 | rename host as h0st |  rename source as devicehostname
     </li>
     <li>
-      Sample "Fields to save with On Poll" (if none given, "on poll" shall store all the fields): source,sourcetype,hostname
+      Sample "Fields to save with On Poll" (if none given, "on poll" will store all the fields): source,sourcetype,hostname
     </li>
     <li>
-      The <b>on_poll_parse_only</b> parameter, if <b>True</b>, it disables the expansion of search due to evaluation of sub-searches, time term expansion, lookups, tags, eventtypes, and sourcetype alias. This parameter is used for the validation of the Splunk query before fetching the results
+      For the <b>on_poll_parse_only</b> parameter, if <b>True</b>, disables the expansion of search due to evaluation of sub-searches, time term expansion, lookups, tags, eventtypes, and sourcetype aliases. This parameter is used for the validation of the Splunk query before fetching the results
     </li>
   </ul>
   <br>
