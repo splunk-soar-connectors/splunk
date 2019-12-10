@@ -5,6 +5,7 @@
 # without a valid written license from Splunk Inc. is PROHIBITED.
 # --
 
+
 def _get_ctx_result(result, provides):
 
     ctx_result = {}
@@ -56,4 +57,3 @@ def display_view(provides, all_app_runs, context):
             results.append(ctx_result)
 
     return 'splunk_run_query.html'
-
