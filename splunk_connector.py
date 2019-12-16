@@ -410,7 +410,7 @@ class SplunkConnector(phantom.BaseConnector):
         comment = param.get(consts.SPLUNK_JSON_COMMENT)
         urgency = param.get(consts.SPLUNK_JSON_URGENCY)
 
-        regexp = re.compile(r"\+\d{1,3}[\"$]")
+        regexp = re.compile(r"\+\d*(\.\d+)?[\"$]")
         if regexp.search(json.dumps(ids)):
             self.send_progress("Interpreting the event ID as an SID + RID combo; querying for the actual event_id...")
             ret_val, event_id = self._resolve_event_id(ids, action_result, param)
