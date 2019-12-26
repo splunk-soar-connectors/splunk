@@ -289,6 +289,10 @@ class SplunkConnector(phantom.BaseConnector):
         self.send_progress("Running search_query: " + search_query)
 
         result = self._return_first_row_from_query(search_query, action_result)
+
+        if phantom.is_fail(result):
+            return RetVal(action_result.get_status(), None)
+
         if 'event_id' in result:
             return RetVal(phantom.APP_SUCCESS, result['event_id'])
 
