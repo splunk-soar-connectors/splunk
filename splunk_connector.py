@@ -604,7 +604,7 @@ class SplunkConnector(phantom.BaseConnector):
         for i in range(len(self._container_name_values)):
             value = consts.CIM_CEF_MAP.get(self._container_name_values[i], self._container_name_values[i])
             if value:
-                values += "{}{}".format(value, '' if i == len(self._container_name_values) - 1 else ', ')
+                values += "{}{}".format(UnicodeDammit(value).unicode_markup.encode('utf-8'), '' if i == len(self._container_name_values) - 1 else ', ')
 
         if not title:
             time = item.get('_time')
@@ -613,7 +613,7 @@ class SplunkConnector(phantom.BaseConnector):
             else:
                 title = "Splunk Log Entry"
         else:
-            title = item.get(title, title)
+            title = UnicodeDammit(item.get(title, title)).unicode_markup.encode('utf-8')
 
         return "{}: {}".format(title, values)
 

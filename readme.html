@@ -11,46 +11,51 @@
     container_name_prefix:
     <ul>
       <li>Name to give containers created via ingestion</li>
-      <li>User can select a field from the events</li>
+      <li>User can select a field name from the events data</li>
       <ul>
-        <li>If the provided field exists then, container_name_prefix will be the value of the provided field</li>
-        <li>If the provided field does not exist then, container_name_prefix will be the provided field</li>
+        <li>If the provided field exists then, container_name_prefix will be the value against the provided field from the events data</li>
+        <li>If the provided field does not exist then, container_name_prefix will be the provided field name itself</li>
       </ul>
       <li>If the container_name_prefix parameter is not provided:</li>
       <ul>
-        <li>If the event contains '_time' field then, container_name_prefix will be 'Splunk Log Entry on {value of the _time field}'</li>
-        <li>If the event does not contain '_time' field then, container_name_prefix will be 'Splunk Log Entry'</li>
+        <li>If the event data contains '_time' field then, container_name_prefix will be 'Splunk Log Entry on &lt;value of the _time field&gt;'</li>
+        <li>If the event data does not contain '_time' field then, container_name_prefix will be 'Splunk Log Entry'</li>
       </ul>
-      <li>User can provide a string. Example : Test title
+      <li>Users can provide a string. Example: Test title
     </ul>
   </li>
   <li>
     container_name_values:
     <ul>
-      <li>Values to append to container name</li>
+      <li>Values to append to the container name created via ingestion</li>
       <li>User can provide CIM fields</li>
+      <li>If the container_name_values parameter is provided:</li>
       <ul>
-        <li>If the mapping for the provided field exists then, container_name_values will be the value of the provided CIM fields</li>
-        <li>If the mapping for the provided field doest not exist then, container_name_values will be same as the provided CIM fields</li>
+        <li>If the mapping for the provided field exists then, container_name_values will be the value against the provided CIM fields from the internally defined mapping</li>
+        <li>If the mapping for the provided field does not exist then, container_name_values will be the same as the provided CIM fields</li>
       </ul>
-      <li>If the container_name_values parameter is not provided then, container_name_values will be empty</li>
-      <li>User can provide a comma-separated string. Example : test1, test2
+      <li>If the container_name_values parameter is not provided:</li>
+      <ul>
+        <li>If 'container_name_prefix' parameter is not provided then, container_name_values will be 'source'</li>
+        <li>If 'container_name_prefix' parameter is provided then, container_name_values will be empty</li>
+      </ul>
+      <li>Users can provide a comma-separated string. Example : test1, test2
     </ul>
   </li>
   <li>
     on_poll_display:
     <ul>
       <li>Fields to save with On Poll</li>
-      <li>User can select the fields from the events which the user wants to ingest in the artifact</li>
+      <li>Users can select the fields from the events which the user wants to ingest in the artifact</li>
       <li>If the on_poll_display parameter is not provided then, all the fields that are extracted from the events will be ingested in the respective artifacts</li>
-      <li>User can provide comma-separated field names. Example : field1, field2, field3 
+      <li>Users can provide comma-separated field names. Example: field1, field2, field3 
     </ul>
   </li>
   <li>
     If the on_poll_query(query to use with On Poll) parameter is not provided, then an error message will be returned<br>
   </li>
   <li>
-    If the on_poll_command(command for query to use with On Poll) parameter is not provided and the on_poll_query does not starts with "|" or "search", then "search" keyword is added at the beginning of the on_poll_query<br>
+    If the on_poll_command(command for the query to use with On Poll) parameter is not provided and the on_poll_query does not start with "|" or "search", then "search" keyword is added at the beginning of the on_poll_query<br>
     Example:
       <ul>
         <li>
