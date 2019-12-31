@@ -47,12 +47,12 @@
             "data_type": "password"
         },
         "splunk_owner": {
-            "description": "Splunk Owner",
+            "description": "The owner context of the namespace",
             "order": 4,
             "data_type": "string"
         },
         "splunk_app": {
-            "description": "Splunk App",
+            "description": "The app context of the namespace",
             "order": 5,
             "data_type": "string"
         },

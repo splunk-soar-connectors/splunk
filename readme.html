@@ -8,6 +8,36 @@
 <h2> Asset Configuration Parameters </h2>
 <ul>
   <li>
+    container_name_prefix:
+    <ul>
+      <li>Name to give containers created via ingestion</li>
+      <li>User can select a field from the events</li>
+      <ul>
+        <li>If the provided field exists then, container_name_prefix will be the value of the provided field</li>
+        <li>If the provided field does not exist then, container_name_prefix will be the provided field</li>
+      </ul>
+      <li>If the container_name_prefix parameter is not provided:</li>
+      <ul>
+        <li>If the event contains '_time' field then, container_name_prefix will be 'Splunk Log Entry on {value of the _time field}'</li>
+        <li>If the event does not contain '_time' field then, container_name_prefix will be 'Splunk Log Entry'</li>
+      </ul>
+      <li>User can provide a string. Example : Test title
+    </ul>
+  </li>
+  <li>
+    container_name_values:
+    <ul>
+      <li>Values to append to container name</li>
+      <li>User can provide CIM fields</li>
+      <ul>
+        <li>If the mapping for the provided field exists then, container_name_values will be the value of the provided CIM fields</li>
+        <li>If the mapping for the provided field doest not exist then, container_name_values will be same as the provided CIM fields</li>
+      </ul>
+      <li>If the container_name_values parameter is not provided then, container_name_values will be empty</li>
+      <li>User can provide a comma-separated string. Example : test1, test2
+    </ul>
+  </li>
+  <li>
     on_poll_display:
     <ul>
       <li>Fields to save with On Poll</li>
