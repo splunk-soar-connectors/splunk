@@ -4,7 +4,18 @@
   SPLUNK CONFIDENTIAL - Use or disclosure of this material in whole or in part
   without a valid written license from Splunk Inc. is PROHIBITED.
 -->
-
+<h2>State File Permissions</h2>
+Please check the permissions for the state file as mentioned below.
+<h4>State Filepath</h4>
+<ul>
+  <li>For Non-NRI Instance : /opt/phantom/local_data/app_states/91883aa8-9c81-470b-97a1-5d8f7995f560/{asset_id}_state.json</li>
+  <li>For NRI Instance : /phantomcyber/local_data/app_states/91883aa8-9c81-470b-97a1-5d8f7995f560/{asset_id}_state.json</li>
+</ul>
+<h4>State File Permissions</h4>
+<ul>
+  <li>File Rights: rw-rw-r-- (664) (The phantom user should have read and write access for the state file)</li>
+  <li>File Owner: appropriate phantom user</li>
+</ul>
 <h2> Asset Configuration Parameters </h2>
 <ul>
   <li>

@@ -74,7 +74,16 @@ class SplunkConnector(phantom.BaseConnector):
 
         self._base_url = 'https://{0}:{1}/'.format(splunk_server, config.get(phantom.APP_JSON_PORT, 8089))
         self._state = self.load_state()
-
+        if not self._state:
+            self.debug_print("None obtained while fetching the state file")
+            self._state = {}
+            self.save_state(self._state)
+            self.debug_print("Recreated the state file with current app_version")
+            self._state = self.load_state()
+            if self._state is None:
+                self.debug_print("Please check the owner, owner group, and the permissions of the state file")
+                self.debug_print("The phantom user should be having correct access rights and ownership for the corresponding state file (refer readme file for more information)")
+                return phantom.APP_ERROR
         self._proxy = {}
         env_vars = config.get('_reserved_environment_variables', {})
         if 'HTTP_PROXY' in env_vars:
@@ -113,7 +122,8 @@ class SplunkConnector(phantom.BaseConnector):
         return phantom.APP_SUCCESS
 
     def finalize(self):
-        self.save_state(self._state)
+        if self._state is not None:
+            self.save_state(self._state)
         return phantom.APP_SUCCESS
 
     def request(self, url, message, **kwargs):
