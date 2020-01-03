@@ -8,8 +8,8 @@
 Please check the permissions for the state file as mentioned below.
 <h4>State Filepath</h4>
 <ul>
-  <li>For Non-NRI Instance : /opt/phantom/local_data/app_states/91883aa8-9c81-470b-97a1-5d8f7995f560/{asset_id}_state.json</li>
-  <li>For NRI Instance : /phantomcyber/local_data/app_states/91883aa8-9c81-470b-97a1-5d8f7995f560/{asset_id}_state.json</li>
+  <li>For Non-NRI Instance: /opt/phantom/local_data/app_states/91883aa8-9c81-470b-97a1-5d8f7995f560/{asset_id}_state.json</li>
+  <li>For NRI Instance: /phantomcyber/local_data/app_states/91883aa8-9c81-470b-97a1-5d8f7995f560/{asset_id}_state.json</li>
 </ul>
 <h4>State File Permissions</h4>
 <ul>
@@ -24,13 +24,13 @@ Please check the permissions for the state file as mentioned below.
       <li>Name to give containers created via ingestion</li>
       <li>User can select a field name from the events data</li>
       <ul>
-        <li>If the provided field exists then, container_name_prefix will be the value against the provided field from the events data</li>
-        <li>If the provided field does not exist then, container_name_prefix will be the provided field name itself</li>
+        <li>If the provided field exists, then container_name_prefix will be the value against the provided field from the events data</li>
+        <li>If the provided field does not exist, then container_name_prefix will be the provided field name itself</li>
       </ul>
       <li>If the container_name_prefix parameter is not provided:</li>
       <ul>
-        <li>If the event data contains '_time' field then, container_name_prefix will be 'Splunk Log Entry on &lt;value of the _time field&gt;'</li>
-        <li>If the event data does not contain '_time' field then, container_name_prefix will be 'Splunk Log Entry'</li>
+        <li>If the event data contains '_time' field, then container_name_prefix will be 'Splunk Log Entry on &lt;value of the _time field&gt;'</li>
+        <li>If the event data does not contain '_time' field, then container_name_prefix will be 'Splunk Log Entry'</li>
       </ul>
       <li>Users can provide a string. Example: Test title
     </ul>
@@ -42,15 +42,15 @@ Please check the permissions for the state file as mentioned below.
       <li>User can provide CIM fields</li>
       <li>If the container_name_values parameter is provided:</li>
       <ul>
-        <li>If the mapping for the provided field exists then, container_name_values will be the value against the provided CIM fields from the internally defined mapping</li>
-        <li>If the mapping for the provided field does not exist then, container_name_values will be the same as the provided CIM fields</li>
+        <li>If the mapping for the provided field exists, then container_name_values will be the value against the provided CIM fields from the internally defined mapping</li>
+        <li>If the mapping for the provided field does not exist, then container_name_values will be the same as the provided CIM fields</li>
       </ul>
       <li>If the container_name_values parameter is not provided:</li>
       <ul>
-        <li>If 'container_name_prefix' parameter is not provided then, container_name_values will be 'source'</li>
-        <li>If 'container_name_prefix' parameter is provided then, container_name_values will be empty</li>
+        <li>If 'container_name_prefix' parameter is not provided, then container_name_values will be 'source'</li>
+        <li>If 'container_name_prefix' parameter is provided, then container_name_values will be empty</li>
       </ul>
-      <li>Users can provide a comma-separated string. Example : test1, test2
+      <li>Users can provide a comma-separated string. Example: test1, test2
     </ul>
   </li>
   <li>
@@ -58,7 +58,7 @@ Please check the permissions for the state file as mentioned below.
     <ul>
       <li>Fields to save with On Poll</li>
       <li>Users can select the fields from the events which the user wants to ingest in the artifact</li>
-      <li>If the on_poll_display parameter is not provided then, all the fields that are extracted from the events will be ingested in the respective artifacts</li>
+      <li>If the on_poll_display parameter is not provided, then all the fields that are extracted from the events will be ingested in the respective artifacts</li>
       <li>Users can provide comma-separated field names. Example: field1, field2, field3 
     </ul>
   </li>
@@ -88,7 +88,7 @@ Please check the permissions for the state file as mentioned below.
       </ul>
   </li>
   <li>
-    If on_poll_command parameter is provided, then query is formed as : {on_poll_command} {on_poll_query}<br>
+    If on_poll_command parameter is provided, then query is formed as: {on_poll_command} {on_poll_query}<br>
     Example:
       <ul>
         <li>
