@@ -142,7 +142,7 @@
         {
             "action": "get host events",
             "description": "Get events pertaining to a host that have occurred in the last 'N' days",
-            "verbose": "The <b>last_n_days</b> parameter must be greater than 0.",
+            "verbose": "<ul><li>The <b>last_n_days</b> parameter must be greater than 0</li><li>The action will search for the events of the hostname (provided in the 'ip_hostname' parameter) in the default index configured on the Splunk instance</li></ul>",
             "type": "investigate",
             "identifier": "get_host_events",
             "read_only": true,
