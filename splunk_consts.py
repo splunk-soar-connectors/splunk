@@ -19,7 +19,8 @@ SPLUNK_ERR_GET_EVENTS = "Error getting events for alert '{ss_name}' having sid '
 SPLUNK_ERR_NOT_ES = "This instance does not seem to be Splunk ES. This action cannot be run"
 SPLUNK_ERR_CONNECTION_NOT_PRE_ESTABLISHED = "Connection to splunk server not yet established"
 SPLUNK_ERR_INVALID_TIME_RANGE = "Invalid Time range specified, where the end time is less than start time"
-SPLUNK_ERR_NEED_PARAM = "One of comment, status, urgency, or owner parameters needs to be supplied to run this action"
+SPLUNK_ERR_NEED_PARAM = "One of comment, status, integer_status, urgency, or owner parameters needs to be supplied to run this action"
+SPLUNK_ERR_INVALID_PARAM = "Please provide non-zero positive integer in {param}"
 
 # Progress messages
 SPLUNK_PROG_GOT_JOB_ID = "Got job id '{job_id}'"
@@ -130,3 +131,6 @@ CIM_CEF_MAP = {
     "user": "destinationUserName",
     "user_id": "destinationUserId"
 }
+
+SPLUNK_INVALID_COMMAND = "Streaming/Transforming command operates on the events returned by some search.\
+    So for using (eval, stats, table) commands, user should provide 'search' in 'command' parameter and provide whole query in the 'query' parameter"

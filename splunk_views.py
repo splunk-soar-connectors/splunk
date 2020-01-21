@@ -5,69 +5,55 @@
 # without a valid written license from Splunk Inc. is PROHIBITED.
 # --
 
-from django.http import HttpResponse
-import json
 
+def _get_ctx_result(result, provides):
 
-def run_query(provides, all_results, context):
-    try:
-        result = all_results[0][1][0]
-    except IndexError:
-        content = {
-          "data": [],
-          "recordsTotal": 0,
-          "recordsFiltered": 0,
-        }
-        return HttpResponse(json.dumps(content), content_type='text/javascript')
+    ctx_result = {}
+    headers = []
+    processed_data = []
 
-    parameters = result.get_param()
-    # If empty display, gathers fields from each row to be used as columns
-    if parameters.get('display') is None:
-        headers_set = set()
-        for summary, action_results in all_results:
-            for result in action_results:
-                data = result.get_data()
-                for row in data:
-                    headers_set.update([key for key in row.keys() if key[0] != '_'])
-        headers = sorted(headers_set)
+    param = result.get_param()
+    summary = result.get_summary()
+    data = result.get_data()
+
+    ctx_result['param'] = param
+    ctx_result["action_name"] = provides
+    if summary:
+        ctx_result['summary'] = summary
+
+    if not data:
+        ctx_result['data'] = {}
+        return ctx_result
+
+    if param.get("display"):
+        headers = [x.strip() for x in param['display'].split(',')]
+
     else:
-        headers = [x.strip() for x in parameters['display'].split(',')]
+        for key in data[0].keys():
+            if key[0] != '_':
+                headers.append(key)
 
-    context['ajax'] = True
-    if 'start' not in context['QS']:
-        context['headers'] = headers
-        return '/widgets/generic_table.html'
+    for item in data:
+        header_values = dict()
+        for header in headers:
+            header_values[header] = item.get(header)
+        processed_data.append(header_values)
 
-    adjusted_names = {
-        'time': '_time',
-        'raw': '_raw',
-    }
+    ctx_result['data'] = data
+    ctx_result['processed_data'] = processed_data
+    ctx_result['headers'] = headers
 
-    start = int(context['QS']['start'][0])
-    length = int(context['QS'].get('length', ['5'])[0])
-    end = start + length
-    cur_pos = 0
-    rows = []
-    total = 0
-    for summary, action_results in all_results:
+    return ctx_result
+
+
+def display_view(provides, all_app_runs, context):
+
+    context['results'] = results = []
+    for summary, action_results in all_app_runs:
         for result in action_results:
-            data = result.get_data()
-            total += len(data)
-            for item in data:
-                cur_pos += 1
-                if (cur_pos - 1) < start:
-                    continue
-                if (cur_pos - 1) >= end:
-                    break
-                row = []
+            ctx_result = _get_ctx_result(result, provides)
+            if not ctx_result:
+                continue
+            results.append(ctx_result)
 
-                for h in headers:
-                    row.append({ 'value': item.get(adjusted_names.get(h, h)) })
-                rows.append(row)
-
-    content = {
-      "data": rows,
-      "recordsTotal": total,
-      "recordsFiltered": total,
-    }
-    return HttpResponse(json.dumps(content), content_type='text/javascript')
+    return 'splunk_run_query.html'
