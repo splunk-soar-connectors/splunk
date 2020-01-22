@@ -7,6 +7,7 @@
 
 # Phantom imports
 import phantom.app as phantom
+from phantom.base_connector import BaseConnector
 
 # THIS Connector imports
 import splunk_consts as consts
@@ -24,6 +25,12 @@ import simplejson as json
 
 from pytz import timezone
 from datetime import datetime
+from bs4 import BeautifulSoup, UnicodeDammit
+
+import urllib2
+import ssl
+from io import BytesIO
+import sys
 
 
 class RetVal(tuple):
@@ -45,12 +52,44 @@ class SplunkConnector(phantom.BaseConnector):
         self._service = None
         self._base_url = None
 
+    def _validate_numeric_parameter(self, value):
+        try:
+            if value:
+                value = int(value)
+            if value == 0 or (value and (not str(value).isdigit() or value <= 0)):
+                return phantom.APP_ERROR
+        except:
+            return phantom.APP_ERROR
+
+        return phantom.APP_SUCCESS
+
     def initialize(self):
 
         config = self.get_config()
+        try:
+            splunk_server = config[phantom.APP_JSON_DEVICE]
+            splunk_server = splunk_server.encode('ascii', 'ignore')
+        except:
+            return phantom.APP_ERROR
 
-        self._base_url = 'https://{0}:{1}/'.format(config[phantom.APP_JSON_DEVICE], config[phantom.APP_JSON_PORT])
+        self._base_url = 'https://{0}:{1}/'.format(splunk_server, config.get(phantom.APP_JSON_PORT, 8089))
         self._state = self.load_state()
+        if not self._state:
+            self.debug_print("None obtained while fetching the state file")
+            self._state = {}
+            self.save_state(self._state)
+            self.debug_print("Recreated the state file with current app_version")
+            self._state = self.load_state()
+            if self._state is None:
+                self.debug_print("Please check the owner, owner group, and the permissions of the state file")
+                self.debug_print("The phantom user should be having correct access rights and ownership for the corresponding state file (refer readme file for more information)")
+                return phantom.APP_ERROR
+        self._proxy = {}
+        env_vars = config.get('_reserved_environment_variables', {})
+        if 'HTTP_PROXY' in env_vars:
+            self._proxy['http'] = env_vars['HTTP_PROXY']['value']
+        if 'HTTPS_PROXY' in env_vars:
+            self._proxy['https'] = env_vars['HTTPS_PROXY']['value']
 
         self._container_name_prefix = config.get('container_name_prefix', '')
         container_name_values = config.get('container_name_values')
@@ -59,11 +98,67 @@ class SplunkConnector(phantom.BaseConnector):
         else:
             self._container_name_values = []
 
+        # Validate retry_count
+        retry_count = config.get('retry_count')
+        ret_val = self._validate_numeric_parameter(retry_count)
+        if phantom.is_fail(ret_val):
+            self.set_status(phantom.APP_ERROR, "Please provide non-zero positive integer in the 'Number of retries' asset configuration parameter")
+            return phantom.APP_ERROR
+
+        # Validate port
+        port = config.get('port')
+        ret_val = self._validate_numeric_parameter(port)
+        if phantom.is_fail(ret_val):
+            self.set_status(phantom.APP_ERROR, "Please provide non-zero positive integer in the 'Port' asset configuration parameter")
+            return phantom.APP_ERROR
+
+        # Validate max_container
+        max_container = config.get('max_container')
+        ret_val = self._validate_numeric_parameter(max_container)
+        if phantom.is_fail(ret_val):
+            self.set_status(phantom.APP_ERROR, "Please provide non-zero positive integer in the 'Max events to ingest (Default: 100)' asset configuration parameter")
+            return phantom.APP_ERROR
+
         return phantom.APP_SUCCESS
 
     def finalize(self):
-        self.save_state(self._state)
+        if self._state is not None:
+            self.save_state(self._state)
         return phantom.APP_SUCCESS
+
+    def request(self, url, message, **kwargs):
+        ''' Splunk SDK Proxy handler
+        '''
+        method = message['method'].lower()
+        data = message.get('body', "") if method == 'post' else None
+        headers = dict(message.get('headers', []))
+        req = urllib2.Request(url, data, headers)
+        try:
+            response = urllib2.urlopen(req)
+            print response
+        except urllib2.URLError as response:
+            # If running Python 2.7.9+, disable SSL certificate validation and try again
+            if sys.version_info >= (2, 7, 9):
+                response = urllib2.urlopen(req, context=ssl._create_unverified_context())
+            else:
+                raise
+        except urllib2.error.HTTPError as response:
+            self.save_progress("Check the proxy settings")
+            pass  # Propagate HTTP errors via the returned response message
+        return {
+            'status': response.code,
+            'reason': response.msg,
+            'headers': dict(response.info()),
+            'body': BytesIO(response.read().encode('utf-8'))
+        }
+
+    def handler(self, proxy):
+        ''' Splunk SDK Proxy Request Handler
+        '''
+        proxy_handler = urllib2.ProxyHandler({'http': proxy, 'https': proxy})
+        opener = urllib2.build_opener(proxy_handler)
+        urllib2.install_opener(opener)
+        return self.request
 
     def _connect(self):
 
@@ -71,19 +166,39 @@ class SplunkConnector(phantom.BaseConnector):
             return phantom.APP_SUCCESS
 
         config = self.get_config()
+
         splunk_server = config[phantom.APP_JSON_DEVICE]
+        username = config.get('username', None)
+
+        try:
+            splunk_server = splunk_server.encode('ascii')
+            username = username.encode('ascii')
+        except:
+            return self.set_status(phantom.APP_ERROR, "'ascii' character found. Enter the valid input parameter value")
+
         kwargs_config_flags = {
                 'host': splunk_server,
-                'port': int(config.get('port', '8089')),
-                'username': config.get('username', None),
+                'port': int(config.get('port', 8089)),
+                'username': username,
                 'password': config.get('password', None),
                 'owner': config.get('splunk_owner', None),
                 'app': config.get('splunk_app', None)}
 
         self.save_progress(phantom.APP_PROG_CONNECTING_TO_ELLIPSES, splunk_server)
 
+        proxy_param = None
+
+        if self._proxy.get('http', None) is not None:
+            proxy_param = self._proxy.get('http')
+        if self._proxy.get('https', None) is not None:
+            proxy_param = self._proxy.get('https')
+
         try:
-            self._service = splunk_client.connect(**kwargs_config_flags)
+            if proxy_param:
+                self.save_progress("[-] Engaging Proxy")
+                self._service = splunk_client.connect(handler=self.handler(proxy_param), **kwargs_config_flags)
+            else:
+                self._service = splunk_client.connect(**kwargs_config_flags)
         except Exception as e:
             return self.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_CONNECTION_FAILED, e)
 
@@ -113,7 +228,7 @@ class SplunkConnector(phantom.BaseConnector):
 
         try:
             response = method(url, data=data, params=params,
-                    auth=(config[phantom.APP_JSON_USERNAME], config[phantom.APP_JSON_PASSWORD]),
+                    auth=(config.get(phantom.APP_JSON_USERNAME), config.get(phantom.APP_JSON_PASSWORD)),
                     verify=config[phantom.APP_JSON_VERIFY])
         except Exception as e:
             return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_CONNECTION_FAILED, e), None
@@ -127,16 +242,28 @@ class SplunkConnector(phantom.BaseConnector):
             else:
                 action_result.add_debug_data({'r_text': 'r is None'})
 
+        try:
+            soup = BeautifulSoup(response.text, "html.parser")
+            error_text = soup.text
+            split_lines = error_text.split('\n')
+            split_lines = [x.strip() for x in split_lines if x.strip()]
+            error_text = '\n'.join(split_lines)
+        except:
+            error_text = response.text
+
         if response.status_code != 200:
-            return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_NOT_200), None
+            try:
+                return action_result.set_status(phantom.APP_ERROR, "{}. {}".format(consts.SPLUNK_ERR_NOT_200, error_text.encode('utf-8'))), None
+            except:
+                return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_NOT_200), None
 
         if endpoint != 'notable_update':
             return phantom.APP_SUCCESS, response.text
 
         try:
             resp_json = response.json()
-        except:
-            return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_NOT_JSON), None
+        except Exception as e:
+            return action_result.set_status(phantom.APP_ERROR, "{}. Error: {}".format(consts.SPLUNK_ERR_NOT_JSON, str(e))), None
 
         return phantom.APP_SUCCESS, resp_json
 
@@ -167,12 +294,15 @@ class SplunkConnector(phantom.BaseConnector):
     def _resolve_event_id(self, sidandrid, action_result, kwargs_create=dict()):
         """Query the splunk instance using the SID+RID of the notable to find the notable ID"""
 
-        # self.debug_print('Search Query:', search_query)
-        search_query = 'search [| makeresults | eval myfield = "' + sidandrid + '" | rex field=myfield "^(?<sid>.*)\+(?<rid>\d*)"'
-        search_query += ' | eval search = "( (sid::" . sid . " OR orig_sid::" . sid . ") (rid::" . rid . " OR orig_rid::" . rid . ") )" | table search] `notable` | table event_id'
+        search_query = r'search [| makeresults | eval myfield = "' + sidandrid + r'" | rex field=myfield "^(?<sid>.*)\+(?<rid>\d*(\.\d+)?)"'
+        search_query += r' | eval search = "( (sid::" . sid . " OR orig_sid::" . sid . ") (rid::" . rid . " OR orig_rid::" . rid . ") )" | table search] `notable` | table event_id'
         self.send_progress("Running search_query: " + search_query)
 
         result = self._return_first_row_from_query(search_query, action_result)
+
+        if phantom.is_fail(result):
+            return RetVal(action_result.get_status(), None)
+
         if 'event_id' in result:
             return RetVal(phantom.APP_SUCCESS, result['event_id'])
 
@@ -278,7 +408,7 @@ class SplunkConnector(phantom.BaseConnector):
         if phantom.is_fail(ret_val):
             return ret_val
 
-        return action_result.set_status(phantom.APP_SUCCESS)
+        return action_result.set_status(phantom.APP_SUCCESS, "Successfully posted the data")
 
     def _update_event(self, param):
 
@@ -294,7 +424,7 @@ class SplunkConnector(phantom.BaseConnector):
         comment = param.get(consts.SPLUNK_JSON_COMMENT)
         urgency = param.get(consts.SPLUNK_JSON_URGENCY)
 
-        regexp = re.compile(r"\+\d{1,3}[\"$]")
+        regexp = re.compile(r"\+\d*(\.\d+)?[\"$]")
         if regexp.search(json.dumps(ids)):
             self.send_progress("Interpreting the event ID as an SID + RID combo; querying for the actual event_id...")
             ret_val, event_id = self._resolve_event_id(ids, action_result, param)
@@ -302,15 +432,36 @@ class SplunkConnector(phantom.BaseConnector):
                 return action_result.set_status(phantom.APP_ERROR, "Unable to find underlying event_id from SID + RID combo")
             ids = event_id
 
-        if not comment and not status and not urgency and not owner:
+        if not comment and not status and not urgency and not owner and integer_status is None:
             return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_NEED_PARAM)
 
+        # 1. Connect and validate whether the given Event IDs are valid or not
+        if (phantom.is_fail(self._connect())):
+            return self.get_status()
+
+        search_query = '|`incident_review` | search rule_id={0}'.format(ids)
+        ret_val = self._run_query(search_query, action_result)
+
+        if phantom.is_fail(ret_val):
+            return action_result.set_status(phantom.APP_ERROR, 'Error occurred while validating the provided event ID. Error: {0}'.format(action_result.get_message()))
+
+        if int(action_result.get_data_size()) <= 0:
+            return action_result.set_status(phantom.APP_ERROR, "Please provide a valid event ID")
+
+        # 2. Re-initialize the action_result object for update event
+        self.remove_action_result(action_result)
+        action_result = self.add_action_result(phantom.ActionResult(dict(param)))
+
+        # 3. Update the provided Events ID
         request_body = {"ruleUIDs": ids}
 
         if owner:
             request_body['newOwner'] = owner
-        if integer_status != None:
-                request_body['status'] = str(integer_status)
+        if integer_status is not None:
+            if int(integer_status) not in consts.SPLUNK_STATUS_DICT.values():
+                return action_result.set_status(phantom.APP_ERROR, "Please provide a valid value in 'integer_status' action parameter.\
+                    Valid values: {}".format((', '.join(map(str, consts.SPLUNK_STATUS_DICT.values()))) ))
+            request_body['status'] = str(integer_status)
         elif status:
             if status not in consts.SPLUNK_STATUS_DICT:
                 if not status.isdigit():
@@ -348,8 +499,9 @@ class SplunkConnector(phantom.BaseConnector):
         last_n_days = param.get(consts.SPLUNK_JSON_LAST_N_DAYS)
 
         try:
-            if last_n_days and int(last_n_days) <= 0:
-                return action_result.set_status(phantom.APP_ERROR, "last_n_days parameter must be greater than 0")
+            if last_n_days == 0 or (last_n_days and (not str(last_n_days).isdigit() or last_n_days <= 0)):
+                return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_INVALID_PARAM.format(param="last_n_days"))
+
         except Exception as e:
             return action_result.set_status(phantom.APP_ERROR, "Error parsing last_n_days paramter: {0}".format(e))
 
@@ -365,16 +517,21 @@ class SplunkConnector(phantom.BaseConnector):
         action_result = self.add_action_result(phantom.ActionResult(dict(param)))
         search_command = config.get('on_poll_command')
         search_string = config.get('on_poll_query')
-        po = config.get('on_poll_parse_only')
+        po = config.get('on_poll_parse_only', False)
 
-        if search_command is None:
-            self.save_progress("Need to specify Command for query String to use polling")
-            return self.set_status(phantom.APP_ERROR)
-        if search_string is None:
+        if not search_string:
             self.save_progress("Need to specify Query String to use polling")
             return self.set_status(phantom.APP_ERROR)
 
-        search_query = search_command.strip() + " " + search_string.strip()
+        try:
+            if not search_command:
+                if (search_string[0] != '|') and (search_string.find('search', 0) != 0):
+                    search_string = 'search {}'.format(UnicodeDammit(search_string.strip()).unicode_markup.encode('utf-8'))
+                search_query = search_string
+            else:
+                search_query = '{0} {1}'.format(search_command.strip(), UnicodeDammit(search_string.strip()).unicode_markup.encode('utf-8'))
+        except:
+            return action_result.set_status(phantom.APP_ERROR, "Error occurred while parsing the search query")
 
         search_params = {}
         start_time = self._state.get('start_time')
@@ -386,7 +543,9 @@ class SplunkConnector(phantom.BaseConnector):
         else:
             search_params['max_count'] = config.get('max_container', 100)
 
-        if search_params['max_count'] <= 0:
+        if int(search_params['max_count']) <= 0:
+            self.debug_print("The value of 'container_count' parameter must be a positive integer. The value provided in the 'container_count' parameter is {}.\
+            Therefore, 'container_count' parameter will be ignored".format(int(search_params['max_count'])))
             search_params.pop('max_count')
 
         ret_val = self._run_query(search_query, action_result, search_params, parse_only=po)
@@ -421,7 +580,11 @@ class SplunkConnector(phantom.BaseConnector):
                 for k, v in item.iteritems():
                     cef[consts.CIM_CEF_MAP.get(k, k)] = v
             md5 = hashlib.md5()
-            md5.update(item.get('_raw'))
+            try:
+                md5.update(item.get('_raw'))
+            except:
+                md5.update(str(item))
+
             sdi = md5.hexdigest()
             severity = self._get_splunk_severity(item)
             container['artifacts'] = [
@@ -446,11 +609,12 @@ class SplunkConnector(phantom.BaseConnector):
         title = self._container_name_prefix
         if not title and not self._container_name_values:
             self._container_name_values.append('source')
+
         values = ''
         for i in range(len(self._container_name_values)):
             value = consts.CIM_CEF_MAP.get(self._container_name_values[i], self._container_name_values[i])
             if value:
-                values += "{}{}".format(value, '' if i == len(self._container_name_values) - 1 else ', ')
+                values += "{}{}".format(UnicodeDammit(value).unicode_markup.encode('utf-8'), '' if i == len(self._container_name_values) - 1 else ', ')
 
         if not title:
             time = item.get('_time')
@@ -459,7 +623,7 @@ class SplunkConnector(phantom.BaseConnector):
             else:
                 title = "Splunk Log Entry"
         else:
-            title = item.get(title, title)
+            title = UnicodeDammit(item.get(title, title)).unicode_markup.encode('utf-8')
 
         return "{}: {}".format(title, values)
 
@@ -478,16 +642,21 @@ class SplunkConnector(phantom.BaseConnector):
         if (phantom.is_fail(self._connect())):
             return self.get_status()
 
-        search_command = param.get(consts.SPLUNK_JSON_COMMAND)
-        search_string = param.get(consts.SPLUNK_JSON_QUERY)
-        po = param.get(consts.SPLUNK_JSON_PARSE_ONLY)
-
         action_result = self.add_action_result(phantom.ActionResult(dict(param)))
 
-        if search_command is None:
-            search_query = search_string.strip()
-        else:
-            search_query = search_command.strip() + " " + search_string.strip()
+        search_command = param.get(consts.SPLUNK_JSON_COMMAND)
+        search_string = param.get(consts.SPLUNK_JSON_QUERY)
+        po = param.get(consts.SPLUNK_JSON_PARSE_ONLY, False)
+
+        try:
+            if not search_command:
+                if (search_string[0] != '|') and (search_string.find('search', 0) != 0):
+                    search_string = 'search {}'.format(UnicodeDammit(search_string.strip()).unicode_markup.encode('utf-8'))
+                search_query = search_string
+            else:
+                search_query = '{0} {1}'.format(search_command.strip(), UnicodeDammit(search_string.strip()).unicode_markup.encode('utf-8'))
+        except:
+            return action_result.set_status(phantom.APP_ERROR, "Error occurred while parsing the search query")
 
         return self._run_query(search_query, action_result, parse_only=po)
 
@@ -586,8 +755,6 @@ class SplunkConnector(phantom.BaseConnector):
 
     def _run_query(self, search_query, action_result, kwargs_create=dict(), parse_only=True):
         """Function that executes the query on splunk"""
-
-        # self.debug_print('Search Query:', search_query)
 
         RETRY_LIMIT = int(self.get_config().get('retry_count', 3))
 
@@ -702,7 +869,6 @@ class SplunkConnector(phantom.BaseConnector):
 
 if __name__ == '__main__':
 
-    import sys
     import pudb
     import argparse
     import requests
@@ -728,9 +894,10 @@ if __name__ == '__main__':
         password = getpass.getpass("Password: ")
 
     if (username and password):
+        login_url = BaseConnector._get_phantom_base_url() + "login"
         try:
             print ("Accessing the Login page")
-            r = requests.get("https://127.0.0.1/login", verify=False)
+            r = requests.get(login_url, verify=False)
             csrftoken = r.cookies['csrftoken']
 
             data = dict()
@@ -740,10 +907,10 @@ if __name__ == '__main__':
 
             headers = dict()
             headers['Cookie'] = 'csrftoken=' + csrftoken
-            headers['Referer'] = 'https://127.0.0.1/login'
+            headers['Referer'] = login_url
 
             print ("Logging into Platform to get the session id")
-            r2 = requests.post("https://127.0.0.1/login", verify=False, data=data, headers=headers)
+            r2 = requests.post(login_url, verify=False, data=data, headers=headers)
             session_id = r2.cookies['sessionid']
         except Exception as e:
             print ("Unable to get session id from the platfrom. Error: " + str(e))
