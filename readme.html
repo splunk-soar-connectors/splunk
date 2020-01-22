@@ -54,12 +54,26 @@ Please check the permissions for the state file as mentioned below.
     </ul>
   </li>
   <li>
+    splunk_app:
+    <ul>
+      <li>The app context of the namespace</li>
+      <li>As per Splunk SDK's documentation if splunk_app parameter is not provided, then "system" will be considered as splunk_app</li>
+    </ul>
+  </li>
+  <li>
+    splunk_owner:
+    <ul>
+      <li>The owner context of the namespace</li>
+      <li>As per Splunk SDK's documentation if splunk_owner parameter is not provided, then "nobody" will be considered as splunk_owner</li>
+    </ul>
+  </li>
+  <li>
     on_poll_display:
     <ul>
       <li>Fields to save with On Poll</li>
       <li>Users can select the fields from the events which the user wants to ingest in the artifact</li>
       <li>If the on_poll_display parameter is not provided, then all the fields that are extracted from the events will be ingested in the respective artifacts</li>
-      <li>Users can provide comma-separated field names. Example: field1, field2, field3 
+      <li>Users can provide comma-separated field names. Example: field1, field2, field3</li>
     </ul>
   </li>
   <li>
