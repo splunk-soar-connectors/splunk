@@ -4,7 +4,7 @@
     "description": "This app integrates with Splunk to update data on the device, in addition to investigate and ingestion actions",
     "publisher": "Splunk",
     "type": "siem",
-    "main_module": "splunk_connector.pyc",
+    "main_module": "splunk_connector.py",
     "app_version": "1.3.43",
     "utctime_updated": "2020-01-28T22:38:24.000000Z",
     "package_name": "phantom_splunk",
