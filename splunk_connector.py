@@ -612,7 +612,8 @@ class SplunkConnector(phantom.BaseConnector):
 
         values = ''
         for i in range(len(self._container_name_values)):
-            value = consts.CIM_CEF_MAP.get(self._container_name_values[i], self._container_name_values[i])
+            value = item.get(consts.CIM_CEF_MAP.get(self._container_name_values[i],
+                self._container_name_values[i]))
             if value:
                 values += "{}{}".format(UnicodeDammit(value).unicode_markup.encode('utf-8'), '' if i == len(self._container_name_values) - 1 else ', ')
 
