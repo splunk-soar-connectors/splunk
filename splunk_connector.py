@@ -12,7 +12,7 @@ from phantom.base_connector import BaseConnector
 # THIS Connector imports
 import splunk_consts as consts
 
-# from splunklib.binding import HTTPError
+from splunklib.binding import HTTPError
 import splunklib.client as splunk_client
 import splunklib.results as splunk_results
 
@@ -36,7 +36,8 @@ from future.standard_library import install_aliases
 install_aliases()
 
 from urllib.parse import urlparse, urlencode  # noqa
-from urllib.error import HTTPError, URLError  # noqa
+from urllib.error import HTTPError as UrllibHTTPError
+from urllib.error import URLError  # noqa
 from urllib.request import urlopen, Request, ProxyHandler, build_opener, install_opener  # noqa
 
 from builtins import str  # noqa
@@ -153,7 +154,7 @@ class SplunkConnector(phantom.BaseConnector):
                 response = urlopen(req, context=ssl._create_unverified_context())
             else:
                 raise
-        except HTTPError as response:
+        except UrllibHTTPError as response:
             self.save_progress("Check the proxy settings")
             pass  # Propagate HTTP errors via the returned response message
         return {
