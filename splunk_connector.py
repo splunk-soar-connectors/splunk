@@ -36,7 +36,8 @@ from future.standard_library import install_aliases
 install_aliases()
 
 from urllib.parse import urlparse, urlencode  # noqa
-from urllib.error import HTTPError as UrllibHTTPError
+from urllib.error import HTTPError as UrllibHTTPError  # noqa
+
 from urllib.error import URLError  # noqa
 from urllib.request import urlopen, Request, ProxyHandler, build_opener, install_opener  # noqa
 
