@@ -11,7 +11,7 @@
     "product_name": "Splunk Enterprise",
     "product_vendor": "Splunk Inc.",
     "product_version_regex": ".*",
-    "min_phantom_version": "4.5.15922",
+    "min_phantom_version": "4.6.19142",
     "python_version": "3",
     "latest_tested_versions": [
         "On-premise, Splunk Enterprise Security v7.3.0"
