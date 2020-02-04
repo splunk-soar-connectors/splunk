@@ -1,5 +1,5 @@
 # File: splunk_connector.py
-# Copyright (c) 2014-2019 Splunk Inc.
+# Copyright (c) 2014-2020 Splunk Inc.
 #
 # SPLUNK CONFIDENTIAL - Use or disclosure of this material in whole or in part
 # without a valid written license from Splunk Inc. is PROHIBITED.
@@ -25,12 +25,26 @@ import simplejson as json
 
 from pytz import timezone
 from datetime import datetime
-from bs4 import BeautifulSoup, UnicodeDammit
+from bs4 import BeautifulSoup
 
-import urllib2
 import ssl
 from io import BytesIO
 import sys
+
+# Python2 - Python3 compatibility imports
+from future.standard_library import install_aliases
+install_aliases()
+
+from urllib.parse import urlparse, urlencode  # noqa
+from urllib.error import HTTPError as UrllibHTTPError  # noqa
+
+from urllib.error import URLError  # noqa
+from urllib.request import urlopen, Request, ProxyHandler, build_opener, install_opener  # noqa
+
+from builtins import str  # noqa
+from builtins import map  # noqa
+from builtins import range  # noqa
+from past.utils import old_div  # noqa
 
 
 class RetVal(tuple):
@@ -68,7 +82,6 @@ class SplunkConnector(phantom.BaseConnector):
         config = self.get_config()
         try:
             splunk_server = config[phantom.APP_JSON_DEVICE]
-            splunk_server = splunk_server.encode('ascii', 'ignore')
         except:
             return phantom.APP_ERROR
 
@@ -132,17 +145,17 @@ class SplunkConnector(phantom.BaseConnector):
         method = message['method'].lower()
         data = message.get('body', "") if method == 'post' else None
         headers = dict(message.get('headers', []))
-        req = urllib2.Request(url, data, headers)
+        req = Request(url, data, headers)
         try:
-            response = urllib2.urlopen(req)
-            print response
-        except urllib2.URLError as response:
+            response = urlopen(req)
+            print(response)
+        except URLError as response:
             # If running Python 2.7.9+, disable SSL certificate validation and try again
             if sys.version_info >= (2, 7, 9):
-                response = urllib2.urlopen(req, context=ssl._create_unverified_context())
+                response = urlopen(req, context=ssl._create_unverified_context())
             else:
                 raise
-        except urllib2.error.HTTPError as response:
+        except UrllibHTTPError as response:
             self.save_progress("Check the proxy settings")
             pass  # Propagate HTTP errors via the returned response message
         return {
@@ -155,9 +168,9 @@ class SplunkConnector(phantom.BaseConnector):
     def handler(self, proxy):
         ''' Splunk SDK Proxy Request Handler
         '''
-        proxy_handler = urllib2.ProxyHandler({'http': proxy, 'https': proxy})
-        opener = urllib2.build_opener(proxy_handler)
-        urllib2.install_opener(opener)
+        proxy_handler = ProxyHandler({'http': proxy, 'https': proxy})
+        opener = build_opener(proxy_handler)
+        install_opener(opener)
         return self.request
 
     def _connect(self):
@@ -169,12 +182,6 @@ class SplunkConnector(phantom.BaseConnector):
 
         splunk_server = config[phantom.APP_JSON_DEVICE]
         username = config.get('username', None)
-
-        try:
-            splunk_server = splunk_server.encode('ascii')
-            username = username.encode('ascii')
-        except:
-            return self.set_status(phantom.APP_ERROR, "'ascii' character found. Enter the valid input parameter value")
 
         kwargs_config_flags = {
                 'host': splunk_server,
@@ -458,9 +465,9 @@ class SplunkConnector(phantom.BaseConnector):
         if owner:
             request_body['newOwner'] = owner
         if integer_status is not None:
-            if int(integer_status) not in consts.SPLUNK_STATUS_DICT.values():
+            if int(integer_status) not in list(consts.SPLUNK_STATUS_DICT.values()):
                 return action_result.set_status(phantom.APP_ERROR, "Please provide a valid value in 'integer_status' action parameter.\
-                    Valid values: {}".format((', '.join(map(str, consts.SPLUNK_STATUS_DICT.values()))) ))
+                    Valid values: {}".format((', '.join(map(str, list(consts.SPLUNK_STATUS_DICT.values())))) ))
             request_body['status'] = str(integer_status)
         elif status:
             if status not in consts.SPLUNK_STATUS_DICT:
@@ -499,7 +506,7 @@ class SplunkConnector(phantom.BaseConnector):
         last_n_days = param.get(consts.SPLUNK_JSON_LAST_N_DAYS)
 
         try:
-            if last_n_days == 0 or (last_n_days and (not str(last_n_days).isdigit() or last_n_days <= 0)):
+            if int(last_n_days) == 0 or (last_n_days and (not str(last_n_days).isdigit() or int(last_n_days) <= 0)):
                 return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_INVALID_PARAM.format(param="last_n_days"))
 
         except Exception as e:
@@ -526,10 +533,10 @@ class SplunkConnector(phantom.BaseConnector):
         try:
             if not search_command:
                 if (search_string[0] != '|') and (search_string.find('search', 0) != 0):
-                    search_string = 'search {}'.format(UnicodeDammit(search_string.strip()).unicode_markup.encode('utf-8'))
+                    search_string = 'search {}'.format(search_string.strip())
                 search_query = search_string
             else:
-                search_query = '{0} {1}'.format(search_command.strip(), UnicodeDammit(search_string.strip()).unicode_markup.encode('utf-8'))
+                search_query = '{0} {1}'.format(search_command.strip(), search_string.strip())
         except:
             return action_result.set_status(phantom.APP_ERROR, "Error occurred while parsing the search query")
 
@@ -570,20 +577,20 @@ class SplunkConnector(phantom.BaseConnector):
             cef = {}
             if header_set:
                 name_mappings = {}
-                for k, v in item.iteritems():
+                for k, v in list(item.items()):
                     if k.lower() in header_set:
                         # Use this to keep the orignal capitalization from splunk
                         name_mappings[k.lower()] = k
                 for h in header_set:
                     cef[name_mappings.get(consts.CIM_CEF_MAP.get(h, h), h)] = item.get(name_mappings.get(h, h))
             else:
-                for k, v in item.iteritems():
+                for k, v in list(item.items()):
                     cef[consts.CIM_CEF_MAP.get(k, k)] = v
             md5 = hashlib.md5()
             try:
-                md5.update(item.get('_raw'))
-            except:
-                md5.update(str(item))
+                md5.update(item.get('_raw').encode('UTF-8'))
+            except TypeError:
+                md5.update(str(item).encode('UTF-8'))
 
             sdi = md5.hexdigest()
             severity = self._get_splunk_severity(item)
@@ -615,7 +622,7 @@ class SplunkConnector(phantom.BaseConnector):
             value = item.get(consts.CIM_CEF_MAP.get(self._container_name_values[i],
                 self._container_name_values[i]))
             if value:
-                values += "{}{}".format(UnicodeDammit(value).unicode_markup.encode('utf-8'), '' if i == len(self._container_name_values) - 1 else ', ')
+                values += "{}{}".format(value, '' if i == len(self._container_name_values) - 1 else ', ')
 
         if not title:
             time = item.get('_time')
@@ -624,7 +631,7 @@ class SplunkConnector(phantom.BaseConnector):
             else:
                 title = "Splunk Log Entry"
         else:
-            title = UnicodeDammit(item.get(title, title)).unicode_markup.encode('utf-8')
+            title = item.get(title, title)
 
         return "{}: {}".format(title, values)
 
@@ -652,10 +659,10 @@ class SplunkConnector(phantom.BaseConnector):
         try:
             if not search_command:
                 if (search_string[0] != '|') and (search_string.find('search', 0) != 0):
-                    search_string = 'search {}'.format(UnicodeDammit(search_string.strip()).unicode_markup.encode('utf-8'))
+                    search_string = 'search {}'.format(search_string.strip())
                 search_query = search_string
             else:
-                search_query = '{0} {1}'.format(search_command.strip(), UnicodeDammit(search_string.strip()).unicode_markup.encode('utf-8'))
+                search_query = '{0} {1}'.format(search_command.strip(), search_string.strip())
         except:
             return action_result.set_status(phantom.APP_ERROR, "Error occurred while parsing the search query")
 
@@ -669,7 +676,7 @@ class SplunkConnector(phantom.BaseConnector):
 
         to_tz = timezone(device_tz_sting)
 
-        utc_dt = datetime.utcfromtimestamp(epoch_milli / 1000).replace(tzinfo=pytz.utc)
+        utc_dt = datetime.utcfromtimestamp(old_div(epoch_milli / 1000)).replace(tzinfo=pytz.utc)
         to_dt = to_tz.normalize(utc_dt.astimezone(to_tz))
 
         # return utc_dt.strftime('%Y-%m-%d %H:%M:%S')
@@ -918,7 +925,7 @@ if __name__ == '__main__':
             exit(1)
 
     if (len(sys.argv) < 2):
-        print "No test json specified as input"
+        print("No test json specified as input")
         exit(0)
 
     with open(sys.argv[1]) as f:

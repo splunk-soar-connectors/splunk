@@ -4,22 +4,26 @@
     "description": "This app integrates with Splunk to update data on the device, in addition to investigate and ingestion actions",
     "publisher": "Splunk",
     "type": "siem",
-    "main_module": "splunk_connector.pyc",
-    "app_version": "1.3.43",
+    "main_module": "splunk_connector.py",
+    "app_version": "2.0.0",
     "utctime_updated": "2020-01-28T22:38:24.000000Z",
     "package_name": "phantom_splunk",
     "product_name": "Splunk Enterprise",
     "product_vendor": "Splunk Inc.",
     "product_version_regex": ".*",
-    "min_phantom_version": "4.2.7532",
+    "min_phantom_version": "4.6.19142",
+    "python_version": "3",
+    "latest_tested_versions": [
+        "On-premise, Splunk Enterprise Security v7.3.0"
+    ],
     "logo": "logo_splunk.svg",
     "logo_dark": "logo_splunk_dark.svg",
-    "license": "Copyright (c) 2014-2019 Splunk Inc.",
+    "license": "Copyright (c) 2014-2020 Splunk Inc.",
     "pip_dependencies": {
         "wheel": [
             {
                 "module": "splunk-sdk",
-                "input_file": "splunk_sdk_wheel/splunk_sdk-1.6.2-py2-none-any.whl"
+                "input_file": "splunk_sdk_wheel/splunk_sdk-1.6.11-py3-none-any.whl"
             }
         ]
     },
