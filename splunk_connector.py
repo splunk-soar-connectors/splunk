@@ -149,13 +149,13 @@ class SplunkConnector(phantom.BaseConnector):
         try:
             response = urlopen(req)
             print(response)
-        except URLError as response:
+        except URLError:
             # If running Python 2.7.9+, disable SSL certificate validation and try again
             if sys.version_info >= (2, 7, 9):
                 response = urlopen(req, context=ssl._create_unverified_context())
             else:
                 raise
-        except UrllibHTTPError as response:
+        except UrllibHTTPError:
             self.save_progress("Check the proxy settings")
             pass  # Propagate HTTP errors via the returned response message
         return {
@@ -904,7 +904,7 @@ if __name__ == '__main__':
     if (username and password):
         login_url = BaseConnector._get_phantom_base_url() + "login"
         try:
-            print ("Accessing the Login page")
+            print("Accessing the Login page")
             r = requests.get(login_url, verify=False)
             csrftoken = r.cookies['csrftoken']
 
@@ -917,11 +917,11 @@ if __name__ == '__main__':
             headers['Cookie'] = 'csrftoken=' + csrftoken
             headers['Referer'] = login_url
 
-            print ("Logging into Platform to get the session id")
+            print("Logging into Platform to get the session id")
             r2 = requests.post(login_url, verify=False, data=data, headers=headers)
             session_id = r2.cookies['sessionid']
         except Exception as e:
-            print ("Unable to get session id from the platfrom. Error: " + str(e))
+            print("Unable to get session id from the platfrom. Error: " + str(e))
             exit(1)
 
     if (len(sys.argv) < 2):
@@ -940,6 +940,6 @@ if __name__ == '__main__':
             in_json['user_session_token'] = session_id
 
         ret_val = connector._handle_action(json.dumps(in_json), None)
-        print (json.dumps(json.loads(ret_val), indent=4))
+        print(json.dumps(json.loads(ret_val), indent=4))
 
     exit(0)
