@@ -446,7 +446,7 @@ class SplunkConnector(phantom.BaseConnector):
         if (phantom.is_fail(self._connect())):
             return self.get_status()
 
-        search_query = 'search `notable` | search event_id="{0}"'.format(ids)
+        search_query = "search `notable_by_id({0})`".format(ids)
         ret_val = self._run_query(search_query, action_result)
 
         if phantom.is_fail(ret_val):
