@@ -173,7 +173,7 @@ class SplunkConnector(phantom.BaseConnector):
         install_opener(opener)
         return self.request
 
-    def _connect(self):
+    def _connect(self, action_result):
 
         if (self._service is not None):
             return phantom.APP_SUCCESS
@@ -207,7 +207,7 @@ class SplunkConnector(phantom.BaseConnector):
             else:
                 self._service = splunk_client.connect(**kwargs_config_flags)
         except Exception as e:
-            return self.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_CONNECTION_FAILED, e)
+            return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_CONNECTION_FAILED, e)
 
         # Must return success if we want handle_action to be called
         return phantom.APP_SUCCESS
@@ -321,8 +321,8 @@ class SplunkConnector(phantom.BaseConnector):
         self.debug_print('Search Query:', search_query)
         RETRY_LIMIT = int(self.get_config().get('retry_count', 3))
 
-        if (phantom.is_fail(self._connect())):
-            return self.get_status()
+        if (phantom.is_fail(self._connect(action_result))):
+            return action_result.get_status()
 
         # Validate the search query
         for attempt_count in range(0, RETRY_LIMIT):
@@ -434,6 +434,7 @@ class SplunkConnector(phantom.BaseConnector):
         regexp = re.compile(r"\+\d*(\.\d+)?[\"$]")
         if regexp.search(json.dumps(ids)):
             self.send_progress("Interpreting the event ID as an SID + RID combo; querying for the actual event_id...")
+            self.debug_print("Interpreting the event ID as an SID + RID combo; querying for the actual event_id...")
             ret_val, event_id = self._resolve_event_id(ids, action_result, param)
             if phantom.is_fail(ret_val):
                 return action_result.set_status(phantom.APP_ERROR, "Unable to find underlying event_id from SID + RID combo")
@@ -442,9 +443,13 @@ class SplunkConnector(phantom.BaseConnector):
         if not comment and not status and not urgency and not owner and integer_status is None:
             return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_NEED_PARAM)
 
+        self.debug_print("Attempting to create a connection")
+
         # 1. Connect and validate whether the given Event IDs are valid or not
-        if (phantom.is_fail(self._connect())):
-            return self.get_status()
+        if (phantom.is_fail(self._connect(action_result))):
+            return action_result.get_status()
+
+        self.debug_print("Connection established. Searching for the event ID")
 
         search_query = "search `notable_by_id({0})`".format(ids)
         ret_val = self._run_query(search_query, action_result)
@@ -454,6 +459,8 @@ class SplunkConnector(phantom.BaseConnector):
 
         if int(action_result.get_data_size()) <= 0:
             return action_result.set_status(phantom.APP_ERROR, "Please provide a valid event ID")
+
+        self.debug_print("Event ID found")
 
         # 2. Re-initialize the action_result object for update event
         self.remove_action_result(action_result)
@@ -481,6 +488,8 @@ class SplunkConnector(phantom.BaseConnector):
         if comment:
             request_body['comment'] = comment
 
+        self.debug_print("Updating the event")
+
         endpoint = 'notable_update'
         ret_val, resp_data = self._make_rest_call_retry(action_result, endpoint, request_body)
 
@@ -496,11 +505,11 @@ class SplunkConnector(phantom.BaseConnector):
             Gets the events for a host for the last 'N' number of days
         """
 
-        # Connect
-        if (phantom.is_fail(self._connect())):
-            return self.get_status()
-
         action_result = self.add_action_result(phantom.ActionResult(dict(param)))
+
+        # Connect
+        if (phantom.is_fail(self._connect(action_result))):
+            return action_result.get_status()
 
         ip_hostname = param[phantom.APP_JSON_IP_HOSTNAME]
         last_n_days = param.get(consts.SPLUNK_JSON_LAST_N_DAYS)
@@ -517,18 +526,20 @@ class SplunkConnector(phantom.BaseConnector):
         return self._run_query(search_query, action_result)
 
     def _on_poll(self, param):
-        if (phantom.is_fail(self._connect())):
-            return self.get_status()
+
+        action_result = self.add_action_result(phantom.ActionResult(dict(param)))
+
+        if (phantom.is_fail(self._connect(action_result))):
+            return action_result.get_status()
 
         config = self.get_config()
-        action_result = self.add_action_result(phantom.ActionResult(dict(param)))
         search_command = config.get('on_poll_command')
         search_string = config.get('on_poll_query')
         po = config.get('on_poll_parse_only', False)
 
         if not search_string:
             self.save_progress("Need to specify Query String to use polling")
-            return self.set_status(phantom.APP_ERROR)
+            return action_result.set_status(phantom.APP_ERROR)
 
         try:
             if not search_command:
@@ -558,7 +569,7 @@ class SplunkConnector(phantom.BaseConnector):
         ret_val = self._run_query(search_query, action_result, search_params, parse_only=po)
         if phantom.is_fail(ret_val):
             self.save_progress(action_result.get_message())
-            return self.set_status(phantom.APP_ERROR)
+            return action_result.set_status(phantom.APP_ERROR)
 
         display = config.get('on_poll_display')
         header_set = None
@@ -610,7 +621,7 @@ class SplunkConnector(phantom.BaseConnector):
                 self.save_progress("Error saving container: {}".format(msg))
                 self.debug_print("Error saving container: {} -- CID: {}".format(msg, cid))
 
-        return self.set_status(phantom.APP_SUCCESS)
+        return action_result.set_status(phantom.APP_SUCCESS)
 
     def _get_splunk_title(self, item):
         title = self._container_name_prefix
@@ -646,11 +657,11 @@ class SplunkConnector(phantom.BaseConnector):
 
     def _handle_run_query(self, param):
 
-        # Connect
-        if (phantom.is_fail(self._connect())):
-            return self.get_status()
-
         action_result = self.add_action_result(phantom.ActionResult(dict(param)))
+
+        # Connect
+        if (phantom.is_fail(self._connect(action_result))):
+            return action_result.get_status()
 
         search_command = param.get(consts.SPLUNK_JSON_COMMAND)
         search_string = param.get(consts.SPLUNK_JSON_QUERY)
@@ -745,16 +756,19 @@ class SplunkConnector(phantom.BaseConnector):
         return action_result.get_status()
 
     def _test_asset_connectivity(self, param):
-        if (phantom.is_fail(self._connect())):
+
+        action_result = self.add_action_result(phantom.ActionResult(dict(param)))
+
+        if (phantom.is_fail(self._connect(action_result))):
             self.debug_print("connect failed")
             self.save_progress(consts.SPLUNK_ERR_CONNECTIVITY_TEST)
-            return self.append_to_message(consts.SPLUNK_ERR_CONNECTIVITY_TEST)
+            return action_result.append_to_message(consts.SPLUNK_ERR_CONNECTIVITY_TEST)
 
         version = self._get_server_version(self)
         if version == 'FAILURE':
             return self.append_to_message(consts.SPLUNK_ERR_CONNECTIVITY_TEST)
 
-        is_es = self._check_for_es(self)
+        is_es = self._check_for_es(action_result)
 
         self.save_progress("Detected Splunk {0}server version {1}".format("ES " if is_es else "", version))
 
