@@ -145,7 +145,7 @@
                     {% for item in result.processed_data %}
                         <tr>
                             {% for header in result.headers %}
-                                {% for k, v in item.iteritems %}
+                                {% for k, v in item.items %}
                                     {% ifequal header k %}
                                         <td>{{ v }}</td>
                                     {% endifequal %}
