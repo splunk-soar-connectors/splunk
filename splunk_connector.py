@@ -430,6 +430,7 @@ class SplunkConnector(phantom.BaseConnector):
         integer_status = param.get("integer_status")
         comment = param.get(consts.SPLUNK_JSON_COMMENT)
         urgency = param.get(consts.SPLUNK_JSON_URGENCY)
+        wait_for_confirmation = param.get("wait_for_confirmation", False)
 
         regexp = re.compile(r"\+\d*(\.\d+)?[\"$]")
         if regexp.search(json.dumps(ids)):
@@ -449,18 +450,20 @@ class SplunkConnector(phantom.BaseConnector):
         if (phantom.is_fail(self._connect(action_result))):
             return action_result.get_status()
 
-        self.debug_print("Connection established. Searching for the event ID")
+        self.debug_print("Connection established.")
 
-        search_query = "search `notable_by_id({0})`".format(ids)
-        ret_val = self._run_query(search_query, action_result)
+        if wait_for_confirmation:
+            self.debug_print("Searching for the event ID.")
+            search_query = "search `notable_by_id({0})`".format(ids)
+            ret_val = self._run_query(search_query, action_result)
 
-        if phantom.is_fail(ret_val):
-            return action_result.set_status(phantom.APP_ERROR, 'Error occurred while validating the provided event ID. Error: {0}'.format(action_result.get_message()))
+            if phantom.is_fail(ret_val):
+                return action_result.set_status(phantom.APP_ERROR, 'Error occurred while validating the provided event ID. Error: {0}'.format(action_result.get_message()))
 
-        if int(action_result.get_data_size()) <= 0:
-            return action_result.set_status(phantom.APP_ERROR, "Please provide a valid event ID")
+            if int(action_result.get_data_size()) <= 0:
+                return action_result.set_status(phantom.APP_ERROR, "Please provide a valid event ID")
 
-        self.debug_print("Event ID found")
+            self.debug_print("Event ID found")
 
         # 2. Re-initialize the action_result object for update event
         self.remove_action_result(action_result)
@@ -498,7 +501,10 @@ class SplunkConnector(phantom.BaseConnector):
 
         action_result.add_data(resp_data)
         action_result.update_summary({consts.SPLUNK_JSON_UPDATED_EVENT_ID: ids})
-        return action_result.set_status(phantom.APP_SUCCESS)
+        if wait_for_confirmation:
+            return action_result.set_status(phantom.APP_SUCCESS)
+        return action_result.set_status(phantom.APP_SUCCESS,
+                        "Updated Event ID: {}. The event_id has not been verified. Please confirm that the provided event_id corresponds to an actual notable event".format(ids))
 
     def _get_host_events(self, param):
         """Executes the query to get events pertaining to a host

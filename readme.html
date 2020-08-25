@@ -116,7 +116,8 @@ Please check the permissions for the state file as mentioned below.
 
 <h2> Update Event </h2>
 <ul>
-  <li>The action updates the event for the provided "event_id". The action first validates the "event_id" provided by the user using the search command: 'search `notable` | search event_id="&lt;event_id&gt;"'.</li>
+  <li>If the <b>wait_for_confirmation</b> parameter is False (which is the default), it will be faster but there will be no confirmation that the notable ID corresponded with an actual notable event. Setting it to True will cause the action to take longer because it will require an SPL search, but it will provide more assurance that the update took place.</li>
+  <li>The action updates the event for the provided "event_id". If the <b>wait_for_confirmation</b> parameter is True, the action validates the "event_id" provided by the user using the search command: 'search `notable` | search event_id="&lt;event_id&gt;"'.</li>
   <ul>
     <li>If this search command returns more than 0 results, the action updates the event.</li>
     <li>If this search command does not return any results then, the action fails with the message "Please provide a valid event ID".</li>
