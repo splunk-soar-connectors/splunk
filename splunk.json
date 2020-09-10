@@ -569,6 +569,12 @@
                     "data_type": "string",
                     "required": false,
                     "order": 1
+                },
+                "wait_for_confirmation": {
+                    "description": "Validate event_ids",
+                    "data_type": "boolean",
+                    "default": false,
+                    "order": 6
                 }
             },
             "output": [
