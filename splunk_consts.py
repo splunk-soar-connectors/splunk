@@ -135,9 +135,9 @@ CIM_CEF_MAP = {
 SPLUNK_INVALID_COMMAND = "Streaming/Transforming command operates on the events returned by some search.\
     So for using (eval, stats, table) commands, user should provide 'search' in 'command' parameter and provide whole query in the 'query' parameter"
 
-#Validation keys
-SPLUNK_INT_STATUS_KEY = "integer_status action parameter"
-SPLUNK_RETRY_COUNT_KEY = "retry_count configuration parameter"
-SPLUNK_PORT_KEY = "port configuration parameter"
-SPLUNK_MAX_CONTAINER_KEY = "max_container configuration parameter"
-SPLUNK_LAST_N_DAYS_KEY = "last_n_days action parameter"
+# Validation keys
+SPLUNK_INT_STATUS_KEY = "'integer_status' action"
+SPLUNK_RETRY_COUNT_KEY = "'retry_count' configuration"
+SPLUNK_PORT_KEY = "'port' configuration"
+SPLUNK_MAX_CONTAINER_KEY = "'max_container' configuration"
+SPLUNK_LAST_N_DAYS_KEY = "'last_n_days' action"
