@@ -108,7 +108,7 @@
         "max_container": {
             "data_type": "numeric",
             "order": 12,
-            "description": "Max events to ingest (Default: 100)",
+            "description": "Max events to ingest for Scheduled Polling(Default: 100)",
             "required": false,
             "default": 100
         },
@@ -619,6 +619,10 @@
                 },
                 {
                     "data_path": "action_result.parameter.urgency",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.parameter.wait_for_confirmation",
                     "data_type": "string"
                 },
                 {
