@@ -26,6 +26,7 @@ import simplejson as json
 from pytz import timezone
 from datetime import datetime
 from bs4 import BeautifulSoup
+from bs4 import UnicodeDammit
 
 import ssl
 from io import BytesIO
@@ -84,6 +85,12 @@ class SplunkConnector(phantom.BaseConnector):
             splunk_server = config[phantom.APP_JSON_DEVICE]
         except:
             return phantom.APP_ERROR
+
+        # Fetching the Python major version
+        try:
+            self._python_version = int(sys.version_info[0])
+        except:
+            return self.set_status(phantom.APP_ERROR, "Error occurred while getting the Phantom server's Python major version")
 
         self._base_url = 'https://{0}:{1}/'.format(splunk_server, config.get(phantom.APP_JSON_PORT, 8089))
         self._state = self.load_state()
@@ -212,6 +219,38 @@ class SplunkConnector(phantom.BaseConnector):
         # Must return success if we want handle_action to be called
         return phantom.APP_SUCCESS
 
+    def _validate_integer(self, action_result, parameter, key, allow_zero=False):
+        if parameter is not None:
+            try:
+                if not float(parameter).is_integer():
+                    return action_result.set_status(phantom.APP_ERROR, "Please provide a valid integer value in the '{}' parameter".format(key)), None
+
+                parameter = int(parameter)
+            except:
+                return action_result.set_status(phantom.APP_ERROR, "Please provide a valid integer value in the '{}' parameter".format(key)), None
+
+            if not allow_zero and parameter <= 0:
+                return action_result.set_status(phantom.APP_ERROR, SPLUNK_ERR_INVALID_PARAM.format(param=key)), None
+            elif allow_zero and parameter < 0:
+                return action_result.set_status(phantom.APP_ERROR, "Please provide a valid non-negative integer value in the '{}' parameter".format(key)), None
+
+        return phantom.APP_SUCCESS, parameter
+
+    def _handle_py_ver_compat_for_input_str(self, input_str, always_encode=False):
+        """
+        This method returns the encoded|original string based on the Python version.
+        :param input_str: Input string to be processed
+        :return: input_str (Processed input string based on following logic 'input_str - Python 3; encoded input_str - Python 2')
+        """
+
+        try:
+            if input_str and (self._python_version == 2 or always_encode):
+                input_str = UnicodeDammit(input_str).unicode_markup.encode('utf-8')
+        except:
+            self.debug_print("Error occurred while handling python 2to3 compatibility for the input string")
+
+        return input_str
+
     def _make_rest_call_retry(self, action_result, endpoint, data, params=None, method=requests.post):
         if params is None:
             params = {}
@@ -258,9 +297,11 @@ class SplunkConnector(phantom.BaseConnector):
         except:
             error_text = response.text
 
+        error_text = self._handle_py_ver_compat_for_input_str(error_text)
+
         if response.status_code != 200:
             try:
-                return action_result.set_status(phantom.APP_ERROR, "{}. {}".format(consts.SPLUNK_ERR_NOT_200, error_text.encode('utf-8'))), None
+                return action_result.set_status(phantom.APP_ERROR, "{}. {}".format(consts.SPLUNK_ERR_NOT_200, error_text)), None
             except:
                 return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_NOT_200), None
 
@@ -401,6 +442,7 @@ class SplunkConnector(phantom.BaseConnector):
         index = param.get(consts.SPLUNK_JSON_INDEX)
         source = param.get(consts.SPLUNK_JSON_SOURCE, consts.SPLUNK_DEFAULT_SOURCE)
         source_type = param.get(consts.SPLUNK_JSON_SOURCE_TYPE, consts.SPLUNK_DEFAULT_SOURCE_TYPE)
+        post_data = self._handle_py_ver_compat_for_input_str(param[consts.SPLUNK_JSON_DATA], always_encode=True)
 
         get_params = {'source': source, 'sourcetype': source_type}
 
@@ -410,7 +452,7 @@ class SplunkConnector(phantom.BaseConnector):
             get_params['index'] = index
 
         endpoint = 'receivers/simple'
-        ret_val, resp_data = self._make_rest_call_retry(action_result, endpoint, param[consts.SPLUNK_JSON_DATA], params=get_params)
+        ret_val, resp_data = self._make_rest_call_retry(action_result, endpoint, post_data, params=get_params)
 
         if phantom.is_fail(ret_val):
             return ret_val
@@ -427,7 +469,11 @@ class SplunkConnector(phantom.BaseConnector):
         owner = param.get(consts.SPLUNK_JSON_OWNER)
         ids = param.get(consts.SPLUNK_JSON_EVENT_IDS)
         status = param.get(consts.SPLUNK_JSON_STATUS)
-        integer_status = param.get("integer_status")
+
+        ret_val, integer_status = self._validate_integer(action_result, param.get("integer_status"), "integer_status aciton parameter", allow_zero=True)
+        if phantom.is_fail(ret_val):
+            return action_result.get_status()
+
         comment = param.get(consts.SPLUNK_JSON_COMMENT)
         urgency = param.get(consts.SPLUNK_JSON_URGENCY)
         wait_for_confirmation = param.get("wait_for_confirmation", False)
