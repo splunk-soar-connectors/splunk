@@ -97,30 +97,20 @@ class SplunkConnector(phantom.BaseConnector):
 
         return error_code, error_msg
 
-    def _validate_numeric_parameter(self, value):
-        try:
-            if value:
-                value = int(value)
-            if value == 0 or (value and (not str(value).isdigit() or value <= 0)):
-                return phantom.APP_ERROR
-        except:
-            return phantom.APP_ERROR
-
-        return phantom.APP_SUCCESS
-
     def initialize(self):
 
         config = self.get_config()
-        try:
-            splunk_server = config[phantom.APP_JSON_DEVICE]
-        except:
-            return phantom.APP_ERROR
 
         # Fetching the Python major version
         try:
             self._python_version = int(sys.version_info[0])
         except:
             return self.set_status(phantom.APP_ERROR, "Error occurred while getting the Phantom server's Python major version")
+
+        try:
+            splunk_server = self._handle_py_ver_compat_for_input_str(config[phantom.APP_JSON_DEVICE])
+        except:
+            return phantom.APP_ERROR
 
         self._base_url = 'https://{0}:{1}/'.format(splunk_server, config.get(phantom.APP_JSON_PORT, 8089))
         self._state = self.load_state()
@@ -149,25 +139,19 @@ class SplunkConnector(phantom.BaseConnector):
             self._container_name_values = []
 
         # Validate retry_count
-        retry_count = config.get('retry_count')
-        ret_val = self._validate_numeric_parameter(retry_count)
+        ret_val, retry_count = self._validate_integer(self, config.get('retry_count'), consts.SPLUNK_RETRY_COUNT_KEY)
         if phantom.is_fail(ret_val):
-            self.set_status(phantom.APP_ERROR, "Please provide non-zero positive integer in the 'Number of retries' asset configuration parameter")
-            return phantom.APP_ERROR
+            self.get_status()
 
         # Validate port
-        port = config.get('port')
-        ret_val = self._validate_numeric_parameter(port)
+        ret_val, port = self._validate_integer(self, config.get('port'), consts.SPLUNK_PORT_KEY)
         if phantom.is_fail(ret_val):
-            self.set_status(phantom.APP_ERROR, "Please provide non-zero positive integer in the 'Port' asset configuration parameter")
-            return phantom.APP_ERROR
+            self.get_status()
 
         # Validate max_container
-        max_container = config.get('max_container')
-        ret_val = self._validate_numeric_parameter(max_container)
+        ret_val, max_container = self._validate_integer(self, config.get('max_container'), consts.SPLUNK_PORT_KEY)
         if phantom.is_fail(ret_val):
-            self.set_status(phantom.APP_ERROR, "Please provide non-zero positive integer in the 'Max events to ingest (Default: 100)' asset configuration parameter")
-            return phantom.APP_ERROR
+            self.get_status()
 
         return phantom.APP_SUCCESS
 
@@ -217,7 +201,7 @@ class SplunkConnector(phantom.BaseConnector):
 
         config = self.get_config()
 
-        splunk_server = config[phantom.APP_JSON_DEVICE]
+        splunk_server = self._handle_py_ver_compat_for_input_str(config[phantom.APP_JSON_DEVICE])
         username = config.get('username', None)
 
         kwargs_config_flags = {
@@ -516,7 +500,7 @@ class SplunkConnector(phantom.BaseConnector):
         ids = param.get(consts.SPLUNK_JSON_EVENT_IDS)
         status = param.get(consts.SPLUNK_JSON_STATUS)
 
-        ret_val, integer_status = self._validate_integer(action_result, param.get("integer_status"), "integer_status aciton parameter", allow_zero=True)
+        ret_val, integer_status = self._validate_integer(action_result, param.get("integer_status"), consts.SPLUNK_INT_STATUS_KEY, allow_zero=True)
         if phantom.is_fail(ret_val):
             return action_result.get_status()
 
@@ -610,14 +594,11 @@ class SplunkConnector(phantom.BaseConnector):
             return action_result.get_status()
 
         ip_hostname = param[phantom.APP_JSON_IP_HOSTNAME]
-        last_n_days = param.get(consts.SPLUNK_JSON_LAST_N_DAYS)
 
-        # Validate last_n_days
-        if last_n_days:
-            ret_val = self._validate_numeric_parameter(last_n_days)
-            if phantom.is_fail(ret_val):
-                return action_result.set_status(phantom.APP_ERROR, "Please provide non-zero positive integer in the '{}' asset configuration parameter".format(
-                    consts.SPLUNK_JSON_LAST_N_DAYS))
+        #Validate last_n_days
+        ret_val, last_n_days = self._validate_integer(action_result, param.get(consts.SPLUNK_JSON_LAST_N_DAYS), consts.SPLUNK_LAST_N_DAYS_KEY)
+        if phantom.is_fail(ret_val):
+            return action_result.get_status()
 
         search_query = 'search host="{0}"{1}'.format(ip_hostname, ' earliest=-{0}d'.format(last_n_days) if last_n_days else '')
 
