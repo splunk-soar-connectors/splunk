@@ -680,10 +680,20 @@ class SplunkConnector(phantom.BaseConnector):
                 for k, v in list(item.items()):
                     cef[consts.CIM_CEF_MAP.get(k, k)] = v
             md5 = hashlib.md5()
-            try:
-                md5.update(item.get('_raw').encode('UTF-8'))
-            except TypeError:
-                md5.update(str(item).encode('UTF-8'))
+
+            raw = self._handle_py_ver_compat_for_input_str(item.get("_raw", ""))
+            if raw:
+                index = self._handle_py_ver_compat_for_input_str(item.get("index", ""))
+                source = self._handle_py_ver_compat_for_input_str(item.get("source", ""))
+                soucetype = self._handle_py_ver_compat_for_input_str(item.get("soucetype", ""))
+                input_str = "{}{}{}{}".format(raw, source, index, soucetype)
+            else:
+                input_str = json.dumps(item)
+
+            if self._python_version == 3:
+                input_str = UnicodeDammit(input_str).unicode_markup.encode('utf-8')
+
+            md5.update(input_str)
 
             sdi = md5.hexdigest()
             severity = self._get_splunk_severity(item)
