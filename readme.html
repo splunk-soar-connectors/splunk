@@ -57,14 +57,14 @@ Please check the permissions for the state file as mentioned below.
     splunk_app:
     <ul>
       <li>The app context of the namespace</li>
-      <li>As per Splunk SDK's documentation if splunk_app parameter is not provided, then "system" will be considered as splunk_app</li>
+      <li>As per Splunk SDK's documentation if the splunk_app parameter is not provided, then "system" will be considered as splunk_app</li>
     </ul>
   </li>
   <li>
     splunk_owner:
     <ul>
       <li>The owner context of the namespace</li>
-      <li>As per Splunk SDK's documentation if splunk_owner parameter is not provided, then "nobody" will be considered as splunk_owner</li>
+      <li>As per Splunk SDK's documentation if the splunk_owner parameter is not provided, then "nobody" will be considered as splunk_owner</li>
     </ul>
   </li>
   <li>
@@ -80,7 +80,7 @@ Please check the permissions for the state file as mentioned below.
     If the on_poll_query(query to use with On Poll) parameter is not provided, then an error message will be returned<br>
   </li>
   <li>
-    If the on_poll_command(command for the query to use with On Poll) parameter is not provided and the on_poll_query does not start with "|" or "search", then "search" keyword is added at the beginning of the on_poll_query<br>
+    If the on_poll_command(command for the query to use with On Poll) parameter is not provided and the on_poll_query does not start with "|" or "search", then the "search" keyword is added at the beginning of the on_poll_query<br>
     Example:
       <ul>
         <li>
