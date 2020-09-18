@@ -10,7 +10,7 @@
 {% block widget_content %} <!-- Main Start Block -->
 
 <!-- File: splunk_run_query.html
-  Copyright (c) 2014-2019 Splunk Inc.
+  Copyright (c) 2014-2020 Splunk Inc.
 
   SPLUNK CONFIDENTIAL - Use or disclosure of this material in whole or in part
   without a valid written license from Splunk Inc. is PROHIBITED.
@@ -145,7 +145,7 @@
                     {% for item in result.processed_data %}
                         <tr>
                             {% for header in result.headers %}
-                                {% for k, v in item.iteritems %}
+                                {% for k, v in item.items %}
                                     {% ifequal header k %}
                                         <td>{{ v }}</td>
                                     {% endifequal %}

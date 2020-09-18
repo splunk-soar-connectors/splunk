@@ -1,5 +1,5 @@
 # File: splunk_consts.py
-# Copyright (c) 2014-2019 Splunk Inc.
+# Copyright (c) 2014-2020 Splunk Inc.
 #
 # SPLUNK CONFIDENTIAL - Use or disclosure of this material in whole or in part
 # without a valid written license from Splunk Inc. is PROHIBITED.
@@ -21,6 +21,10 @@ SPLUNK_ERR_CONNECTION_NOT_PRE_ESTABLISHED = "Connection to splunk server not yet
 SPLUNK_ERR_INVALID_TIME_RANGE = "Invalid Time range specified, where the end time is less than start time"
 SPLUNK_ERR_NEED_PARAM = "One of comment, status, integer_status, urgency, or owner parameters needs to be supplied to run this action"
 SPLUNK_ERR_INVALID_PARAM = "Please provide non-zero positive integer in {param}"
+SPLUNK_ERR_MSG_UNAVAILABLE = "Error message unavailable. Please check the asset configuration and|or action parameters."
+SPLUNK_ERR_CODE_UNAVAILABLE = "Error code unavailable"
+SPLUNK_UNICODE_DAMMIT_TYPE_ERROR_MESSAGE = "Error occurred while connecting to the Splunk server. Please check the asset configuration and|or the action parameters."
+SPLUNK_EXCEPTION_ERROR_MESSAGE = "{msg}. Error Code: {error_code}. Error Message: {error_msg}"
 
 # Progress messages
 SPLUNK_PROG_GOT_JOB_ID = "Got job id '{job_id}'"
@@ -134,3 +138,10 @@ CIM_CEF_MAP = {
 
 SPLUNK_INVALID_COMMAND = "Streaming/Transforming command operates on the events returned by some search.\
     So for using (eval, stats, table) commands, user should provide 'search' in 'command' parameter and provide whole query in the 'query' parameter"
+
+# Validation keys
+SPLUNK_INT_STATUS_KEY = "'integer_status' action"
+SPLUNK_RETRY_COUNT_KEY = "'retry_count' configuration"
+SPLUNK_PORT_KEY = "'port' configuration"
+SPLUNK_MAX_CONTAINER_KEY = "'max_container' configuration"
+SPLUNK_LAST_N_DAYS_KEY = "'last_n_days' action"

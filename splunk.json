@@ -4,22 +4,26 @@
     "description": "This app integrates with Splunk to update data on the device, in addition to investigate and ingestion actions",
     "publisher": "Splunk",
     "type": "siem",
-    "main_module": "splunk_connector.pyc",
-    "app_version": "1.3.41",
-    "utctime_updated": "2020-01-22T23:55:30.000000Z",
+    "main_module": "splunk_connector.py",
+    "app_version": "2.0.21",
+    "utctime_updated": "2020-09-18T23:10:18.000000Z",
     "package_name": "phantom_splunk",
     "product_name": "Splunk Enterprise",
     "product_vendor": "Splunk Inc.",
     "product_version_regex": ".*",
-    "min_phantom_version": "4.2.7532",
+    "min_phantom_version": "4.8.24304",
+    "python_version": "3",
+    "latest_tested_versions": [
+        "On-premise, Splunk Enterprise Security v8.0.0"
+    ],
     "logo": "logo_splunk.svg",
     "logo_dark": "logo_splunk_dark.svg",
-    "license": "Copyright (c) 2014-2019 Splunk Inc.",
+    "license": "Copyright (c) 2014-2020 Splunk Inc.",
     "pip_dependencies": {
         "wheel": [
             {
                 "module": "splunk-sdk",
-                "input_file": "splunk_sdk_wheel/splunk_sdk-1.6.2-py2-none-any.whl"
+                "input_file": "splunk_sdk_wheel/splunk_sdk-1.6.11-py3-none-any.whl"
             }
         ]
     },
@@ -72,7 +76,6 @@
             "data_type": "string",
             "order": 8,
             "description": "Command for query to use with On Poll",
-            "required": false,
             "value_list": [
                 "",
                 "search",
@@ -86,14 +89,12 @@
         "on_poll_query": {
             "data_type": "string",
             "order": 9,
-            "description": "Query to use with On Poll",
-            "required": false
+            "description": "Query to use with On Poll"
         },
         "on_poll_display": {
             "data_type": "string",
             "order": 10,
-            "description": "Fields to save with On Poll",
-            "required": false
+            "description": "Fields to save with On Poll"
         },
         "on_poll_parse_only": {
             "data_type": "boolean",
@@ -104,28 +105,24 @@
         "max_container": {
             "data_type": "numeric",
             "order": 12,
-            "description": "Max events to ingest (Default: 100)",
-            "required": false,
+            "description": "Max events to ingest for Scheduled Polling(Default: 100)",
             "default": 100
         },
         "container_name_prefix": {
             "data_type": "string",
             "order": 13,
-            "description": "Name to give containers created via ingestion",
-            "required": false
+            "description": "Name to give containers created via ingestion"
         },
         "container_name_values": {
             "data_type": "string",
             "order": 14,
-            "description": "Values to append to container name",
-            "required": false
+            "description": "Values to append to container name"
         },
         "retry_count": {
             "description": "Number of retries",
             "data_type": "numeric",
             "order": 15,
-            "default": 3,
-            "required": false
+            "default": 3
         }
     },
     "actions": [
@@ -161,8 +158,7 @@
                 "last_n_days": {
                     "description": "Number of days ago",
                     "data_type": "numeric",
-                    "order": 1,
-                    "required": false
+                    "order": 1
                 }
             },
             "render": {
@@ -174,7 +170,11 @@
             "output": [
                 {
                     "data_path": "action_result.status",
-                    "data_type": "string"
+                    "data_type": "string",
+                    "example_values": [
+                        "success",
+                        "failed"
+                    ]
                 },
                 {
                     "data_path": "action_result.parameter.ip_hostname",
@@ -311,7 +311,7 @@
         {
             "action": "run query",
             "description": "Run a search query on the Splunk device. Please escape any quotes that are part of the query string",
-            "verbose": "By default, the widget for the &quot;run query&quot; action will show the host, time and raw fields. If you would like to see specific fields parsed out, they can be listed in a comma-separated format in the &quot;display&quot; parameter.<br><br>Please keep in mind that Splunk does not always return all possible fields. Splunk may not return fields that are calculated or not present in the event.<br><br>To work around this you can force Splunk to return specific fields by using the &quot;fields&quot;. This works by appending &quot;| fields + *&quot; to your query. This will return every field, you can replace the asterisk with a comma-separated list of fields.<br><br>Finally, some searches (such as those based on data models) can contain name-spaced fields. If a data model called &quot;my_model&quot; with a search &quot;my_search&quot; has a field &quot;hash&quot; then the field will be named &quot;my_search.hash&quot; and that is what must be used in the Splunk fields command and the display parameter. If using a non-global lookup file that is only accessible by a specific Splunk App, make sure to note the specific Splunk App in your asset configuration. The <b>parse_only</b> parameter, if <b>True</b>, it disables the expansion of search due to evaluation of sub-searches, time term expansion, lookups, tags, eventtypes, and sourcetype alias. This parameter is used for the validation of the Splunk query before fetching the results.",
+            "verbose": "By default, the widget for the &quot;run query&quot; action will show the host, time, and raw fields. If you would like to see specific fields parsed out, they can be listed in a comma-separated format in the &quot;display&quot; parameter.<br><br>Please keep in mind that Splunk does not always return all possible fields. Splunk may not return fields that are calculated or not present in the event.<br><br>To work around this you can force Splunk to return specific fields by using the &quot;fields&quot;. By appending &quot;| fields + *&quot; to your query, Splunk will return every field. You can replace the asterisk with a comma-separated list of fields to only return specific fields.<br><br>Finally, some searches (such as those based on data models) can contain name-spaced fields. If a data model called &quot;my_model&quot; with a search &quot;my_search&quot; has a field &quot;hash&quot; then the field will be named &quot;my_search.hash&quot; and that is what must be used in the Splunk fields command and the display parameter. If using a non-global lookup file that is only accessible by a specific Splunk App, make sure to note the specific Splunk App in your asset configuration. The <b>parse_only</b> parameter, if <b>True</b>, it disables the expansion of search due to evaluation of sub-searches, time term expansion, lookups, tags, eventtypes, and sourcetype alias. This parameter is used for the validation of the Splunk query before fetching the results.",
             "type": "investigate",
             "identifier": "execute_search",
             "read_only": true,
@@ -320,7 +320,6 @@
                     "description": "Beginning command (in Splunk Processing Language)",
                     "data_type": "string",
                     "order": 0,
-                    "required": false,
                     "value_list": [
                         "search",
                         "eval",
@@ -344,8 +343,7 @@
                 "display": {
                     "description": "Display fields (comma-separated)",
                     "data_type": "string",
-                    "order": 2,
-                    "required": false
+                    "order": 2
                 },
                 "parse_only": {
                     "description": "Parse only",
@@ -504,7 +502,7 @@
         {
             "action": "update event",
             "description": "Update a notable event",
-            "verbose": "The <b>event_ids</b> parameter takes a single event_id (which has the format: 68E08B8B-A853-3A20-9768-231C97B7EE76@@notable@@a4bd78810ae8e03e285e552fac0ddb23) or an adaptive response SID + RID combo (which has the format: scheduler__admin__SplunkEnterpriseSecuritySuite__RMD515d4671130158e57_at_1532441220_4982+0).<br><br>NOTE: This action only works with a notable event from Splunk ES.<br><br><Second Note: The <b>status</b> parameter takes a string value, but custom status values are unique to installation and not available at app creation. The <b>integer_status</b> parameter takes a positive integer denoting the custom value desired. This integer must be determined by the customer on-site. If set it will override <b>status</b>.",
+            "verbose": "The <b>event_ids</b> parameter takes a single event_id (which has the format: 68E08B8B-A853-3A20-9768-231C97B7EE76@@notable@@a4bd78810ae8e03e285e552fac0ddb23) or an adaptive response SID + RID combo (which has the format: scheduler__admin__SplunkEnterpriseSecuritySuite__RMD515d4671130158e57_at_1532441220_4982+0).<br><br>NOTE: This action only works with a notable event from Splunk ES.<br><br>Second Note: The <b>status</b> parameter takes a string value, but custom status values are unique to installation and not available at app creation. The <b>integer_status</b> parameter takes a positive integer denoting the custom value desired. This integer must be determined by the customer on-site. If set it will override <b>status</b>.",
             "type": "generic",
             "identifier": "update_event",
             "read_only": false,
@@ -522,7 +520,6 @@
                 "comment": {
                     "description": "New comment for the event",
                     "data_type": "string",
-                    "required": false,
                     "order": 5
                 },
                 "status": {
@@ -537,13 +534,11 @@
                         "resolved",
                         "closed"
                     ],
-                    "required": false,
                     "order": 2
                 },
                 "integer_status": {
                     "description": "Integer representing custom status value",
                     "data_type": "numeric",
-                    "required": false,
                     "order": 3
                 },
                 "urgency": {
@@ -557,14 +552,18 @@
                         "high",
                         "critical"
                     ],
-                    "required": false,
                     "order": 4
                 },
                 "owner": {
                     "description": "New owner for the event",
                     "data_type": "string",
-                    "required": false,
                     "order": 1
+                },
+                "wait_for_confirmation": {
+                    "description": "Validate event_ids",
+                    "data_type": "boolean",
+                    "default": false,
+                    "order": 6
                 }
             },
             "output": [
@@ -610,6 +609,10 @@
                 {
                     "data_path": "action_result.parameter.urgency",
                     "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.parameter.wait_for_confirmation",
+                    "data_type": "boolean"
                 },
                 {
                     "data_path": "action_result.data.*.failure_count",
@@ -701,26 +704,22 @@
                         "host name"
                     ],
                     "primary": true,
-                    "required": false,
                     "order": 1
                 },
                 "index": {
                     "description": "Index to send event to",
                     "data_type": "string",
-                    "required": false,
                     "order": 4
                 },
                 "source": {
                     "description": "Source for event",
                     "data_type": "string",
-                    "required": false,
                     "default": "Phantom",
                     "order": 2
                 },
                 "source_type": {
                     "description": "Type of source for event",
                     "data_type": "string",
-                    "required": false,
                     "default": "Automation/Orchestration Platform",
                     "order": 3
                 }
@@ -730,7 +729,11 @@
                     "data_path": "action_result.status",
                     "data_type": "string",
                     "column_name": "Status",
-                    "column_order": 0
+                    "column_order": 0,
+                    "example_values": [
+                        "success",
+                        "failed"
+                    ]
                 },
                 {
                     "data_path": "action_result.parameter.data",
