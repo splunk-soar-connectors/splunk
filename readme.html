@@ -54,6 +54,14 @@ Please check the permissions for the state file as mentioned below.
     </ul>
   </li>
   <li>
+    Container count to update the state file:
+    <ul>
+      <li>This parameter will allow the user to specify the number of containers and will only be used in scheduled or interval polling</li>
+      <li>Everytime the count of the containers reaches the count provided by the user, the "start_time" stored in the state file will be updated by the index time of that event</li>
+      <li>The default value is 100</li>
+    </ul>
+  </li>
+  <li>
     splunk_app:
     <ul>
       <li>The app context of the namespace</li>

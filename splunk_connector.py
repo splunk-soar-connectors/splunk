@@ -70,6 +70,7 @@ class SplunkConnector(phantom.BaseConnector):
         self.retry_count = None
         self.port = None
         self.max_container = None
+        self.container_update_state = None
 
     def _get_error_message_from_exception(self, e):
         """ This method is used to get appropriate error message from the exception.
@@ -153,7 +154,12 @@ class SplunkConnector(phantom.BaseConnector):
             return self.get_status()
 
         # Validate max_container
-        ret_val, self.max_container = self._validate_integer(self, config.get('max_container', 100), consts.SPLUNK_MAX_CONTAINER_KEY)
+        ret_val, self.max_container = self._validate_integer(self, config.get('max_container', 100), consts.SPLUNK_MAX_CONTAINER_KEY, True)
+        if phantom.is_fail(ret_val):
+            return self.get_status()
+
+        # Validate container_update_state
+        ret_val, self.container_update_state = self._validate_integer(self, config.get('container_update_state', 100), consts.SPLUNK_CONTAINER_UPDATE_STATE_KEY)
         if phantom.is_fail(ret_val):
             return self.get_status()
 
@@ -662,8 +668,9 @@ class SplunkConnector(phantom.BaseConnector):
         data = list(reversed(action_result.get_data()))
         self.save_progress("Finished search")
 
-        if data and not self.is_poll_now():
-            self._state['start_time'] = data[-1].get('_indextime')
+        self.debug_print("Total {} event(s) fetched".format(len(data)))
+
+        count = 1
 
         for item in data:
             container = {}
@@ -708,10 +715,23 @@ class SplunkConnector(phantom.BaseConnector):
             container['name'] = self._get_splunk_title(item)
             container['severity'] = severity
             container['source_data_identifier'] = sdi
+
             ret_val, msg, cid = self.save_container(container)
             if phantom.is_fail(ret_val):
                 self.save_progress("Error saving container: {}".format(msg))
                 self.debug_print("Error saving container: {} -- CID: {}".format(msg, cid))
+                continue
+
+            if count == self.container_update_state and not self.is_poll_now():
+                self._state['start_time'] = item.get("_indextime")
+                self.save_state(self._state)
+                self.debug_print("Index time updated")
+                count = 0
+
+            count += 1
+
+        if data and not self.is_poll_now():
+            self._state['start_time'] = data[-1].get('_indextime')
 
         return action_result.set_status(phantom.APP_SUCCESS)
 

@@ -108,20 +108,26 @@
             "description": "Max events to ingest for Scheduled Polling(Default: 100)",
             "default": 100
         },
+        "container_update_state": {
+            "data_type": "numeric",
+            "order": 13,
+            "description": "Container count to update the state file",
+            "default": 100
+        },
         "container_name_prefix": {
             "data_type": "string",
-            "order": 13,
+            "order": 14,
             "description": "Name to give containers created via ingestion"
         },
         "container_name_values": {
             "data_type": "string",
-            "order": 14,
+            "order": 15,
             "description": "Values to append to container name"
         },
         "retry_count": {
             "description": "Number of retries",
             "data_type": "numeric",
-            "order": 15,
+            "order": 16,
             "default": 3
         }
     },
