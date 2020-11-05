@@ -16,6 +16,7 @@ from splunklib.binding import HTTPError
 import splunklib.client as splunk_client
 import splunklib.results as splunk_results
 
+import os
 import re
 import time
 import pytz
@@ -129,11 +130,17 @@ class SplunkConnector(phantom.BaseConnector):
                 self.debug_print("The phantom user should be having correct access rights and ownership for the corresponding state file (refer readme file for more information)")
                 return phantom.APP_ERROR
         self._proxy = {}
+
         env_vars = config.get('_reserved_environment_variables', {})
         if 'HTTP_PROXY' in env_vars:
             self._proxy['http'] = env_vars['HTTP_PROXY']['value']
+        elif 'HTTP_PROXY' in os.environ:
+            self._proxy['http'] = os.environ.get('HTTP_PROXY')
+
         if 'HTTPS_PROXY' in env_vars:
             self._proxy['https'] = env_vars['HTTPS_PROXY']['value']
+        elif 'HTTPS_PROXY' in os.environ:
+            self._proxy['https'] = os.environ.get('HTTPS_PROXY')
 
         self._container_name_prefix = config.get('container_name_prefix', '')
         container_name_values = config.get('container_name_values')
