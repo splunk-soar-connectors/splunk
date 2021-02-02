@@ -11,14 +11,14 @@
     "product_name": "Splunk Enterprise",
     "product_vendor": "Splunk Inc.",
     "product_version_regex": ".*",
-    "min_phantom_version": "4.8.24304",
+    "min_phantom_version": "4.9.39220",
     "python_version": "3",
     "latest_tested_versions": [
         "On-premise, Splunk Enterprise Security v8.0.0"
     ],
     "logo": "logo_splunk.svg",
     "logo_dark": "logo_splunk_dark.svg",
-    "license": "Copyright (c) 2014-2020 Splunk Inc.",
+    "license": "Copyright (c) 2014-2021 Splunk Inc.",
     "pip_dependencies": {
         "wheel": [
             {
