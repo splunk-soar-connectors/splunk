@@ -863,16 +863,16 @@ class SplunkConnector(phantom.BaseConnector):
             self.save_progress(consts.SPLUNK_ERR_CONNECTIVITY_TEST)
             return action_result.append_to_message(consts.SPLUNK_ERR_CONNECTIVITY_TEST)
 
-        version = self._get_server_version(self)
+        version = self._get_server_version(action_result)
         if version == 'FAILURE':
-            return self.append_to_message(consts.SPLUNK_ERR_CONNECTIVITY_TEST)
+            return action_result.append_to_message(consts.SPLUNK_ERR_CONNECTIVITY_TEST)
 
         is_es = self._check_for_es(action_result)
 
         self.save_progress("Detected Splunk {0}server version {1}".format("ES " if is_es else "", version))
 
         self.debug_print("connect passed")
-        return self.set_status_save_progress(phantom.APP_SUCCESS, consts.SPLUNK_SUCC_CONNECTIVITY_TEST)
+        return action_result.set_status(phantom.APP_SUCCESS, consts.SPLUNK_SUCC_CONNECTIVITY_TEST)
 
     def _run_query(self, search_query, action_result, kwargs_create=dict(), parse_only=True):
         """Function that executes the query on splunk"""
