@@ -1,5 +1,5 @@
 # File: splunk_connector.py
-# Copyright (c) 2014-2020 Splunk Inc.
+# Copyright (c) 2014-2021 Splunk Inc.
 #
 # SPLUNK CONFIDENTIAL - Use or disclosure of this material in whole or in part
 # without a valid written license from Splunk Inc. is PROHIBITED.
@@ -878,6 +878,8 @@ class SplunkConnector(phantom.BaseConnector):
         """Function that executes the query on splunk"""
 
         RETRY_LIMIT = self.retry_count
+        summary = action_result.update_summary({})
+        summary["sid"] = "Search ID not created"
 
         # Validate the search query
         for attempt_count in range(0, RETRY_LIMIT):
@@ -915,6 +917,7 @@ class SplunkConnector(phantom.BaseConnector):
                     error_text = consts.SPLUNK_EXCEPTION_ERROR_MESSAGE.format(msg=consts.SPLUNK_ERR_UNABLE_TO_CREATE_JOB, error_code=error_code, error_msg=error_msg)
                     return action_result.set_status(phantom.APP_ERROR, error_text)
 
+        summary["sid"] = job.__dict__.get("sid")
         result_count = 0
         while True:
             for attempt_count in range(0, RETRY_LIMIT):
@@ -965,7 +968,7 @@ class SplunkConnector(phantom.BaseConnector):
                 status = "Finished parsing {0:.1%} of results".format((float(result_index) / float(result_count)))
                 self.send_progress(status)
 
-        action_result.update_summary({consts.SPLUNK_JSON_TOTAL_EVENTS: result_index})
+        summary[consts.SPLUNK_JSON_TOTAL_EVENTS] = result_index
         return action_result.set_status(phantom.APP_SUCCESS)
 
     def handle_action(self, param):
