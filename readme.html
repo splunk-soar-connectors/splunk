@@ -68,6 +68,15 @@ Please check the permissions for the state file as mentioned below.
     </ul>
   </li>
   <li>
+    retry_count:
+    <ul>
+      <li>Number of retries</li>
+      <li>To ask a query to the Splunk server using the splunklib library, first, the query asked by the user is to be parsed. Then, this parsed query is used to create a job and once this job is ready the results are ready to be fetched.
+        So while performing any of the above steps, if any exception occurs then, the code will retry that step for the number of retries provided in the "retry count" configuration parameter.</li>
+      <li>It will also be used if an error or an exception occurs while posting the data in the "post data" action or modifying the event in the "update event" action.</li>
+    </ul>
+  </li>
+  <li>
     on_poll_display:
     <ul>
       <li>Fields to save with On Poll</li>
