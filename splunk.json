@@ -5,20 +5,20 @@
     "publisher": "Splunk",
     "type": "siem",
     "main_module": "splunk_connector.py",
-    "app_version": "2.0.22",
-    "utctime_updated": "2020-09-18T23:17:39.000000Z",
+    "app_version": "2.0.33",
+    "utctime_updated": "2021-02-05T17:29:12.000000Z",
     "package_name": "phantom_splunk",
     "product_name": "Splunk Enterprise",
     "product_vendor": "Splunk Inc.",
     "product_version_regex": ".*",
-    "min_phantom_version": "4.8.24304",
+    "min_phantom_version": "4.9.39220",
     "python_version": "3",
     "latest_tested_versions": [
         "On-premise, Splunk Enterprise Security v8.0.0"
     ],
     "logo": "logo_splunk.svg",
     "logo_dark": "logo_splunk_dark.svg",
-    "license": "Copyright (c) 2014-2020 Splunk Inc.",
+    "license": "Copyright (c) 2014-2021 Splunk Inc.",
     "pip_dependencies": {
         "wheel": [
             {
@@ -261,6 +261,13 @@
                     "data_type": "numeric"
                 },
                 {
+                    "data_path": "action_result.summary.sid",
+                    "data_type": "string",
+                    "example_values": [
+                        "1612177958.977510"
+                    ]
+                },
+                {
                     "data_path": "action_result.message",
                     "data_type": "string"
                 },
@@ -278,7 +285,7 @@
         {
             "action": "on poll",
             "description": "Ingest logs from the Splunk instance",
-            "verbose": "The configured query is what will be used during ingestion. If you only wish to show certain fields, then you can specify these as a comma-separated list in the configuration. If left unspecified, all available fields will be added to each artifact. When limiting the number of events to ingest, it will ingest the most recent events. By specifying the max count to 0, all events will be ingested.<br><br>",
+            "verbose": "The configured query is what will be used during ingestion. If you only wish to show certain fields, then you can specify these as a comma-separated list in the configuration. If left unspecified, all available fields will be added to each artifact. When limiting the number of events to ingest, it will ingest the most recent events.<br><br>",
             "type": "ingest",
             "identifier": "on_poll",
             "read_only": true,
@@ -476,10 +483,17 @@
                     ]
                 },
                 {
+                    "data_path": "action_result.summary.sid",
+                    "data_type": "string",
+                    "example_values": [
+                        "1612177958.977510"
+                    ]
+                },
+                {
                     "data_path": "action_result.message",
                     "data_type": "string",
                     "example_values": [
-                        "Total events: 2"
+                        "Sid: 1612177958.977510, Total events: 2"
                     ]
                 },
                 {
@@ -648,6 +662,13 @@
                     "data_type": "string",
                     "example_values": [
                         "2CF264EE-6016-4F6A-BCC3-4B7251E113F7@@notable@@035142b19c09ab645c6bbfb847e866f4"
+                    ]
+                },
+                {
+                    "data_path": "action_result.summary.sid",
+                    "data_type": "string",
+                    "example_values": [
+                        "1612177958.977510"
                     ]
                 },
                 {
