@@ -1,5 +1,5 @@
 # File: splunk_connector.py
-# Copyright (c) 2014-2020 Splunk Inc.
+# Copyright (c) 2014-2021 Splunk Inc.
 #
 # SPLUNK CONFIDENTIAL - Use or disclosure of this material in whole or in part
 # without a valid written license from Splunk Inc. is PROHIBITED.
@@ -16,6 +16,7 @@ from splunklib.binding import HTTPError
 import splunklib.client as splunk_client
 import splunklib.results as splunk_results
 
+import os
 import re
 import time
 import pytz
@@ -129,11 +130,17 @@ class SplunkConnector(phantom.BaseConnector):
                 self.debug_print("The phantom user should be having correct access rights and ownership for the corresponding state file (refer readme file for more information)")
                 return phantom.APP_ERROR
         self._proxy = {}
+
         env_vars = config.get('_reserved_environment_variables', {})
         if 'HTTP_PROXY' in env_vars:
             self._proxy['http'] = env_vars['HTTP_PROXY']['value']
+        elif 'HTTP_PROXY' in os.environ:
+            self._proxy['http'] = os.environ.get('HTTP_PROXY')
+
         if 'HTTPS_PROXY' in env_vars:
             self._proxy['https'] = env_vars['HTTPS_PROXY']['value']
+        elif 'HTTPS_PROXY' in os.environ:
+            self._proxy['https'] = os.environ.get('HTTPS_PROXY')
 
         self._container_name_prefix = config.get('container_name_prefix', '')
         container_name_values = config.get('container_name_values')
@@ -856,21 +863,24 @@ class SplunkConnector(phantom.BaseConnector):
             self.save_progress(consts.SPLUNK_ERR_CONNECTIVITY_TEST)
             return action_result.append_to_message(consts.SPLUNK_ERR_CONNECTIVITY_TEST)
 
-        version = self._get_server_version(self)
+        version = self._get_server_version(action_result)
         if version == 'FAILURE':
-            return self.append_to_message(consts.SPLUNK_ERR_CONNECTIVITY_TEST)
+            return action_result.append_to_message(consts.SPLUNK_ERR_CONNECTIVITY_TEST)
 
         is_es = self._check_for_es(action_result)
 
         self.save_progress("Detected Splunk {0}server version {1}".format("ES " if is_es else "", version))
 
         self.debug_print("connect passed")
-        return self.set_status_save_progress(phantom.APP_SUCCESS, consts.SPLUNK_SUCC_CONNECTIVITY_TEST)
+        self.save_progress(consts.SPLUNK_SUCC_CONNECTIVITY_TEST)
+        return action_result.set_status(phantom.APP_SUCCESS, consts.SPLUNK_SUCC_CONNECTIVITY_TEST)
 
     def _run_query(self, search_query, action_result, kwargs_create=dict(), parse_only=True):
         """Function that executes the query on splunk"""
 
         RETRY_LIMIT = self.retry_count
+        summary = action_result.update_summary({})
+        summary["sid"] = "Search ID not created"
 
         # Validate the search query
         for attempt_count in range(0, RETRY_LIMIT):
@@ -908,6 +918,7 @@ class SplunkConnector(phantom.BaseConnector):
                     error_text = consts.SPLUNK_EXCEPTION_ERROR_MESSAGE.format(msg=consts.SPLUNK_ERR_UNABLE_TO_CREATE_JOB, error_code=error_code, error_msg=error_msg)
                     return action_result.set_status(phantom.APP_ERROR, error_text)
 
+        summary["sid"] = job.__dict__.get("sid")
         result_count = 0
         while True:
             for attempt_count in range(0, RETRY_LIMIT):
@@ -958,7 +969,7 @@ class SplunkConnector(phantom.BaseConnector):
                 status = "Finished parsing {0:.1%} of results".format((float(result_index) / float(result_count)))
                 self.send_progress(status)
 
-        action_result.update_summary({consts.SPLUNK_JSON_TOTAL_EVENTS: result_index})
+        summary[consts.SPLUNK_JSON_TOTAL_EVENTS] = result_index
         return action_result.set_status(phantom.APP_SUCCESS)
 
     def handle_action(self, param):
