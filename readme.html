@@ -149,6 +149,9 @@ Please check the permissions for the state file as mentioned below.
     <li>
       For the <b>on_poll_parse_only</b> parameter, if <b>True</b>, disables the expansion of search due to evaluation of sub-searches, time term expansion, lookups, tags, eventtypes, and sourcetype aliases. This parameter is used for the validation of the Splunk query before fetching the results
     </li>
+    <li>
+      If multiple severities are returned for the incident in the "on poll" action, then the highest "severity" will be given priority. If the "severity" is not present in the incident, then the "urgency" of the incident will be considered. If the "urgency" is also not present, then the ingested container "severity" will be taken as "medium" by default.
+    </li>
   </ul>
   <br>
   <li>Helpful examples to run on poll</li>

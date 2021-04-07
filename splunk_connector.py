@@ -194,7 +194,7 @@ class SplunkConnector(phantom.BaseConnector):
             'status': response.code,
             'reason': response.msg,
             'headers': dict(response.info()),
-            'body': BytesIO(response.read().encode('utf-8'))
+            'body': BytesIO(response.read())
         }
 
     def handler(self, proxy):
@@ -747,7 +747,17 @@ class SplunkConnector(phantom.BaseConnector):
 
     def _get_splunk_severity(self, item):
         severity = item.get('severity')
-        severity = consts.SPLUNK_SEVERITY_MAP.get(severity)
+        if isinstance(severity, list):
+            severity_keys = ['critical', 'high', 'medium', 'low', 'informational']
+            for severity_key in severity_keys:
+                if severity_key in severity:
+                    severity = consts.SPLUNK_SEVERITY_MAP[severity_key]
+                    break
+            else:
+                severity = ''
+        else:
+            severity = consts.SPLUNK_SEVERITY_MAP.get(severity)
+
         if not severity:
             # Check to see if urgency is set
             urgency = item.get('urgency')
@@ -951,7 +961,7 @@ class SplunkConnector(phantom.BaseConnector):
         ten_percent = float(result_count) * 0.10
 
         try:
-            results = splunk_results.ResultsReader(job.results(count=0))
+            results = splunk_results.ResultsReader(job.results(count=kwargs_create.get('max_count', 0)))
         except Exception as e:
             error_code, error_msg = self._get_error_message_from_exception(e)
             error_text = consts.SPLUNK_EXCEPTION_ERROR_MESSAGE.format(msg="Error retrieving results", error_code=error_code, error_msg=error_msg)
