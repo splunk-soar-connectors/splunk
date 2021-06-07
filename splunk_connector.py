@@ -26,6 +26,8 @@ import simplejson as json
 
 from pytz import timezone
 from datetime import datetime
+from dateutil.parser import parse as dateutil_parse
+from dateutil.parser import ParserError
 from bs4 import BeautifulSoup
 from bs4 import UnicodeDammit
 
@@ -704,12 +706,15 @@ class SplunkConnector(phantom.BaseConnector):
 
             sdi = md5.hexdigest()
             severity = self._get_splunk_severity(item)
+            spl_event_start = self._get_event_start(item.get("_time"))
+
             container['artifacts'] = [
                 {
                     'cef': cef,
                     'name': 'Field Values',
                     'source_data_identifier': sdi,
-                    'severity': severity
+                    'severity': severity,
+                    'start_time': spl_event_start
                 }
             ]
             container['name'] = self._get_splunk_title(item)
@@ -721,6 +726,23 @@ class SplunkConnector(phantom.BaseConnector):
                 self.debug_print("Error saving container: {} -- CID: {}".format(msg, cid))
 
         return action_result.set_status(phantom.APP_SUCCESS)
+
+    def _get_event_start(self, start_time):
+        # use platform default start_time
+        if not start_time:
+            return None
+
+        try:
+            # convert to Phantom timestamp format
+            # '%Y-%m-%dT%H:%M:%S.%fZ
+            datetime_obj = dateutil_parse(start_time)
+            return datetime_obj.astimezone(pytz.utc).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+        except ParserError as parse_err:
+            self.save_progress("ParserError while parsing _time: {}".format(parse_err))
+            return None
+        except Exception as e:
+            self.save_progress("Exception while parsing _time: {}".format(e))
+            return None
 
     def _get_splunk_title(self, item):
         title = self._container_name_prefix
