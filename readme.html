@@ -4,6 +4,10 @@
   SPLUNK CONFIDENTIAL - Use or disclosure of this material in whole or in part
   without a valid written license from Splunk Inc. is PROHIBITED.
 -->
+<p>
+  <h2>Splunk-SDK</h2>
+  This app uses the Splunk-SDK module, which is licensed under the Apache Software License, Copyright (c) 2011-2019 Splunk, Inc.
+</p>
 <h2>State File Permissions</h2>
 Please check the permissions for the state file as mentioned below.
 <h4>State Filepath</h4>
@@ -42,8 +46,8 @@ Please check the permissions for the state file as mentioned below.
       <li>User can provide CIM fields</li>
       <li>If the container_name_values parameter is provided:</li>
       <ul>
-        <li>If the mapping for the provided field exists, then container_name_values will be the value against the provided CIM fields from the internally defined mapping</li>
-        <li>If the mapping for the provided field does not exist, then container_name_values will be the same as the provided CIM fields</li>
+        <li>If the provided field exists, then container_name_values will be the value against the provided CIM field or its CIM field mapping from the events data</li>
+        <li>If neither a CIM field mapping nor CIM field itself is present in the event data, then container_name_values will be the CIM field mapping or CIM field</li>
       </ul>
       <li>If the container_name_values parameter is not provided:</li>
       <ul>
@@ -51,6 +55,14 @@ Please check the permissions for the state file as mentioned below.
         <li>If 'container_name_prefix' parameter is provided, then container_name_values will be empty</li>
       </ul>
       <li>Users can provide a comma-separated string. Example: test1, test2
+    </ul>
+  </li>
+  <li>
+    Container count to update the state file:
+    <ul>
+      <li>This parameter will allow the user to specify the number of containers and will only be used in scheduled or interval polling</li>
+      <li>Everytime the count of the containers reaches the count provided by the user, the "start_time" stored in the state file will be updated by the index time of that event</li>
+      <li>The default value is 100</li>
     </ul>
   </li>
   <li>
@@ -131,6 +143,7 @@ Please check the permissions for the state file as mentioned below.
     <li>If this search command returns more than 0 results, the action updates the event.</li>
     <li>If this search command does not return any results then, the action fails with the message "Please provide a valid event ID".</li>
   </ul>
+  <li>Use integer status field for custom status. Example: 1 For New, 2 for In progress, etc.</li>
 </ul>
 
 <h2> On Poll </h2>

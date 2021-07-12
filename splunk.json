@@ -5,8 +5,8 @@
     "publisher": "Splunk",
     "type": "siem",
     "main_module": "splunk_connector.py",
-    "app_version": "2.1.5",
-    "utctime_updated": "2021-06-24T19:49:49.000000Z",
+    "app_version": "2.2.0",
+    "utctime_updated": "2021-04-13T13:46:27.000000Z",
     "package_name": "phantom_splunk",
     "product_name": "Splunk Enterprise",
     "product_vendor": "Splunk Inc.",
@@ -108,20 +108,26 @@
             "description": "Max events to ingest for Scheduled Polling(Default: 100)",
             "default": 100
         },
+        "container_update_state": {
+            "data_type": "numeric",
+            "order": 13,
+            "description": "Container count to update the state file",
+            "default": 100
+        },
         "container_name_prefix": {
             "data_type": "string",
-            "order": 13,
+            "order": 14,
             "description": "Name to give containers created via ingestion"
         },
         "container_name_values": {
             "data_type": "string",
-            "order": 14,
+            "order": 15,
             "description": "Values to append to container name"
         },
         "retry_count": {
             "description": "Number of retries",
             "data_type": "numeric",
-            "order": 15,
+            "order": 16,
             "default": 3
         }
     },
@@ -179,6 +185,9 @@
                 {
                     "data_path": "action_result.parameter.ip_hostname",
                     "data_type": "string",
+                    "example_values": [
+                        "test_host"
+                    ],
                     "contains": [
                         "ip",
                         "host name"
@@ -186,7 +195,10 @@
                 },
                 {
                     "data_path": "action_result.parameter.last_n_days",
-                    "data_type": "numeric"
+                    "data_type": "numeric",
+                    "example_values": [
+                        2
+                    ]
                 },
                 {
                     "data_path": "action_result.data.*._bkt",
@@ -269,15 +281,24 @@
                 },
                 {
                     "data_path": "action_result.message",
-                    "data_type": "string"
+                    "data_type": "string",
+                    "example_values": [
+                        "Sid: 1621953772.25264, Total events: 1"
+                    ]
                 },
                 {
                     "data_path": "summary.total_objects",
-                    "data_type": "numeric"
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
                 },
                 {
                     "data_path": "summary.total_objects_successful",
-                    "data_type": "numeric"
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
                 }
             ],
             "versions": "EQ(*)"
@@ -384,7 +405,11 @@
                 },
                 {
                     "data_path": "action_result.parameter.display",
-                    "data_type": "string"
+                    "data_type": "string",
+                    "example_values": [
+                        "_time",
+                        "index"
+                    ]
                 },
                 {
                     "data_path": "action_result.parameter.parse_only",
@@ -401,7 +426,7 @@
                         "splunk query"
                     ],
                     "example_values": [
-                        "\"Send to Phantom\""
+                        "\"Send to test\""
                     ]
                 },
                 {
@@ -509,6 +534,136 @@
                     "example_values": [
                         1
                     ]
+                },
+                {
+                    "data_path": "action_result.data.*.count",
+                    "data_type": "string",
+                    "example_value": "3058733"
+                },
+                {
+                    "data_path": "action_result.data.*._subsecond",
+                    "data_type": "string",
+                    "example_value": ".427"
+                },
+                {
+                    "data_path": "action_result.data.*._kv",
+                    "data_type": "string",
+                    "example_value": "1"
+                },
+                {
+                    "data_path": "action_result.data.*.user",
+                    "data_type": "string",
+                    "example_value": "admin"
+                },
+                {
+                    "data_path": "action_result.data.*.content.sid",
+                    "data_type": "string",
+                    "example_value": "1621953839.25275"
+                },
+                {
+                    "data_path": "action_result.data.*.content.host",
+                    "data_type": "string",
+                    "example_value": "test"
+                },
+                {
+                    "data_path": "action_result.data.*.content.info",
+                    "data_type": "string",
+                    "example_value": "granted"
+                },
+                {
+                    "data_path": "action_result.data.*.is_Adhoc_Jobs",
+                    "data_type": "string",
+                    "example_value": "1"
+                },
+                {
+                    "data_path": "action_result.data.*.content.search",
+                    "data_type": "string",
+                    "example_value": "search [| makeresults | eval myfield = \"test\" | table search] `notable` | table event_id"
+                },
+                {
+                    "data_path": "action_result.data.*.content.source",
+                    "data_type": "string",
+                    "example_value": "source"
+                },
+                {
+                    "data_path": "action_result.data.*.is_Failed_Jobs",
+                    "data_type": "string",
+                    "example_value": "0"
+                },
+                {
+                    "data_path": "action_result.data.*.is_Realtime_Jobs",
+                    "data_type": "string",
+                    "example_value": "0"
+                },
+                {
+                    "data_path": "action_result.data.*.is_Scheduled_Jobs",
+                    "data_type": "string",
+                    "example_value": "0"
+                },
+                {
+                    "data_path": "action_result.data.*.is_Subsearch_Jobs",
+                    "data_type": "string",
+                    "example_value": "0"
+                },
+                {
+                    "data_path": "action_result.data.*.is_not_Adhoc_Jobs",
+                    "data_type": "string",
+                    "example_value": "0"
+                },
+                {
+                    "data_path": "action_result.data.*.content.sourcetype",
+                    "data_type": "string",
+                    "example_value": "source"
+                },
+                {
+                    "data_path": "action_result.data.*.is_not_Failed_Jobs",
+                    "data_type": "string",
+                    "example_value": "1"
+                },
+                {
+                    "data_path": "action_result.data.*.content.search_type",
+                    "data_type": "string",
+                    "example_value": "adhoc"
+                },
+                {
+                    "data_path": "action_result.data.*.is_Acceleration_Jobs",
+                    "data_type": "string",
+                    "example_value": "0"
+                },
+                {
+                    "data_path": "action_result.data.*.is_not_Realtime_Jobs",
+                    "data_type": "string",
+                    "example_value": "1"
+                },
+                {
+                    "data_path": "action_result.data.*.is_not_Scheduled_Jobs",
+                    "data_type": "string",
+                    "example_value": "1"
+                },
+                {
+                    "data_path": "action_result.data.*.is_not_Subsearch_Jobs",
+                    "data_type": "string",
+                    "example_value": "1"
+                },
+                {
+                    "data_path": "action_result.data.*.is_not_Acceleration_Jobs",
+                    "data_type": "string",
+                    "example_value": "1"
+                },
+                {
+                    "data_path": "action_result.data.*.a",
+                    "data_type": "string",
+                    "example_value": "abc"
+                },
+                {
+                    "data_path": "action_result.data.*.count(host)",
+                    "data_type": "string",
+                    "example_value": "28"
+                },
+                {
+                    "data_path": "action_result.data.*.values(source)",
+                    "data_type": "string",
+                    "example_value": "/opt/splunk/var/log/splunk/scheduler.log"
                 }
             ],
             "versions": "EQ(*)"
@@ -610,23 +765,39 @@
                 },
                 {
                     "data_path": "action_result.parameter.integer_status",
-                    "data_type": "numeric"
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
                 },
                 {
                     "data_path": "action_result.parameter.owner",
-                    "data_type": "string"
+                    "data_type": "string",
+                    "example_values": [
+                        "test"
+                    ]
                 },
                 {
                     "data_path": "action_result.parameter.status",
-                    "data_type": "string"
+                    "data_type": "string",
+                    "example_values": [
+                        "new"
+                    ]
                 },
                 {
                     "data_path": "action_result.parameter.urgency",
-                    "data_type": "string"
+                    "data_type": "string",
+                    "example_values": [
+                        "low"
+                    ]
                 },
                 {
                     "data_path": "action_result.parameter.wait_for_confirmation",
-                    "data_type": "boolean"
+                    "data_type": "boolean",
+                    "example_values": [
+                        false,
+                        true
+                    ]
                 },
                 {
                     "data_path": "action_result.data.*.failure_count",
@@ -758,11 +929,17 @@
                 },
                 {
                     "data_path": "action_result.parameter.data",
-                    "data_type": "string"
+                    "data_type": "string",
+                    "example_values": [
+                        "test_data"
+                    ]
                 },
                 {
                     "data_path": "action_result.parameter.host",
                     "data_type": "string",
+                    "example_values": [
+                        "test_host"
+                    ],
                     "contains": [
                         "ip",
                         "host name"
@@ -770,15 +947,24 @@
                 },
                 {
                     "data_path": "action_result.parameter.index",
-                    "data_type": "string"
+                    "data_type": "string",
+                    "example_values": [
+                        "main"
+                    ]
                 },
                 {
                     "data_path": "action_result.parameter.source",
-                    "data_type": "string"
+                    "data_type": "string",
+                    "example_values": [
+                        "test"
+                    ]
                 },
                 {
                     "data_path": "action_result.parameter.source_type",
-                    "data_type": "string"
+                    "data_type": "string",
+                    "example_values": [
+                        "pb"
+                    ]
                 },
                 {
                     "data_path": "action_result.data",
@@ -791,16 +977,26 @@
                 {
                     "data_path": "action_result.message",
                     "data_type": "string",
+                    "example_values": [
+                        "Successfully posted the data"
+                    ],
                     "column_name": "Message",
                     "column_order": 1
                 },
                 {
                     "data_path": "summary.total_objects",
-                    "data_type": "numeric"
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
+                    
                 },
                 {
                     "data_path": "summary.total_objects_successful",
-                    "data_type": "numeric"
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
                 }
             ],
             "versions": "EQ(*)",

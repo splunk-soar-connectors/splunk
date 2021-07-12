@@ -73,6 +73,8 @@ class SplunkConnector(phantom.BaseConnector):
         self.retry_count = None
         self.port = None
         self.max_container = None
+        self._splunk_status_dict = None
+        self.container_update_state = None
 
     def _get_error_message_from_exception(self, e):
         """ This method is used to get appropriate error message from the exception.
@@ -162,7 +164,12 @@ class SplunkConnector(phantom.BaseConnector):
             return self.get_status()
 
         # Validate max_container
-        ret_val, self.max_container = self._validate_integer(self, config.get('max_container', 100), consts.SPLUNK_MAX_CONTAINER_KEY)
+        ret_val, self.max_container = self._validate_integer(self, config.get('max_container', 100), consts.SPLUNK_MAX_CONTAINER_KEY, True)
+        if phantom.is_fail(ret_val):
+            return self.get_status()
+
+        # Validate container_update_state
+        ret_val, self.container_update_state = self._validate_integer(self, config.get('container_update_state', 100), consts.SPLUNK_CONTAINER_UPDATE_STATE_KEY)
         if phantom.is_fail(ret_val):
             return self.get_status()
 
@@ -177,6 +184,7 @@ class SplunkConnector(phantom.BaseConnector):
         ''' Splunk SDK Proxy handler
         '''
         method = message['method'].lower()
+        config = self.get_config()
         data = message.get('body', "") if method == 'post' else None
         headers = dict(message.get('headers', []))
         req = Request(url, data, headers)
@@ -185,7 +193,7 @@ class SplunkConnector(phantom.BaseConnector):
             print(response)
         except URLError:
             # If running Python 2.7.9+, disable SSL certificate validation and try again
-            if sys.version_info >= (2, 7, 9):
+            if sys.version_info >= (2, 7, 9) and not config[phantom.APP_JSON_VERIFY]:
                 response = urlopen(req, context=ssl._create_unverified_context())
             else:
                 raise
@@ -448,11 +456,8 @@ class SplunkConnector(phantom.BaseConnector):
                             error_text = consts.SPLUNK_EXCEPTION_ERROR_MESSAGE.format(msg=consts.SPLUNK_ERR_CONNECTION_FAILED, error_code=error_code, error_msg=error_msg)
                             return action_result.set_status(phantom.APP_ERROR, error_text)
 
-                stats = {'is_done': job['isDone'],
-                        'progress': float(job['doneProgress']) * 100,
-                        'scan_count': int(job['scanCount']),
-                        'event_count': int(job['eventCount']),
-                        'result_count': int(job['resultCount'])}
+                stats = self._get_stats(job)
+
                 status = ("Progress: %(progress)03.1f%%   %(scan_count)d scanned   "
                         "%(event_count)d matched   %(result_count)d results") % stats
                 self.send_progress(status)
@@ -501,6 +506,43 @@ class SplunkConnector(phantom.BaseConnector):
 
         return action_result.set_status(phantom.APP_SUCCESS, "Successfully posted the data")
 
+    def _get_stats(self, job):
+        stats = {'is_done': job['isDone'] if ('isDone' in job) else "Unknown status",
+                'progress': float(job['doneProgress']) * 100 if ('doneProgress' in job) else consts.SPLUNK_JOB_FIELD_NOT_FOUND_MESSAGE.format(field="Done progress"),
+                'scan_count': int(job['scanCount']) if ('scanCount' in job) else consts.SPLUNK_JOB_FIELD_NOT_FOUND_MESSAGE.format(field="Scan count"),
+                'event_count': int(job['eventCount']) if ('eventCount' in job) else consts.SPLUNK_JOB_FIELD_NOT_FOUND_MESSAGE.format(field="Event count"),
+                'result_count': int(job['resultCount']) if ('resultCount' in job) else consts.SPLUNK_JOB_FIELD_NOT_FOUND_MESSAGE.format(field="Result count")}
+
+        return stats
+
+    def _set_splunk_status_dict(self, action_result):
+
+        endpoint = 'alerts/reviewstatuses?count=-1&output_mode=json'
+        ret_val, resp_data = self._make_rest_call_retry(action_result, endpoint, {}, method=requests.get)
+
+        if phantom.is_fail(ret_val) or not resp_data:
+            return False
+
+        self._splunk_status_dict = {}
+        resp_data_json = json.loads(resp_data)
+        entry = resp_data_json.get("entry")
+
+        if not entry:
+            return False
+
+        for data in entry:
+            status_id = data.get("name")
+            status_name = data.get('content', {}).get('label')
+            is_enabled = str(data.get('content', {}).get('disabled')) == '0'
+            is_notable_status_type = data.get('content', {}).get('status_type') == 'notable'
+            if status_id and status_id.isdigit() and status_name and is_enabled and is_notable_status_type:
+                self._splunk_status_dict[status_name.lower()] = int(status_id)
+
+        if not self._splunk_status_dict:
+            return False
+
+        return True
+
     def _update_event(self, param):
 
         action_result = self.add_action_result(phantom.ActionResult(dict(param)))
@@ -531,6 +573,10 @@ class SplunkConnector(phantom.BaseConnector):
 
         if not comment and not status and not urgency and not owner and integer_status is None:
             return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_NEED_PARAM)
+
+        if status or integer_status is not None:
+            if not self._set_splunk_status_dict(action_result):
+                return action_result.set_status(phantom.APP_ERROR, 'Error occurred while fetching Splunk event status')
 
         self.debug_print("Attempting to create a connection")
 
@@ -563,17 +609,17 @@ class SplunkConnector(phantom.BaseConnector):
         if owner:
             request_body['newOwner'] = owner
         if integer_status is not None:
-            if int(integer_status) not in list(consts.SPLUNK_STATUS_DICT.values()):
+            if int(integer_status) not in list(self._splunk_status_dict.values()):
                 return action_result.set_status(phantom.APP_ERROR, "Please provide a valid value in 'integer_status' action parameter.\
-                    Valid values: {}".format((', '.join(map(str, list(consts.SPLUNK_STATUS_DICT.values())))) ))
+                    Valid values: {}".format((', '.join(map(str, list(self._splunk_status_dict.values())))) ))
             request_body['status'] = str(integer_status)
         elif status:
-            if status not in consts.SPLUNK_STATUS_DICT:
+            if status not in self._splunk_status_dict:
                 if not status.isdigit():
                     return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_BAD_STATUS)
                 request_body['status'] = status
             else:
-                request_body['status'] = consts.SPLUNK_STATUS_DICT[status]
+                request_body['status'] = self._splunk_status_dict[status]
         if urgency:
             request_body['urgency'] = urgency
         if comment:
@@ -671,8 +717,9 @@ class SplunkConnector(phantom.BaseConnector):
         data = list(reversed(action_result.get_data()))
         self.save_progress("Finished search")
 
-        if data and not self.is_poll_now():
-            self._state['start_time'] = data[-1].get('_indextime')
+        self.debug_print("Total {} event(s) fetched".format(len(data)))
+
+        count = 1
 
         for item in data:
             container = {}
@@ -694,8 +741,8 @@ class SplunkConnector(phantom.BaseConnector):
             if raw:
                 index = self._handle_py_ver_compat_for_input_str(item.get("index", ""))
                 source = self._handle_py_ver_compat_for_input_str(item.get("source", ""))
-                soucetype = self._handle_py_ver_compat_for_input_str(item.get("soucetype", ""))
-                input_str = "{}{}{}{}".format(raw, source, index, soucetype)
+                sourcetype = self._handle_py_ver_compat_for_input_str(item.get("sourcetype", ""))
+                input_str = "{}{}{}{}".format(raw, source, index, sourcetype)
             else:
                 input_str = json.dumps(item)
 
@@ -720,10 +767,23 @@ class SplunkConnector(phantom.BaseConnector):
             container['name'] = self._get_splunk_title(item)
             container['severity'] = severity
             container['source_data_identifier'] = sdi
+
             ret_val, msg, cid = self.save_container(container)
             if phantom.is_fail(ret_val):
                 self.save_progress("Error saving container: {}".format(msg))
                 self.debug_print("Error saving container: {} -- CID: {}".format(msg, cid))
+                continue
+
+            if count == self.container_update_state and not self.is_poll_now():
+                self._state['start_time'] = item.get("_indextime")
+                self.save_state(self._state)
+                self.debug_print("Index time updated")
+                count = 0
+
+            count += 1
+
+        if data and not self.is_poll_now():
+            self._state['start_time'] = data[-1].get('_indextime')
 
         return action_result.set_status(phantom.APP_SUCCESS)
 
@@ -738,10 +798,14 @@ class SplunkConnector(phantom.BaseConnector):
             datetime_obj = dateutil_parse(start_time)
             return datetime_obj.astimezone(pytz.utc).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
         except ParserError as parse_err:
-            self.save_progress("ParserError while parsing _time: {}".format(parse_err))
+            error_code, error_msg = self._get_error_message_from_exception(parse_err)
+            error_text = consts.SPLUNK_EXCEPTION_ERROR_MESSAGE.format(msg="ParserError while parsing _time", error_code=error_code, error_msg=error_msg)
+            self.save_progress(error_text)
             return None
         except Exception as e:
-            self.save_progress("Exception while parsing _time: {}".format(e))
+            error_code, error_msg = self._get_error_message_from_exception(e)
+            error_text = consts.SPLUNK_EXCEPTION_ERROR_MESSAGE.format(msg="Exception while parsing _time", error_code=error_code, error_msg=error_msg)
+            self.save_progress(error_text)
             return None
 
     def _get_splunk_title(self, item):
@@ -751,10 +815,14 @@ class SplunkConnector(phantom.BaseConnector):
 
         values = ''
         for i in range(len(self._container_name_values)):
-            value = item.get(consts.CIM_CEF_MAP.get(self._container_name_values[i],
-                self._container_name_values[i]))
-            if value:
-                values += "{}{}".format(value, '' if i == len(self._container_name_values) - 1 else ', ')
+            if consts.CIM_CEF_MAP.get(self._container_name_values[i]) and item.get(consts.CIM_CEF_MAP.get(self._container_name_values[i])):
+                value = item.get(consts.CIM_CEF_MAP.get(self._container_name_values[i]))
+            elif item.get(self._container_name_values[i]):
+                value = item.get(self._container_name_values[i])
+            else:
+                value = consts.CIM_CEF_MAP.get(self._container_name_values[i], self._container_name_values[i])
+
+            values += "{}{}".format(value, '' if i == len(self._container_name_values) - 1 else ', ')
 
         if not title:
             time = item.get('_time')
@@ -965,12 +1033,13 @@ class SplunkConnector(phantom.BaseConnector):
                         error_text = consts.SPLUNK_EXCEPTION_ERROR_MESSAGE.format(msg=consts.SPLUNK_ERR_CONNECTION_FAILED, error_code=error_code, error_msg=error_msg)
                         return action_result.set_status(phantom.APP_ERROR, error_text)
 
-            stats = {'is_done': job['isDone'],
-                     'progress': float(job['doneProgress']) * 100,
-                     'scan_count': int(job['scanCount']),
-                     'event_count': int(job['eventCount']),
-                     'result_count': int(job['resultCount'])}
-            status = ("Progress: %(progress)03.1f%%   %(scan_count)d scanned   "
+            stats = self._get_stats(job)
+
+            if not ('doneProgress' in job and 'scanCount' in job and 'eventCount' in job and 'resultCount' in job):
+                status = ("Progress: {}   {} scanned   {} matched   {} results".format(
+                            stats.get("progress"), stats.get("scan_count"), stats.get("event_count"), stats.get("result_count")))
+            else:
+                status = ("Progress: %(progress)03.1f%%   %(scan_count)d scanned   "
                       "%(event_count)d matched   %(result_count)d results") % stats
             self.send_progress(status)
             if stats['is_done'] == '1':
