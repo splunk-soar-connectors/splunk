@@ -25,6 +25,7 @@ SPLUNK_ERR_MSG_UNAVAILABLE = "Error message unavailable. Please check the asset 
 SPLUNK_ERR_CODE_UNAVAILABLE = "Error code unavailable"
 SPLUNK_UNICODE_DAMMIT_TYPE_ERROR_MESSAGE = "Error occurred while connecting to the Splunk server. Please check the asset configuration and|or the action parameters."
 SPLUNK_EXCEPTION_ERROR_MESSAGE = "{msg}. Error Code: {error_code}. Error Message: {error_msg}"
+SPLUNK_JOB_FIELD_NOT_FOUND_MESSAGE = "{field} not found"
 
 # Progress messages
 SPLUNK_PROG_GOT_JOB_ID = "Got job id '{job_id}'"
@@ -74,15 +75,6 @@ SPLUNK_MILLISECONDS_IN_A_DAY = 86400000
 SPLUNK_NUMBER_OF_DAYS_BEFORE_ENDTIME = 10
 
 # Dictionaries
-SPLUNK_STATUS_DICT = {
-        "unassigned": 0,
-        "new": 1,
-        "in progress": 2,
-        "pending": 3,
-        "resolved": 4,
-        "closed": 5
-    }
-
 SPLUNK_SEVERITY_MAP = {
     'informational': 'low',
     'low': 'low',
@@ -144,4 +136,5 @@ SPLUNK_INT_STATUS_KEY = "'integer_status' action"
 SPLUNK_RETRY_COUNT_KEY = "'retry_count' configuration"
 SPLUNK_PORT_KEY = "'port' configuration"
 SPLUNK_MAX_CONTAINER_KEY = "'max_container' configuration"
+SPLUNK_CONTAINER_UPDATE_STATE_KEY = "'Container count to update the state file' configuration"
 SPLUNK_LAST_N_DAYS_KEY = "'last_n_days' action"
