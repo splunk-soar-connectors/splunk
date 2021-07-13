@@ -27,6 +27,7 @@ def _get_ctx_result(result, provides):
 
     if param.get("display"):
         headers = [x.strip() for x in param['display'].split(',')]
+        headers = list(filter(None, headers))
 
     else:
         for key in data[0].keys():
