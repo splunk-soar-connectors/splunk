@@ -137,6 +137,7 @@ Please check the permissions for the state file as mentioned below.
 
 <h2> Update Event </h2>
 <ul>
+  <li>To execute this action successfully, the minimum role required is "ess_analyst", but the user can have other roles too.</li>
   <li>If the <b>wait_for_confirmation</b> parameter is False (which is the default), it will be faster but there will be no confirmation that the notable ID corresponded with an actual notable event. Setting it to True will cause the action to take longer because it will require an SPL search, but it will provide more assurance that the update took place.</li>
   <li>The action updates the event for the provided "event_id". If the <b>wait_for_confirmation</b> parameter is True, the action validates the "event_id" provided by the user using the search command: 'search `notable` | search event_id="&lt;event_id&gt;"'.</li>
   <ul>
