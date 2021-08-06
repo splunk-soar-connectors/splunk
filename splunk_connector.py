@@ -259,14 +259,14 @@ class SplunkConnector(phantom.BaseConnector):
         if parameter is not None:
             try:
                 if not float(parameter).is_integer():
-                    return action_result.set_status(phantom.APP_ERROR, "Please provide a valid integer value in the {} parameter".format(key)), None
+                    return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_INVALID_INTEGER.format(param=key)), None
 
                 parameter = int(parameter)
             except:
-                return action_result.set_status(phantom.APP_ERROR, "Please provide a valid integer value in the {} parameter".format(key)), None
+                return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_INVALID_INTEGER.format(param=key)), None
 
             if parameter < 0:
-                return action_result.set_status(phantom.APP_ERROR, "Please provide a valid non-negative integer value in the {} parameter".format(key)), None
+                return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_NON_NEGATIVE_INTEGER.format(param=key)), None
             if not allow_zero and parameter == 0:
                 return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_INVALID_PARAM.format(param=key)), None
 
@@ -382,9 +382,9 @@ class SplunkConnector(phantom.BaseConnector):
     def _resolve_event_id(self, sidandrid, action_result, kwargs_create=dict()):
         """Query the splunk instance using the SID+RID of the notable to find the notable ID"""
 
-        search_query = r'search [| makeresults | eval myfield = "' + sidandrid + r'" | rex field=myfield "^(?<sid>.*)\+(?<rid>\d*(\.\d+)?)"'
+        search_query = r'search [| makeresults | eval myfield = "{}" | rex field=myfield "^(?<sid>.*)\+(?<rid>\d*(\.\d+)?)"'.format(sidandrid)
         search_query += r' | eval search = "( (sid::" . sid . " OR orig_sid::" . sid . ") (rid::" . rid . " OR orig_rid::" . rid . ") )" | table search] `notable` | table event_id'
-        self.send_progress("Running search_query: " + search_query)
+        self.send_progress("Running search_query: {}".format(search_query))
 
         result = self._return_first_row_from_query(search_query, action_result)
 
@@ -633,12 +633,16 @@ class SplunkConnector(phantom.BaseConnector):
         if not ret_val:
             return ret_val
 
+        if "success" in resp_data and not resp_data.get("success"):
+            msg = resp_data.get("message")
+            return action_result.set_status(phantom.APP_ERROR, msg if msg else "Unable to update the notable event")
+
         action_result.add_data(resp_data)
         action_result.update_summary({consts.SPLUNK_JSON_UPDATED_EVENT_ID: ids})
         if wait_for_confirmation:
             return action_result.set_status(phantom.APP_SUCCESS)
         return action_result.set_status(phantom.APP_SUCCESS,
-                        "Updated Event ID: {}. The event_id has not been verified. Please confirm that the provided event_id corresponds to an actual notable event".format(ids))
+                    "Updated Event ID: {}. The event_id has not been verified. Please confirm that the provided event_id corresponds to an actual notable event".format(ids))
 
     def _get_host_events(self, param):
         """Executes the query to get events pertaining to a host
@@ -711,7 +715,7 @@ class SplunkConnector(phantom.BaseConnector):
         display = config.get('on_poll_display')
         header_set = None
         if display:
-            header_set = {x.strip().lower() for x in display.split(',')}
+            header_set = [x.strip().lower() for x in display.split(',')]
 
         # Set the most recent event to data[0]
         data = list(reversed(action_result.get_data()))
@@ -755,15 +759,6 @@ class SplunkConnector(phantom.BaseConnector):
             severity = self._get_splunk_severity(item)
             spl_event_start = self._get_event_start(item.get("_time"))
 
-            container['artifacts'] = [
-                {
-                    'cef': cef,
-                    'name': 'Field Values',
-                    'source_data_identifier': sdi,
-                    'severity': severity,
-                    'start_time': spl_event_start
-                }
-            ]
             container['name'] = self._get_splunk_title(item)
             container['severity'] = severity
             container['source_data_identifier'] = sdi
@@ -772,6 +767,20 @@ class SplunkConnector(phantom.BaseConnector):
             if phantom.is_fail(ret_val):
                 self.save_progress("Error saving container: {}".format(msg))
                 self.debug_print("Error saving container: {} -- CID: {}".format(msg, cid))
+                continue
+
+            artifact = [{
+                    'cef': cef,
+                    'name': 'Field Values',
+                    'source_data_identifier': sdi,
+                    'severity': severity,
+                    'start_time': spl_event_start,
+                    'container_id': cid
+                }]
+            create_artifact_status, create_artifact_msg, _ = self.save_artifacts(artifact)
+            if phantom.is_fail(create_artifact_status):
+                self.save_progress("Error saving artifact: {}".format(create_artifact_msg))
+                self.debug_print("Error saving artifact: {}".format(create_artifact_msg))
                 continue
 
             if count == self.container_update_state and not self.is_poll_now():
@@ -944,7 +953,7 @@ class SplunkConnector(phantom.BaseConnector):
             #  if not present etc.
             ss_names = ['"{0}"'.format(x.strip(' "')) for x in ss_name.split(',') if len(x.strip()) > 0]
             self.debug_print("ss_names", ss_names)
-            ss_query = 'ss_name = ' + ' OR ss_name = '.join(ss_names)
+            ss_query = 'ss_name = {}'.format(' OR ss_name = '.join(ss_names))
 
         query = 'search index=_audit action=alert_fired {0} | head {1} | fields ss_name sid trigger_time severity'.format(ss_query, count)
 
@@ -988,10 +997,15 @@ class SplunkConnector(phantom.BaseConnector):
                 self._service.parse(search_query, parse_only=parse_only)
                 break
             except HTTPError as e:
-                error_code, error_msg = self._get_error_message_from_exception(e)
-                error_text = consts.SPLUNK_EXCEPTION_ERROR_MESSAGE.format(msg=consts.SPLUNK_ERR_INVALID_QUERY, error_code=error_code, error_msg=error_msg)
-                return action_result.set_status(phantom.APP_ERROR, error_text, query=search_query)
+                if (phantom.is_fail(self._connect(action_result))):
+                    return action_result.get_status()
+                if attempt_count == RETRY_LIMIT - 1:
+                    error_code, error_msg = self._get_error_message_from_exception(e)
+                    error_text = consts.SPLUNK_EXCEPTION_ERROR_MESSAGE.format(msg=consts.SPLUNK_ERR_INVALID_QUERY, error_code=error_code, error_msg=error_msg)
+                    return action_result.set_status(phantom.APP_ERROR, error_text, query=search_query)
             except Exception as e:
+                if (phantom.is_fail(self._connect(action_result))):
+                    return action_result.get_status()
                 if attempt_count == RETRY_LIMIT - 1:
                     error_code, error_msg = self._get_error_message_from_exception(e)
                     error_text = consts.SPLUNK_EXCEPTION_ERROR_MESSAGE.format(msg=consts.SPLUNK_ERR_CONNECTION_FAILED, error_code=error_code, error_msg=error_msg)
@@ -1086,7 +1100,7 @@ class SplunkConnector(phantom.BaseConnector):
 
         # Get the action that we are supposed to carry out, set it in the connection result object
         action = self.get_action_identifier()
-        self.send_progress("executing action: " + action)
+        self.send_progress("executing action: {}".format(action))
         if action == self.ACTION_ID_RUN_QUERY:
             result = self._handle_run_query(param)
         elif action == self.ACTION_ID_POST_DATA:
