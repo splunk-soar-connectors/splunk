@@ -5,13 +5,13 @@
     "publisher": "Splunk",
     "type": "siem",
     "main_module": "splunk_connector.py",
-    "app_version": "2.3.2",
+    "app_version": "2.4.0",
     "utctime_updated": "2021-08-04T14:08:07.000000Z",
     "package_name": "phantom_splunk",
     "product_name": "Splunk Enterprise",
     "product_vendor": "Splunk Inc.",
     "product_version_regex": ".*",
-    "min_phantom_version": "4.9.39220",
+    "min_phantom_version": "4.10.0.40961",
     "python_version": "3",
     "latest_tested_versions": [
         "On-premise, Splunk Enterprise Security v8.2.0",
@@ -130,6 +130,12 @@
             "data_type": "numeric",
             "order": 16,
             "default": 3
+        },
+        "remove_empty_cef": {
+            "description": "Remove CEF fields having empty values from the artifact",
+            "data_type": "boolean",
+            "order": 17,
+            "default": false
         }
     },
     "actions": [
