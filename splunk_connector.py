@@ -75,6 +75,7 @@ class SplunkConnector(phantom.BaseConnector):
         self.max_container = None
         self._splunk_status_dict = None
         self.container_update_state = None
+        self.remove_empty_cef = None
 
     def _get_error_message_from_exception(self, e):
         """ This method is used to get appropriate error message from the exception.
@@ -172,6 +173,8 @@ class SplunkConnector(phantom.BaseConnector):
         ret_val, self.container_update_state = self._validate_integer(self, config.get('container_update_state', 100), consts.SPLUNK_CONTAINER_UPDATE_STATE_KEY)
         if phantom.is_fail(ret_val):
             return self.get_status()
+
+        self.remove_empty_cef = config.get("remove_empty_cef", False)
 
         return phantom.APP_SUCCESS
 
@@ -768,6 +771,13 @@ class SplunkConnector(phantom.BaseConnector):
                 self.save_progress("Error saving container: {}".format(msg))
                 self.debug_print("Error saving container: {} -- CID: {}".format(msg, cid))
                 continue
+
+            if self.remove_empty_cef:
+                cleaned_cef = {}
+                for key, value in list(cef.items()):
+                    if value is not None:
+                        cleaned_cef[key] = value
+                cef = cleaned_cef
 
             artifact = [{
                     'cef': cef,
