@@ -742,7 +742,7 @@ class SplunkConnector(phantom.BaseConnector):
             else:
                 for k, v in list(item.items()):
                     cef[consts.CIM_CEF_MAP.get(k, k)] = v
-            md5 = hashlib.md5()
+            sha256 = hashlib.sha256()
 
             raw = self._handle_py_ver_compat_for_input_str(item.get("_raw", ""))
             if raw:
@@ -756,9 +756,9 @@ class SplunkConnector(phantom.BaseConnector):
             if self._python_version == 3:
                 input_str = UnicodeDammit(input_str).unicode_markup.encode('utf-8')
 
-            md5.update(input_str)
+            sha256.update(input_str)
 
-            sdi = md5.hexdigest()
+            sdi = sha256.hexdigest()
             severity = self._get_splunk_severity(item)
             spl_event_start = self._get_event_start(item.get("_time"))
 
