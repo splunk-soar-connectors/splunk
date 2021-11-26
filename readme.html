@@ -156,6 +156,19 @@ Please check the permissions for the state file as mentioned below.
 
 <h2> On Poll </h2>
 <ul>
+  <li>There are two approaches to polling as mentioned below.</li>
+  <ul>
+    <li>POLL NOW (Manual polling)</li>
+    <ul>
+      <li>
+        It will fetch the data every time as per the corresponding asset configuration parameters. It doesn’t store the last run context of the fetched data.
+      </li>
+    </ul>
+    <li>Scheduled/Interval Polling</li>
+    <ul>
+      <li>The ingestion action will be triggered after each specified time interval. It stores the last run context of the fetched data and starts fetching new data based on the combination of the values of stored context for the previous ingestion run and the corresponding asset configuration parameters.</li>
+    </ul>
+  </ul>
   <li>Notes</li>
   <ul>
     <li>
@@ -267,4 +280,19 @@ For example, if a hostname is expected in the container name, the "Name to give 
 can be set to "Notable Splunk Event" and "Values to append to container name" parameter can be set to "host".
 This will set the container name to "Notable Splunk Event, host=my.sample.host".
 The appended values can be a comma-separated list.
+</p>
+<h2>Special characters present in the Splunk query can affect the output</h2>
+<p>
+The user must use appropriate special characters in the query according to individual use-case otherwise the query will end up providing unexpected results. Following is a list of several such special characters:
+  <ul>
+    <li>Non-breaking space</li>
+    <li>Soft hyphen</li>
+    <li>Micro symbol</li>
+    <li>Division symbol</li>
+    <li>Non-breaking hyphen</li>
+    <li>En dash</li>
+    <li>Em dash</li>
+    <li>Ellipsis</li>
+  </ul>
+There can exist more such characters apart from the ones listed above.
 </p>
