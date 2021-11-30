@@ -696,14 +696,14 @@ class SplunkConnector(phantom.BaseConnector):
             return action_result.set_status(phantom.APP_ERROR, "Error occurred while parsing the search query")
 
         search_params = {}
-        start_time = self._state.get('start_time')
-        if start_time:
-            search_params['index_earliest'] = start_time
 
         if self.is_poll_now():
             search_params['max_count'] = param.get('container_count', 100)
         else:
             search_params['max_count'] = self.max_container
+            start_time = self._state.get('start_time')
+            if start_time:
+                search_params['index_earliest'] = start_time
 
         if int(search_params['max_count']) <= 0:
             self.debug_print("The value of 'container_count' parameter must be a positive integer. The value provided in the 'container_count' parameter is {}.\
