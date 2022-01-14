@@ -16,6 +16,7 @@
 #
 # Phantom imports
 import phantom.app as phantom
+from phantom.action_result import ActionResult
 from phantom.base_connector import BaseConnector
 
 # THIS Connector imports
@@ -367,6 +368,22 @@ class SplunkConnector(phantom.BaseConnector):
 
         return phantom.APP_SUCCESS, resp_json
 
+    def _make_rest_calls_to_phantom(self, action_result, url):
+
+        r = requests.get(url, verify=False)
+        if not r:
+            message = 'Status Code: {0}'.format(r.status_code)
+            if (r.text):
+                message += " Error from Server: {0}".format(r.text.replace('{', '{{').replace('}', '}}'))
+            return (action_result.set_status(phantom.APP_ERROR, "Error retrieving system info, {0}".format(message)), None)
+
+        try:
+            resp_json = r.json()
+        except Exception as e:
+            return (action_result.set_status(phantom.APP_ERROR, "Error processing response JSON", e), None)
+
+        return (phantom.APP_SUCCESS, resp_json)
+
     def _get_server_version(self, action_result):
 
         endpoint = 'server/info'
@@ -678,6 +695,24 @@ class SplunkConnector(phantom.BaseConnector):
 
         return self._run_query(search_query, action_result)
 
+    def _get_fips_enabled(self, action_result=None):
+        if (not action_result):
+            action_result = ActionResult()
+        temp_base_url = self.get_phantom_base_url()
+        ret_val, resp_json = self._make_rest_calls_to_phantom(action_result, temp_base_url + 'rest/system_settings?sections[\"fips\"]')
+
+        if (phantom.is_fail(ret_val)):
+            return (False, False)
+
+        if (resp_json.get("fips")):
+            is_fips_enabled = resp_json.get("fips").get("enabled")
+            if (is_fips_enabled):
+                self.debug_print('fips is enabled')
+                return (True, True)
+
+        self.debug_print('fips is not enabled')
+        return (True, False)
+
     def _on_poll(self, param):
 
         action_result = self.add_action_result(phantom.ActionResult(dict(param)))
@@ -751,7 +786,6 @@ class SplunkConnector(phantom.BaseConnector):
             else:
                 for k, v in list(item.items()):
                     cef[consts.CIM_CEF_MAP.get(k, k)] = v
-            sha256 = hashlib.sha256()
 
             raw = self._handle_py_ver_compat_for_input_str(item.get("_raw", ""))
             if raw:
@@ -765,9 +799,24 @@ class SplunkConnector(phantom.BaseConnector):
             if self._python_version == 3:
                 input_str = UnicodeDammit(input_str).unicode_markup.encode('utf-8')
 
-            sha256.update(input_str)
+            action_result, fips_enabled = self._get_fips_enabled()
+            # if the rest/system_settings call fails, we do not know if the platform is in fips mode or not
+            # we should fail to avoid using the wrong hashing algorithm
+            if (not action_result):
+                self._base_connector.debug_print('Error occurred in _create_dict_hash. Failed to retrieve system_settings')
+                return None
 
-            sdi = sha256.hexdigest()
+            # if fips is not enabled, we should continue with our existing md5 usage for generating SDIs
+            # to not impact existing customers
+            if (not fips_enabled):
+                md5 = hashlib.md5()
+                md5.update(input_str)
+                sdi = md5.hexdigest()
+            else:
+                sha256 = hashlib.sha256()
+                sha256.update(input_str)
+                sdi = sha256.hexdigest()
+
             severity = self._get_splunk_severity(item)
             spl_event_start = self._get_event_start(item.get("_time"))
 
