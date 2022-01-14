@@ -819,7 +819,7 @@ class SplunkConnector(phantom.BaseConnector):
             # if the rest/system_settings call fails, we do not know if the platform is in fips mode or not
             # we should fail to avoid using the wrong hashing algorithm
             if (not action_result):
-                self._base_connector.debug_print('Error occurred in _create_dict_hash. Failed to retrieve system_settings')
+                self.debug_print('Error occurred in _create_dict_hash. Failed to retrieve system_settings')
                 return None
 
             # if fips is not enabled, we should continue with our existing md5 usage for generating SDIs
