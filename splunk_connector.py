@@ -15,48 +15,44 @@
 #
 #
 # Phantom imports
+import hashlib
+import os
+import re
+import ssl
+import sys
+import time
+from datetime import datetime
+from io import BytesIO
+
 import phantom.app as phantom
+import pytz
+import requests
+import simplejson as json
+import splunklib.client as splunk_client
+import splunklib.results as splunk_results
+from bs4 import BeautifulSoup, UnicodeDammit
+from dateutil.parser import ParserError
+from dateutil.parser import parse as dateutil_parse
+# Python2 - Python3 compatibility imports
+from future.standard_library import install_aliases
 from phantom.base_connector import BaseConnector
+from pytz import timezone
+from splunklib.binding import HTTPError
 
 # THIS Connector imports
 import splunk_consts as consts
 
-from splunklib.binding import HTTPError
-import splunklib.client as splunk_client
-import splunklib.results as splunk_results
-
-import os
-import re
-import time
-import pytz
-import hashlib
-import requests
-import simplejson as json
-
-from pytz import timezone
-from datetime import datetime
-from dateutil.parser import parse as dateutil_parse
-from dateutil.parser import ParserError
-from bs4 import BeautifulSoup
-from bs4 import UnicodeDammit
-
-import ssl
-from io import BytesIO
-import sys
-
-# Python2 - Python3 compatibility imports
-from future.standard_library import install_aliases
 install_aliases()
 
-from urllib.parse import urlparse, urlencode  # noqa
-from urllib.error import HTTPError as UrllibHTTPError  # noqa
-
-from urllib.error import URLError  # noqa
-from urllib.request import urlopen, Request, ProxyHandler, build_opener, install_opener  # noqa
-
-from builtins import str  # noqa
 from builtins import map  # noqa
 from builtins import range  # noqa
+from builtins import str  # noqa
+from urllib.error import HTTPError as UrllibHTTPError  # noqa
+from urllib.error import URLError  # noqa
+from urllib.parse import urlencode, urlparse  # noqa
+from urllib.request import (ProxyHandler, Request, build_opener,  # noqa
+                            install_opener, urlopen)
+
 from past.utils import old_div  # noqa
 
 
@@ -1188,8 +1184,9 @@ class SplunkConnector(phantom.BaseConnector):
 
 if __name__ == '__main__':
 
-    import pudb
     import argparse
+
+    import pudb
     import requests
 
     pudb.set_trace()
