@@ -141,8 +141,8 @@ class SplunkConnector(phantom.BaseConnector):
             self._state = self.load_state()
             if self._state is None:
                 self.debug_print("Please check the owner, owner group, and the permissions of the state file")
-                self.debug_print("The phantom user should be having correct access rights and ownership for the "\
-                    "corresponding state file (refer readme file for more information)")
+                self.debug_print("The phantom user should be having correct access rights and ownership for the \
+                    corresponding state file (refer readme file for more information)")
                 return phantom.APP_ERROR
         self._proxy = {}
 
@@ -534,7 +534,7 @@ class SplunkConnector(phantom.BaseConnector):
 
     def _get_stats(self, job):
         stats = {'is_done': job['isDone'] if ('isDone' in job) else "Unknown status",
-                'progress': float(job['doneProgress']) * 100 if ('doneProgress' in job) 
+                'progress': float(job['doneProgress']) * 100 if ('doneProgress' in job)
                     else consts.SPLUNK_JOB_FIELD_NOT_FOUND_MESSAGE.format(field="Done progress"),
                 'scan_count': int(job['scanCount']) if ('scanCount' in job)
                     else consts.SPLUNK_JOB_FIELD_NOT_FOUND_MESSAGE.format(field="Scan count"),
@@ -673,9 +673,8 @@ class SplunkConnector(phantom.BaseConnector):
         action_result.update_summary({consts.SPLUNK_JSON_UPDATED_EVENT_ID: ids})
         if wait_for_confirmation:
             return action_result.set_status(phantom.APP_SUCCESS)
-        return action_result.set_status(phantom.APP_SUCCESS,
-                    "Updated Event ID: {}. The event_id has not been verified. ".format(ids)
-                    + "Please confirm that the provided event_id corresponds to an actual notable event")
+        return action_result.set_status(phantom.APP_SUCCESS, "Updated Event ID: {}. The event_id has not been verified. \
+            Please confirm that the provided event_id corresponds to an actual notable event".format(ids))
 
     def _get_host_events(self, param):
         """Executes the query to get events pertaining to a host
@@ -888,8 +887,8 @@ class SplunkConnector(phantom.BaseConnector):
             self._container_name_values.append('source')
         values = ''
         for i in range(len(self._container_name_values)):
-            if consts.CIM_CEF_MAP.get(self._container_name_values[i])and item.get(
-                consts.CIM_CEF_MAP.get(self._container_name_values[i])):
+            if consts.CIM_CEF_MAP.get(self._container_name_values[i]) and item.get(
+                    consts.CIM_CEF_MAP.get(self._container_name_values[i])):
                 value = item.get(consts.CIM_CEF_MAP.get(self._container_name_values[i]))
             elif item.get(self._container_name_values[i]):
                 value = item.get(self._container_name_values[i])

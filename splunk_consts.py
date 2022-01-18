@@ -142,7 +142,8 @@ CIM_CEF_MAP = {
 }
 
 SPLUNK_INVALID_COMMAND = "Streaming/Transforming command operates on the events returned by some search.\
-    So for using (eval, stats, table) commands, user should provide 'search' in 'command' parameter and provide whole query in the 'query' parameter"
+    So for using (eval, stats, table) commands, user should provide 'search' in 'command' parameter \
+    and provide whole query in the 'query' parameter"
 
 # Validation keys
 SPLUNK_INT_STATUS_KEY = "'integer_status' action"
