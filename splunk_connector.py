@@ -50,6 +50,7 @@ import splunk_consts as consts
 
 install_aliases()
 
+
 class RetVal(tuple):
     def __new__(cls, val1, val2=None):
         return tuple.__new__(RetVal, (val1, val2))
