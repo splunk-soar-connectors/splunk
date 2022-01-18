@@ -28,7 +28,7 @@ from io import BytesIO
 from urllib.error import HTTPError as UrllibHTTPError  # noqa
 from urllib.error import URLError  # noqa
 from urllib.parse import urlencode, urlparse  # noqa
-from urllib.request import ProxyHandler, Request, build_opener, install_opener, urlopen # noqa
+from urllib.request import ProxyHandler, Request, build_opener, install_opener, urlopen  # noqa
 
 import phantom.app as phantom
 import pytz
