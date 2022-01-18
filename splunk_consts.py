@@ -28,13 +28,15 @@ SPLUNK_ERR_GET_EVENTS = "Error getting events for alert '{ss_name}' having sid '
 SPLUNK_ERR_NOT_ES = "This instance does not seem to be Splunk ES. This action cannot be run"
 SPLUNK_ERR_CONNECTION_NOT_PRE_ESTABLISHED = "Connection to splunk server not yet established"
 SPLUNK_ERR_INVALID_TIME_RANGE = "Invalid Time range specified, where the end time is less than start time"
-SPLUNK_ERR_NEED_PARAM = "One of comment, status, integer_status, urgency, or owner parameters needs to be supplied to run this action"
+SPLUNK_ERR_NEED_PARAM = "One of comment, status, integer_status, urgency, or owner parameters needs to be supplied to run this \
+    action"
 SPLUNK_ERR_INVALID_INTEGER = "Please provide a valid integer value in the {param} parameter"
 SPLUNK_ERR_NON_NEGATIVE_INTEGER = "Please provide a valid non-negative integer value in the {param} parameter"
 SPLUNK_ERR_INVALID_PARAM = "Please provide non-zero positive integer in {param}"
 SPLUNK_ERR_MSG_UNAVAILABLE = "Error message unavailable. Please check the asset configuration and|or action parameters."
 SPLUNK_ERR_CODE_UNAVAILABLE = "Error code unavailable"
-SPLUNK_UNICODE_DAMMIT_TYPE_ERROR_MESSAGE = "Error occurred while connecting to the Splunk server. Please check the asset configuration and|or the action parameters."
+SPLUNK_UNICODE_DAMMIT_TYPE_ERROR_MESSAGE = "Error occurred while connecting to the Splunk server. Please check the asset \
+    configuration and|or the action parameters."
 SPLUNK_EXCEPTION_ERROR_MESSAGE = "{msg}. Error Code: {error_code}. Error Message: {error_msg}"
 SPLUNK_JOB_FIELD_NOT_FOUND_MESSAGE = "{field} not found"
 

@@ -16,7 +16,6 @@
 #
 # Phantom imports
 import phantom.app as phantom
-from phantom.action_result import ActionResult
 from phantom.base_connector import BaseConnector
 
 # THIS Connector imports
@@ -40,7 +39,6 @@ from dateutil.parser import parse as dateutil_parse
 from dateutil.parser import ParserError
 from bs4 import BeautifulSoup
 from bs4 import UnicodeDammit
-from distutils.version import LooseVersion
 
 import ssl
 from io import BytesIO
@@ -143,8 +141,8 @@ class SplunkConnector(phantom.BaseConnector):
             self._state = self.load_state()
             if self._state is None:
                 self.debug_print("Please check the owner, owner group, and the permissions of the state file")
-                self.debug_print("The phantom user should be having correct access rights and ownership for the "
-                    + "corresponding state file (refer readme file for more information)")
+                self.debug_print("The phantom user should be having correct access rights and ownership for the "\
+                    "corresponding state file (refer readme file for more information)")
                 return phantom.APP_ERROR
         self._proxy = {}
 
@@ -402,8 +400,11 @@ class SplunkConnector(phantom.BaseConnector):
     def _resolve_event_id(self, sidandrid, action_result, kwargs_create=dict()):
         """Query the splunk instance using the SID+RID of the notable to find the notable ID"""
 
-        search_query = r'search [| makeresults | eval myfield = "{}" | rex field=myfield "^(?<sid>.*)\+(?<rid>\d*(\.\d+)?)"'.format(sidandrid)
-        search_query += r' | eval search = "( (sid::" . sid . " OR orig_sid::" . sid . ") (rid::" . rid . " OR orig_rid::" . rid . ") )" | table search] `notable` | table event_id'
+        search_query = r'search [| makeresults | eval myfield = "{}"'.format(sidandrid)
+        search_query += r' | rex field=myfield "^(?<sid>.*)\+(?<rid>\d*(\.\d+)?)"'
+        search_query += r' | eval search = "( (sid::" . sid . " OR orig_sid::" . sid . ")'
+        search_query += r' (rid::" . rid . " OR orig_rid::" . rid . ") )"'
+        search_query += r' | table search] `notable` | table event_id'
         self.send_progress("Running search_query: {}".format(search_query))
 
         result = self._return_first_row_from_query(search_query, action_result)
@@ -495,7 +496,8 @@ class SplunkConnector(phantom.BaseConnector):
                 results = splunk_results.ResultsReader(job.results(count=0))
             except Exception as e:
                 error_code, error_msg = self._get_error_message_from_exception(e)
-                error_text = consts.SPLUNK_EXCEPTION_ERROR_MESSAGE.format(msg="Error retrieving results", error_code=error_code, error_msg=error_msg)
+                error_text = consts.SPLUNK_EXCEPTION_ERROR_MESSAGE.format(msg="Error retrieving results", error_code=error_code,
+                    error_msg=error_msg)
                 return action_result.set_status(phantom.APP_ERROR, error_text)
 
             for result in results:
@@ -532,10 +534,14 @@ class SplunkConnector(phantom.BaseConnector):
 
     def _get_stats(self, job):
         stats = {'is_done': job['isDone'] if ('isDone' in job) else "Unknown status",
-                'progress': float(job['doneProgress']) * 100 if ('doneProgress' in job) else consts.SPLUNK_JOB_FIELD_NOT_FOUND_MESSAGE.format(field="Done progress"),
-                'scan_count': int(job['scanCount']) if ('scanCount' in job) else consts.SPLUNK_JOB_FIELD_NOT_FOUND_MESSAGE.format(field="Scan count"),
-                'event_count': int(job['eventCount']) if ('eventCount' in job) else consts.SPLUNK_JOB_FIELD_NOT_FOUND_MESSAGE.format(field="Event count"),
-                'result_count': int(job['resultCount']) if ('resultCount' in job) else consts.SPLUNK_JOB_FIELD_NOT_FOUND_MESSAGE.format(field="Result count")}
+                'progress': float(job['doneProgress']) * 100 if ('doneProgress' in job) 
+                    else consts.SPLUNK_JOB_FIELD_NOT_FOUND_MESSAGE.format(field="Done progress"),
+                'scan_count': int(job['scanCount']) if ('scanCount' in job)
+                    else consts.SPLUNK_JOB_FIELD_NOT_FOUND_MESSAGE.format(field="Scan count"),
+                'event_count': int(job['eventCount']) if ('eventCount' in job)
+                    else consts.SPLUNK_JOB_FIELD_NOT_FOUND_MESSAGE.format(field="Event count"),
+                'result_count': int(job['resultCount']) if ('resultCount' in job)
+                    else consts.SPLUNK_JOB_FIELD_NOT_FOUND_MESSAGE.format(field="Result count")}
 
         return stats
 
@@ -636,8 +642,8 @@ class SplunkConnector(phantom.BaseConnector):
             request_body['newOwner'] = owner
         if integer_status is not None:
             if int(integer_status) not in list(self._splunk_status_dict.values()):
-                return action_result.set_status(phantom.APP_ERROR, "Please provide a valid value in 'integer_status' action parameter.\
-                    Valid values: {}".format((', '.join(map(str, list(self._splunk_status_dict.values())))) ))
+                return action_result.set_status(phantom.APP_ERROR, "Please provide a valid value in 'integer_status' action\
+                     parameter. Valid values: {}".format((', '.join(map(str, list(self._splunk_status_dict.values())))) ))
             request_body['status'] = str(integer_status)
         elif status:
             if status not in self._splunk_status_dict:
@@ -703,7 +709,7 @@ class SplunkConnector(phantom.BaseConnector):
         fips_enabled = is_fips_enabled()
         if (fips_enabled):
             self.debug_print('fips is enabled')
-        else: 
+        else:
             self.debug_print('fips is not enabled')
         return fips_enabled
 
@@ -880,7 +886,6 @@ class SplunkConnector(phantom.BaseConnector):
         title = self._container_name_prefix
         if not title and not self._container_name_values:
             self._container_name_values.append('source')
-
         values = ''
         for i in range(len(self._container_name_values)):
             if consts.CIM_CEF_MAP.get(self._container_name_values[i])and item.get(
@@ -890,7 +895,6 @@ class SplunkConnector(phantom.BaseConnector):
                 value = item.get(self._container_name_values[i])
             else:
                 value = consts.CIM_CEF_MAP.get(self._container_name_values[i], self._container_name_values[i])
-
             values += "{}{}".format(value, '' if i == len(self._container_name_values) - 1 else ', ')
 
         if not title:
