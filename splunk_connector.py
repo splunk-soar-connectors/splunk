@@ -13,16 +13,23 @@
 # either express or implied. See the License for the specific language governing permissions
 # and limitations under the License.
 #
-#
-# Phantom imports
+
 import hashlib
 import os
 import re
 import ssl
 import sys
 import time
+from builtins import map  # noqa
+from builtins import range  # noqa
+from builtins import str  # noqa
 from datetime import datetime
 from io import BytesIO
+from urllib.error import HTTPError as UrllibHTTPError  # noqa
+from urllib.error import URLError  # noqa
+from urllib.parse import urlencode, urlparse  # noqa
+from urllib.request import (ProxyHandler, Request, build_opener,  # noqa
+                            install_opener, urlopen)
 
 import phantom.app as phantom
 import pytz
@@ -33,28 +40,15 @@ import splunklib.results as splunk_results
 from bs4 import BeautifulSoup, UnicodeDammit
 from dateutil.parser import ParserError
 from dateutil.parser import parse as dateutil_parse
-# Python2 - Python3 compatibility imports
 from future.standard_library import install_aliases
+from past.utils import old_div  # noqa
 from phantom.base_connector import BaseConnector
 from pytz import timezone
 from splunklib.binding import HTTPError
 
-# THIS Connector imports
 import splunk_consts as consts
 
 install_aliases()
-
-from builtins import map  # noqa
-from builtins import range  # noqa
-from builtins import str  # noqa
-from urllib.error import HTTPError as UrllibHTTPError  # noqa
-from urllib.error import URLError  # noqa
-from urllib.parse import urlencode, urlparse  # noqa
-from urllib.request import (ProxyHandler, Request, build_opener,  # noqa
-                            install_opener, urlopen)
-
-from past.utils import old_div  # noqa
-
 
 class RetVal(tuple):
     def __new__(cls, val1, val2=None):
