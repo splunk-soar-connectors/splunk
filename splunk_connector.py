@@ -788,13 +788,9 @@ class SplunkConnector(phantom.BaseConnector):
             # if fips is not enabled, we should continue with our existing md5 usage for generating SDIs
             # to not impact existing customers
             if not fips_enabled:
-                md5 = hashlib.md5()
-                md5.update(input_str)
-                sdi = md5.hexdigest()
+                sdi = hashlib.md5(input_str).hexdigest()
             else:
-                sha256 = hashlib.sha256()
-                sha256.update(input_str)
-                sdi = sha256.hexdigest()
+                sdi = hashlib.sha256(input_str).hexdigest()
 
             severity = self._get_splunk_severity(item)
             spl_event_start = self._get_event_start(item.get("_time"))
