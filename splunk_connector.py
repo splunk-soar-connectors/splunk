@@ -13,51 +13,41 @@
 # either express or implied. See the License for the specific language governing permissions
 # and limitations under the License.
 #
-#
-# Phantom imports
-import phantom.app as phantom
-from phantom.base_connector import BaseConnector
 
-# THIS Connector imports
-import splunk_consts as consts
-
-from splunklib.binding import HTTPError
-import splunklib.client as splunk_client
-import splunklib.results as splunk_results
-
+import hashlib
 import os
 import re
-import time
-import pytz
-import hashlib
-import requests
-import simplejson as json
-
-from pytz import timezone
-from datetime import datetime
-from dateutil.parser import parse as dateutil_parse
-from dateutil.parser import ParserError
-from bs4 import BeautifulSoup
-from bs4 import UnicodeDammit
-
 import ssl
-from io import BytesIO
 import sys
-
-# Python2 - Python3 compatibility imports
-from future.standard_library import install_aliases
-install_aliases()
-
-from urllib.parse import urlparse, urlencode  # noqa
-from urllib.error import HTTPError as UrllibHTTPError  # noqa
-
-from urllib.error import URLError  # noqa
-from urllib.request import urlopen, Request, ProxyHandler, build_opener, install_opener  # noqa
-
-from builtins import str  # noqa
+import time
 from builtins import map  # noqa
 from builtins import range  # noqa
+from builtins import str  # noqa
+from datetime import datetime
+from io import BytesIO
+from urllib.error import HTTPError as UrllibHTTPError  # noqa
+from urllib.error import URLError  # noqa
+from urllib.parse import urlencode, urlparse  # noqa
+from urllib.request import ProxyHandler, Request, build_opener, install_opener, urlopen  # noqa
+
+import phantom.app as phantom
+import pytz
+import requests
+import simplejson as json
+import splunklib.client as splunk_client
+import splunklib.results as splunk_results
+from bs4 import BeautifulSoup, UnicodeDammit
+from dateutil.parser import ParserError
+from dateutil.parser import parse as dateutil_parse
+from future.standard_library import install_aliases
 from past.utils import old_div  # noqa
+from phantom.base_connector import BaseConnector
+from pytz import timezone
+from splunklib.binding import HTTPError
+
+import splunk_consts as consts
+
+install_aliases()
 
 
 class RetVal(tuple):
@@ -141,7 +131,8 @@ class SplunkConnector(phantom.BaseConnector):
             self._state = self.load_state()
             if self._state is None:
                 self.debug_print("Please check the owner, owner group, and the permissions of the state file")
-                self.debug_print("The phantom user should be having correct access rights and ownership for the corresponding state file (refer readme file for more information)")
+                self.debug_print("The phantom user should have correct access rights and ownership for the \
+                    corresponding state file (refer readme file for more information)")
                 return phantom.APP_ERROR
         self._proxy = {}
 
@@ -174,12 +165,14 @@ class SplunkConnector(phantom.BaseConnector):
             return self.get_status()
 
         # Validate max_container
-        ret_val, self.max_container = self._validate_integer(self, config.get('max_container', 100), consts.SPLUNK_MAX_CONTAINER_KEY, True)
+        ret_val, self.max_container = self._validate_integer(self, config.get('max_container', 100),
+            consts.SPLUNK_MAX_CONTAINER_KEY, True)
         if phantom.is_fail(ret_val):
             return self.get_status()
 
         # Validate container_update_state
-        ret_val, self.container_update_state = self._validate_integer(self, config.get('container_update_state', 100), consts.SPLUNK_CONTAINER_UPDATE_STATE_KEY)
+        ret_val, self.container_update_state = self._validate_integer(self, config.get('container_update_state', 100),
+            consts.SPLUNK_CONTAINER_UPDATE_STATE_KEY)
         if phantom.is_fail(ret_val):
             return self.get_status()
 
@@ -261,7 +254,8 @@ class SplunkConnector(phantom.BaseConnector):
                 self._service = splunk_client.connect(**kwargs_config_flags)
         except Exception as e:
             error_code, error_msg = self._get_error_message_from_exception(e)
-            error_text = consts.SPLUNK_EXCEPTION_ERROR_MESSAGE.format(msg=consts.SPLUNK_ERR_CONNECTION_FAILED, error_code=error_code, error_msg=error_msg)
+            error_text = consts.SPLUNK_EXCEPTION_ERROR_MESSAGE.format(msg=consts.SPLUNK_ERR_CONNECTION_FAILED,
+                error_code=error_code, error_msg=error_msg)
             return action_result.set_status(phantom.APP_ERROR, error_text)
 
         # Must return success if we want handle_action to be called
@@ -326,7 +320,8 @@ class SplunkConnector(phantom.BaseConnector):
                     verify=config[phantom.APP_JSON_VERIFY])
         except Exception as e:
             error_code, error_msg = self._get_error_message_from_exception(e)
-            error_text = consts.SPLUNK_EXCEPTION_ERROR_MESSAGE.format(msg=consts.SPLUNK_ERR_CONNECTION_FAILED, error_code=error_code, error_msg=error_msg)
+            error_text = consts.SPLUNK_EXCEPTION_ERROR_MESSAGE.format(msg=consts.SPLUNK_ERR_CONNECTION_FAILED,
+                error_code=error_code, error_msg=error_msg)
             return action_result.set_status(phantom.APP_ERROR, error_text), None
 
         # store the r_text in debug data, it will get dumped in the logs if an error occurs
@@ -362,7 +357,8 @@ class SplunkConnector(phantom.BaseConnector):
             resp_json = response.json()
         except Exception as e:
             error_code, error_msg = self._get_error_message_from_exception(e)
-            error_text = consts.SPLUNK_EXCEPTION_ERROR_MESSAGE.format(msg=consts.SPLUNK_ERR_NOT_JSON, error_code=error_code, error_msg=error_msg)
+            error_text = consts.SPLUNK_EXCEPTION_ERROR_MESSAGE.format(msg=consts.SPLUNK_ERR_NOT_JSON,
+                error_code=error_code, error_msg=error_msg)
             return action_result.set_status(phantom.APP_ERROR, error_text), None
 
         return phantom.APP_SUCCESS, resp_json
@@ -394,11 +390,9 @@ class SplunkConnector(phantom.BaseConnector):
     def _resolve_event_id(self, sidandrid, action_result, kwargs_create=dict()):
         """Query the splunk instance using the SID+RID of the notable to find the notable ID"""
 
-        search_query = r'search [| makeresults | eval myfield = "{}" | rex field=myfield "^(?<sid>.*)\+(?<rid>\d*(\.\d+)?)"'.format(sidandrid)
-        search_query += r' | eval search = "( (sid::" . sid . " OR orig_sid::" . sid . ") (rid::" . rid . " OR orig_rid::" . rid . ") )" | table search] `notable` | table event_id'
-        self.send_progress("Running search_query: {}".format(search_query))
+        self.send_progress("Running search_query: {}".format(consts.SPLUNK_RID_SID_NOTABLE_QUERY))
 
-        result = self._return_first_row_from_query(search_query, action_result)
+        result = self._return_first_row_from_query(consts.SPLUNK_RID_SID_NOTABLE_QUERY.format(sidandrid), action_result)
 
         if phantom.is_fail(result):
             return RetVal(action_result.get_status(), None)
@@ -424,12 +418,14 @@ class SplunkConnector(phantom.BaseConnector):
                 break
             except HTTPError as e:
                 error_code, error_msg = self._get_error_message_from_exception(e)
-                error_text = consts.SPLUNK_EXCEPTION_ERROR_MESSAGE.format(msg=consts.SPLUNK_ERR_INVALID_QUERY, error_code=error_code, error_msg=error_msg)
+                error_text = consts.SPLUNK_EXCEPTION_ERROR_MESSAGE.format(msg=consts.SPLUNK_ERR_INVALID_QUERY,
+                    error_code=error_code, error_msg=error_msg)
                 return action_result.set_status(phantom.APP_ERROR, error_text, query=search_query)
             except Exception as e:
                 if attempt_count == RETRY_LIMIT - 1:
                     error_code, error_msg = self._get_error_message_from_exception(e)
-                    error_text = consts.SPLUNK_EXCEPTION_ERROR_MESSAGE.format(msg=consts.SPLUNK_ERR_CONNECTION_FAILED, error_code=error_code, error_msg=error_msg)
+                    error_text = consts.SPLUNK_EXCEPTION_ERROR_MESSAGE.format(msg=consts.SPLUNK_ERR_CONNECTION_FAILED,
+                        error_code=error_code, error_msg=error_msg)
                     return action_result.set_status(phantom.APP_ERROR, error_text)
 
         self.debug_print(consts.SPLUNK_PROG_CREATED_QUERY.format(query=search_query))
@@ -452,7 +448,8 @@ class SplunkConnector(phantom.BaseConnector):
                 except Exception as e:
                     if attempt_count == RETRY_LIMIT - 1:
                         error_code, error_msg = self._get_error_message_from_exception(e)
-                        error_text = consts.SPLUNK_EXCEPTION_ERROR_MESSAGE.format(msg=consts.SPLUNK_ERR_UNABLE_TO_CREATE_JOB, error_code=error_code, error_msg=error_msg)
+                        error_text = consts.SPLUNK_EXCEPTION_ERROR_MESSAGE.format(msg=consts.SPLUNK_ERR_UNABLE_TO_CREATE_JOB,
+                            error_code=error_code, error_msg=error_msg)
                         return action_result.set_status(phantom.APP_ERROR, error_text)
 
             while True:
@@ -465,7 +462,8 @@ class SplunkConnector(phantom.BaseConnector):
                     except Exception as e:
                         if attempt_count == RETRY_LIMIT - 1:
                             error_code, error_msg = self._get_error_message_from_exception(e)
-                            error_text = consts.SPLUNK_EXCEPTION_ERROR_MESSAGE.format(msg=consts.SPLUNK_ERR_CONNECTION_FAILED, error_code=error_code, error_msg=error_msg)
+                            error_text = consts.SPLUNK_EXCEPTION_ERROR_MESSAGE.format(msg=consts.SPLUNK_ERR_CONNECTION_FAILED,
+                                error_code=error_code, error_msg=error_msg)
                             return action_result.set_status(phantom.APP_ERROR, error_text)
 
                 stats = self._get_stats(job)
@@ -483,7 +481,8 @@ class SplunkConnector(phantom.BaseConnector):
                 results = splunk_results.ResultsReader(job.results(count=0))
             except Exception as e:
                 error_code, error_msg = self._get_error_message_from_exception(e)
-                error_text = consts.SPLUNK_EXCEPTION_ERROR_MESSAGE.format(msg="Error retrieving results", error_code=error_code, error_msg=error_msg)
+                error_text = consts.SPLUNK_EXCEPTION_ERROR_MESSAGE.format(msg="Error retrieving results", error_code=error_code,
+                    error_msg=error_msg)
                 return action_result.set_status(phantom.APP_ERROR, error_text)
 
             for result in results:
@@ -520,10 +519,14 @@ class SplunkConnector(phantom.BaseConnector):
 
     def _get_stats(self, job):
         stats = {'is_done': job['isDone'] if ('isDone' in job) else "Unknown status",
-                'progress': float(job['doneProgress']) * 100 if ('doneProgress' in job) else consts.SPLUNK_JOB_FIELD_NOT_FOUND_MESSAGE.format(field="Done progress"),
-                'scan_count': int(job['scanCount']) if ('scanCount' in job) else consts.SPLUNK_JOB_FIELD_NOT_FOUND_MESSAGE.format(field="Scan count"),
-                'event_count': int(job['eventCount']) if ('eventCount' in job) else consts.SPLUNK_JOB_FIELD_NOT_FOUND_MESSAGE.format(field="Event count"),
-                'result_count': int(job['resultCount']) if ('resultCount' in job) else consts.SPLUNK_JOB_FIELD_NOT_FOUND_MESSAGE.format(field="Result count")}
+                'progress': float(job['doneProgress']) * 100 if ('doneProgress' in job)
+                    else consts.SPLUNK_JOB_FIELD_NOT_FOUND_MESSAGE.format(field="Done progress"),
+                'scan_count': int(job['scanCount']) if ('scanCount' in job)
+                    else consts.SPLUNK_JOB_FIELD_NOT_FOUND_MESSAGE.format(field="Scan count"),
+                'event_count': int(job['eventCount']) if ('eventCount' in job)
+                    else consts.SPLUNK_JOB_FIELD_NOT_FOUND_MESSAGE.format(field="Event count"),
+                'result_count': int(job['resultCount']) if ('resultCount' in job)
+                    else consts.SPLUNK_JOB_FIELD_NOT_FOUND_MESSAGE.format(field="Result count")}
 
         return stats
 
@@ -566,7 +569,8 @@ class SplunkConnector(phantom.BaseConnector):
         ids = param.get(consts.SPLUNK_JSON_EVENT_IDS)
         status = param.get(consts.SPLUNK_JSON_STATUS)
 
-        ret_val, integer_status = self._validate_integer(action_result, param.get("integer_status"), consts.SPLUNK_INT_STATUS_KEY, allow_zero=True)
+        ret_val, integer_status = self._validate_integer(action_result, param.get("integer_status"),
+            consts.SPLUNK_INT_STATUS_KEY, allow_zero=True)
         if phantom.is_fail(ret_val):
             return action_result.get_status()
 
@@ -604,7 +608,8 @@ class SplunkConnector(phantom.BaseConnector):
             ret_val = self._run_query(search_query, action_result)
 
             if phantom.is_fail(ret_val):
-                return action_result.set_status(phantom.APP_ERROR, 'Error occurred while validating the provided event ID. Error: {0}'.format(action_result.get_message()))
+                return action_result.set_status(phantom.APP_ERROR,
+                    'Error occurred while validating the provided event ID. Error: {0}'.format(action_result.get_message()))
 
             if int(action_result.get_data_size()) <= 0:
                 return action_result.set_status(phantom.APP_ERROR, "Please provide a valid event ID")
@@ -622,8 +627,8 @@ class SplunkConnector(phantom.BaseConnector):
             request_body['newOwner'] = owner
         if integer_status is not None:
             if int(integer_status) not in list(self._splunk_status_dict.values()):
-                return action_result.set_status(phantom.APP_ERROR, "Please provide a valid value in 'integer_status' action parameter.\
-                    Valid values: {}".format((', '.join(map(str, list(self._splunk_status_dict.values())))) ))
+                return action_result.set_status(phantom.APP_ERROR, "Please provide a valid value in 'integer_status' action\
+                     parameter. Valid values: {}".format((', '.join(map(str, list(self._splunk_status_dict.values())))) ))
             request_body['status'] = str(integer_status)
         elif status:
             if status not in self._splunk_status_dict:
@@ -653,8 +658,8 @@ class SplunkConnector(phantom.BaseConnector):
         action_result.update_summary({consts.SPLUNK_JSON_UPDATED_EVENT_ID: ids})
         if wait_for_confirmation:
             return action_result.set_status(phantom.APP_SUCCESS)
-        return action_result.set_status(phantom.APP_SUCCESS,
-                    "Updated Event ID: {}. The event_id has not been verified. Please confirm that the provided event_id corresponds to an actual notable event".format(ids))
+        return action_result.set_status(phantom.APP_SUCCESS, "Updated Event ID: {}. The event_id has not been verified. \
+            Please confirm that the provided event_id corresponds to an actual notable event".format(ids))
 
     def _get_host_events(self, param):
         """Executes the query to get events pertaining to a host
@@ -670,13 +675,27 @@ class SplunkConnector(phantom.BaseConnector):
         ip_hostname = param[phantom.APP_JSON_IP_HOSTNAME]
 
         # Validate last_n_days
-        ret_val, last_n_days = self._validate_integer(action_result, param.get(consts.SPLUNK_JSON_LAST_N_DAYS), consts.SPLUNK_LAST_N_DAYS_KEY)
+        ret_val, last_n_days = self._validate_integer(action_result, param.get(consts.SPLUNK_JSON_LAST_N_DAYS),
+            consts.SPLUNK_LAST_N_DAYS_KEY)
         if phantom.is_fail(ret_val):
             return action_result.get_status()
 
         search_query = 'search host="{0}"{1}'.format(ip_hostname, ' earliest=-{0}d'.format(last_n_days) if last_n_days else '')
 
         return self._run_query(search_query, action_result)
+
+    def _get_fips_enabled(self):
+        try:
+            from phantom_common.install_info import is_fips_enabled
+        except ImportError:
+            return False
+
+        fips_enabled = is_fips_enabled()
+        if fips_enabled:
+            self.debug_print('FIPS is enabled')
+        else:
+            self.debug_print('FIPS is not enabled')
+        return fips_enabled
 
     def _on_poll(self, param):
 
@@ -715,7 +734,8 @@ class SplunkConnector(phantom.BaseConnector):
                 search_params['index_earliest'] = start_time
 
         if int(search_params['max_count']) <= 0:
-            self.debug_print("The value of 'container_count' parameter must be a positive integer. The value provided in the 'container_count' parameter is {}.\
+            self.debug_print("The value of 'container_count' parameter must be a positive integer. \
+            The value provided in the 'container_count' parameter is {}.\
             Therefore, 'container_count' parameter will be ignored".format(int(search_params['max_count'])))
             search_params.pop('max_count')
 
@@ -751,7 +771,6 @@ class SplunkConnector(phantom.BaseConnector):
             else:
                 for k, v in list(item.items()):
                     cef[consts.CIM_CEF_MAP.get(k, k)] = v
-            sha256 = hashlib.sha256()
 
             raw = self._handle_py_ver_compat_for_input_str(item.get("_raw", ""))
             if raw:
@@ -765,9 +784,14 @@ class SplunkConnector(phantom.BaseConnector):
             if self._python_version == 3:
                 input_str = UnicodeDammit(input_str).unicode_markup.encode('utf-8')
 
-            sha256.update(input_str)
+            fips_enabled = self._get_fips_enabled()
+            # if fips is not enabled, we should continue with our existing md5 usage for generating SDIs
+            # to not impact existing customers
+            if not fips_enabled:
+                sdi = hashlib.md5(input_str).hexdigest()
+            else:
+                sdi = hashlib.sha256(input_str).hexdigest()
 
-            sdi = sha256.hexdigest()
             severity = self._get_splunk_severity(item)
             spl_event_start = self._get_event_start(item.get("_time"))
 
@@ -827,12 +851,14 @@ class SplunkConnector(phantom.BaseConnector):
             return datetime_obj.astimezone(pytz.utc).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
         except ParserError as parse_err:
             error_code, error_msg = self._get_error_message_from_exception(parse_err)
-            error_text = consts.SPLUNK_EXCEPTION_ERROR_MESSAGE.format(msg="ParserError while parsing _time", error_code=error_code, error_msg=error_msg)
+            error_text = consts.SPLUNK_EXCEPTION_ERROR_MESSAGE.format(msg="ParserError while parsing _time",
+                error_code=error_code, error_msg=error_msg)
             self.save_progress(error_text)
             return None
         except Exception as e:
             error_code, error_msg = self._get_error_message_from_exception(e)
-            error_text = consts.SPLUNK_EXCEPTION_ERROR_MESSAGE.format(msg="Exception while parsing _time", error_code=error_code, error_msg=error_msg)
+            error_text = consts.SPLUNK_EXCEPTION_ERROR_MESSAGE.format(msg="Exception while parsing _time",
+                error_code=error_code, error_msg=error_msg)
             self.save_progress(error_text)
             return None
 
@@ -840,16 +866,15 @@ class SplunkConnector(phantom.BaseConnector):
         title = self._container_name_prefix
         if not title and not self._container_name_values:
             self._container_name_values.append('source')
-
         values = ''
         for i in range(len(self._container_name_values)):
-            if consts.CIM_CEF_MAP.get(self._container_name_values[i]) and item.get(consts.CIM_CEF_MAP.get(self._container_name_values[i])):
+            if consts.CIM_CEF_MAP.get(self._container_name_values[i]) and item.get(
+                    consts.CIM_CEF_MAP.get(self._container_name_values[i])):
                 value = item.get(consts.CIM_CEF_MAP.get(self._container_name_values[i]))
             elif item.get(self._container_name_values[i]):
                 value = item.get(self._container_name_values[i])
             else:
                 value = consts.CIM_CEF_MAP.get(self._container_name_values[i], self._container_name_values[i])
-
             values += "{}{}".format(value, '' if i == len(self._container_name_values) - 1 else ', ')
 
         if not title:
@@ -974,7 +999,7 @@ class SplunkConnector(phantom.BaseConnector):
             self.debug_print("ss_names", ss_names)
             ss_query = 'ss_name = {}'.format(' OR ss_name = '.join(ss_names))
 
-        query = 'search index=_audit action=alert_fired {0} | head {1} | fields ss_name sid trigger_time severity'.format(ss_query, count)
+        query = consts.SPLUNK_SEARCH_AUDIT_INDEX_QUERY.format(ss_query, count)
 
         self.debug_print("query", query)
 
@@ -1020,14 +1045,16 @@ class SplunkConnector(phantom.BaseConnector):
                     return action_result.get_status()
                 if attempt_count == RETRY_LIMIT - 1:
                     error_code, error_msg = self._get_error_message_from_exception(e)
-                    error_text = consts.SPLUNK_EXCEPTION_ERROR_MESSAGE.format(msg=consts.SPLUNK_ERR_INVALID_QUERY, error_code=error_code, error_msg=error_msg)
+                    error_text = consts.SPLUNK_EXCEPTION_ERROR_MESSAGE.format(msg=consts.SPLUNK_ERR_INVALID_QUERY,
+                        error_code=error_code, error_msg=error_msg)
                     return action_result.set_status(phantom.APP_ERROR, error_text, query=search_query)
             except Exception as e:
                 if (phantom.is_fail(self._connect(action_result))):
                     return action_result.get_status()
                 if attempt_count == RETRY_LIMIT - 1:
                     error_code, error_msg = self._get_error_message_from_exception(e)
-                    error_text = consts.SPLUNK_EXCEPTION_ERROR_MESSAGE.format(msg=consts.SPLUNK_ERR_CONNECTION_FAILED, error_code=error_code, error_msg=error_msg)
+                    error_text = consts.SPLUNK_EXCEPTION_ERROR_MESSAGE.format(msg=consts.SPLUNK_ERR_CONNECTION_FAILED,
+                        error_code=error_code, error_msg=error_msg)
                     return action_result.set_status(phantom.APP_ERROR, error_text)
 
         self.debug_print(consts.SPLUNK_PROG_CREATED_QUERY.format(query=search_query))
@@ -1048,7 +1075,8 @@ class SplunkConnector(phantom.BaseConnector):
             except Exception as e:
                 if attempt_count == RETRY_LIMIT - 1:
                     error_code, error_msg = self._get_error_message_from_exception(e)
-                    error_text = consts.SPLUNK_EXCEPTION_ERROR_MESSAGE.format(msg=consts.SPLUNK_ERR_UNABLE_TO_CREATE_JOB, error_code=error_code, error_msg=error_msg)
+                    error_text = consts.SPLUNK_EXCEPTION_ERROR_MESSAGE.format(msg=consts.SPLUNK_ERR_UNABLE_TO_CREATE_JOB,
+                        error_code=error_code, error_msg=error_msg)
                     return action_result.set_status(phantom.APP_ERROR, error_text)
 
         summary["sid"] = job.__dict__.get("sid")
@@ -1063,7 +1091,8 @@ class SplunkConnector(phantom.BaseConnector):
                 except Exception as e:
                     if attempt_count == RETRY_LIMIT - 1:
                         error_code, error_msg = self._get_error_message_from_exception(e)
-                        error_text = consts.SPLUNK_EXCEPTION_ERROR_MESSAGE.format(msg=consts.SPLUNK_ERR_CONNECTION_FAILED, error_code=error_code, error_msg=error_msg)
+                        error_text = consts.SPLUNK_EXCEPTION_ERROR_MESSAGE.format(msg=consts.SPLUNK_ERR_CONNECTION_FAILED,
+                            error_code=error_code, error_msg=error_msg)
                         return action_result.set_status(phantom.APP_ERROR, error_text)
 
             stats = self._get_stats(job)
@@ -1088,7 +1117,8 @@ class SplunkConnector(phantom.BaseConnector):
             results = splunk_results.ResultsReader(job.results(count=kwargs_create.get('max_count', 0)))
         except Exception as e:
             error_code, error_msg = self._get_error_message_from_exception(e)
-            error_text = consts.SPLUNK_EXCEPTION_ERROR_MESSAGE.format(msg="Error retrieving results", error_code=error_code, error_msg=error_msg)
+            error_text = consts.SPLUNK_EXCEPTION_ERROR_MESSAGE.format(msg="Error retrieving results",
+                error_code=error_code, error_msg=error_msg)
             return action_result.set_status(phantom.APP_ERROR, error_text)
 
         for result in results:
@@ -1138,8 +1168,9 @@ class SplunkConnector(phantom.BaseConnector):
 
 if __name__ == '__main__':
 
-    import pudb
     import argparse
+
+    import pudb
     import requests
 
     pudb.set_trace()
