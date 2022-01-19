@@ -392,7 +392,7 @@ class SplunkConnector(phantom.BaseConnector):
 
         self.send_progress("Running search_query: {}".format(consts.SPLUNK_RID_SID_NOTABLE_QUERY))
 
-        result = self._return_first_row_from_query(consts.SPLUNK_RID_SID_NOTABLE_QUERY, action_result)
+        result = self._return_first_row_from_query(consts.SPLUNK_RID_SID_NOTABLE_QUERY.format(sidandrid), action_result)
 
         if phantom.is_fail(result):
             return RetVal(action_result.get_status(), None)
