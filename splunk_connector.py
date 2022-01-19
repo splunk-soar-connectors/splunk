@@ -390,14 +390,9 @@ class SplunkConnector(phantom.BaseConnector):
     def _resolve_event_id(self, sidandrid, action_result, kwargs_create=dict()):
         """Query the splunk instance using the SID+RID of the notable to find the notable ID"""
 
-        search_query = r'search [| makeresults | eval myfield = "{}"'.format(sidandrid)
-        search_query += r' | rex field=myfield "^(?<sid>.*)\+(?<rid>\d*(\.\d+)?)"'
-        search_query += r' | eval search = "( (sid::" . sid . " OR orig_sid::" . sid . ")'
-        search_query += r' (rid::" . rid . " OR orig_rid::" . rid . ") )"'
-        search_query += r' | table search] `notable` | table event_id'
-        self.send_progress("Running search_query: {}".format(search_query))
+        self.send_progress("Running search_query: {}".format(consts.SPLUNK_RID_SID_NOTABLE_QUERY))
 
-        result = self._return_first_row_from_query(search_query, action_result)
+        result = self._return_first_row_from_query(consts.SPLUNK_RID_SID_NOTABLE_QUERY, action_result)
 
         if phantom.is_fail(result):
             return RetVal(action_result.get_status(), None)
@@ -696,10 +691,10 @@ class SplunkConnector(phantom.BaseConnector):
             return False
 
         fips_enabled = is_fips_enabled()
-        if (fips_enabled):
-            self.debug_print('fips is enabled')
+        if fips_enabled:
+            self.debug_print('FIPS is enabled')
         else:
-            self.debug_print('fips is not enabled')
+            self.debug_print('FIPS is not enabled')
         return fips_enabled
 
     def _on_poll(self, param):
@@ -792,7 +787,7 @@ class SplunkConnector(phantom.BaseConnector):
             fips_enabled = self._get_fips_enabled()
             # if fips is not enabled, we should continue with our existing md5 usage for generating SDIs
             # to not impact existing customers
-            if (not fips_enabled):
+            if not fips_enabled:
                 md5 = hashlib.md5()
                 md5.update(input_str)
                 sdi = md5.hexdigest()
@@ -1008,8 +1003,7 @@ class SplunkConnector(phantom.BaseConnector):
             self.debug_print("ss_names", ss_names)
             ss_query = 'ss_name = {}'.format(' OR ss_name = '.join(ss_names))
 
-        query = "search index=_audit action=alert_fired {0} | head {1} | \
-            fields ss_name sid trigger_time severity".format(ss_query, count)
+        query = consts.SPLUNK_SEARCH_AUDIT_INDEX_QUERY.format(ss_query, count)
 
         self.debug_print("query", query)
 
