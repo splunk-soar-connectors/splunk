@@ -1138,11 +1138,9 @@ class SplunkConnector(phantom.BaseConnector):
 
     def handle_action(self, param):
         """Function that handles all the actions
-
             Args:
                 The json containing config, action and supporting parameters
                 Handle to the ph_connector, should be used/passed when making ph_connector function calls
-
             Return:
                 status code
         """
