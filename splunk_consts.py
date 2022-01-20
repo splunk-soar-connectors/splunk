@@ -1,10 +1,19 @@
 # File: splunk_consts.py
+#
 # Copyright (c) 2014-2021 Splunk Inc.
 #
-# SPLUNK CONFIDENTIAL - Use or disclosure of this material in whole or in part
-# without a valid written license from Splunk Inc. is PROHIBITED.
-# --
-
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software distributed under
+# the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+# either express or implied. See the License for the specific language governing permissions
+# and limitations under the License.
+#
+#
 # Success/Error status and messages
 SPLUNK_ERR_INVALID_QUERY = "Query invalid '{query}'"
 SPLUNK_SUCC_QUERY_EXECUTED = "Executed splunk query"
@@ -19,13 +28,15 @@ SPLUNK_ERR_GET_EVENTS = "Error getting events for alert '{ss_name}' having sid '
 SPLUNK_ERR_NOT_ES = "This instance does not seem to be Splunk ES. This action cannot be run"
 SPLUNK_ERR_CONNECTION_NOT_PRE_ESTABLISHED = "Connection to splunk server not yet established"
 SPLUNK_ERR_INVALID_TIME_RANGE = "Invalid Time range specified, where the end time is less than start time"
-SPLUNK_ERR_NEED_PARAM = "One of comment, status, integer_status, urgency, or owner parameters needs to be supplied to run this action"
+SPLUNK_ERR_NEED_PARAM = "One of comment, status, integer_status, urgency, or owner parameters needs to be supplied to run this \
+    action"
 SPLUNK_ERR_INVALID_INTEGER = "Please provide a valid integer value in the {param} parameter"
 SPLUNK_ERR_NON_NEGATIVE_INTEGER = "Please provide a valid non-negative integer value in the {param} parameter"
 SPLUNK_ERR_INVALID_PARAM = "Please provide non-zero positive integer in {param}"
 SPLUNK_ERR_MSG_UNAVAILABLE = "Error message unavailable. Please check the asset configuration and|or action parameters."
 SPLUNK_ERR_CODE_UNAVAILABLE = "Error code unavailable"
-SPLUNK_UNICODE_DAMMIT_TYPE_ERROR_MESSAGE = "Error occurred while connecting to the Splunk server. Please check the asset configuration and|or the action parameters."
+SPLUNK_UNICODE_DAMMIT_TYPE_ERROR_MESSAGE = "Error occurred while connecting to the Splunk server. Please check the asset \
+    configuration and|or the action parameters."
 SPLUNK_EXCEPTION_ERROR_MESSAGE = "{msg}. Error Code: {error_code}. Error Message: {error_msg}"
 SPLUNK_JOB_FIELD_NOT_FOUND_MESSAGE = "{field} not found"
 
@@ -131,7 +142,8 @@ CIM_CEF_MAP = {
 }
 
 SPLUNK_INVALID_COMMAND = "Streaming/Transforming command operates on the events returned by some search.\
-    So for using (eval, stats, table) commands, user should provide 'search' in 'command' parameter and provide whole query in the 'query' parameter"
+    So for using (eval, stats, table) commands, user should provide 'search' in 'command' parameter \
+    and provide whole query in the 'query' parameter"
 
 # Validation keys
 SPLUNK_INT_STATUS_KEY = "'integer_status' action"
@@ -140,3 +152,12 @@ SPLUNK_PORT_KEY = "'port' configuration"
 SPLUNK_MAX_CONTAINER_KEY = "'max_container' configuration"
 SPLUNK_CONTAINER_UPDATE_STATE_KEY = "'Container count to update the state file' configuration"
 SPLUNK_LAST_N_DAYS_KEY = "'last_n_days' action"
+
+# Queries
+SPLUNK_RID_SID_NOTABLE_QUERY = r'search [| makeresults | eval myfield = "{}"'
+SPLUNK_RID_SID_NOTABLE_QUERY += r' | rex field=myfield "^(?<sid>.*)\+(?<rid>\d*(\.\d+)?)"'
+SPLUNK_RID_SID_NOTABLE_QUERY += r' | eval search = "( (sid::" . sid . " OR orig_sid::" . sid . ")'
+SPLUNK_RID_SID_NOTABLE_QUERY += r' (rid::" . rid . " OR orig_rid::" . rid . ") )"'
+SPLUNK_RID_SID_NOTABLE_QUERY += r' | table search] `notable` | table event_id'
+SPLUNK_SEARCH_AUDIT_INDEX_QUERY = "search index=_audit action=alert_fired {0} | head {1} | \
+            fields ss_name sid trigger_time severity"
