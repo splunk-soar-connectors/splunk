@@ -1233,4 +1233,3 @@ if __name__ == '__main__':
         print(json.dumps(json.loads(ret_val), indent=4))
 
     exit(0)
-
