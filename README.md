@@ -2,7 +2,7 @@
 # Splunk
 
 Publisher: Splunk  
-Connector Version: 2\.6\.2  
+Connector Version: 2\.6\.6  
 Product Vendor: Splunk Inc\.  
 Product Name: Splunk Enterprise  
 Product Version Supported (regex): "\.\*"  
@@ -10,7 +10,7 @@ Minimum Product Version: 5\.0\.0
 
 This app integrates with Splunk to update data on the device, in addition to investigate and ingestion actions
 
-[comment]: # " File: readme.md"
+[comment]: # " File: README.md"
 [comment]: # "  Copyright (c) 2014-2021 Splunk Inc."
 [comment]: # ""
 [comment]: # "Licensed under the Apache License, Version 2.0 (the 'License');"
