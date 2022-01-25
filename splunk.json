@@ -186,7 +186,7 @@
             "order": 17,
             "default": false
         },
-        "sleeptime_in_requests":{
+        "sleeptime_in_requests": {
             "description": "The time to wait for next REST call",
             "data_type": "numeric",
             "order": 18,
