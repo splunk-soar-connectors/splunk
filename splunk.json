@@ -5,7 +5,7 @@
     "publisher": "Splunk",
     "type": "siem",
     "main_module": "splunk_connector.py",
-    "app_version": "2.6.6",
+    "app_version": "2.7.0",
     "utctime_updated": "2022-01-20T21:07:16.000000Z",
     "package_name": "phantom_splunk",
     "product_name": "Splunk Enterprise",
@@ -20,7 +20,7 @@
     ],
     "logo": "logo_splunk.svg",
     "logo_dark": "logo_splunk_dark.svg",
-    "license": "Copyright (c) 2014-2021 Splunk Inc.",
+    "license": "Copyright (c) 2014-2022 Splunk Inc.",
     "pip_dependencies": {
         "wheel": [
             {
@@ -185,6 +185,12 @@
             "data_type": "boolean",
             "order": 17,
             "default": false
+        },
+        "sleeptime_in_requests":{
+            "description": "The time to wait for next REST call",
+            "data_type": "numeric",
+            "order": 18,
+            "default": 1
         }
     },
     "actions": [

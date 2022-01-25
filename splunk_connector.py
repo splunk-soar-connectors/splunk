@@ -1,6 +1,6 @@
 # File: splunk_connector.py
 #
-# Copyright (c) 2014-2021 Splunk Inc.
+# Copyright (c) 2014-2022 Splunk Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,7 +28,8 @@ from io import BytesIO
 from urllib.error import HTTPError as UrllibHTTPError  # noqa
 from urllib.error import URLError  # noqa
 from urllib.parse import urlencode, urlparse  # noqa
-from urllib.request import ProxyHandler, Request, build_opener, install_opener, urlopen  # noqa
+from urllib.request import (ProxyHandler, Request, build_opener,  # noqa
+                            install_opener, urlopen)
 
 import phantom.app as phantom
 import pytz
@@ -75,6 +76,7 @@ class SplunkConnector(phantom.BaseConnector):
         self._splunk_status_dict = None
         self.container_update_state = None
         self.remove_empty_cef = None
+        self.sleeptime_in_requests = None
 
     def _get_error_message_from_exception(self, e):
         """ This method is used to get appropriate error message from the exception.
@@ -173,6 +175,12 @@ class SplunkConnector(phantom.BaseConnector):
         # Validate container_update_state
         ret_val, self.container_update_state = self._validate_integer(self, config.get('container_update_state', 100),
             consts.SPLUNK_CONTAINER_UPDATE_STATE_KEY)
+        if phantom.is_fail(ret_val):
+            return self.get_status()
+
+        # Validate sleeptime_in_requests
+        ret_val, self.sleeptime_in_requests = self._validate_integer(self, config.get('sleeptime_in_requests', 1),
+                                                                    consts.SPLUNK_SLEEPTIME_IN_REQUESTS_KEY)
         if phantom.is_fail(ret_val):
             return self.get_status()
 
@@ -456,6 +464,7 @@ class SplunkConnector(phantom.BaseConnector):
                 for attempt_count in range(0, RETRY_LIMIT):
                     try:
                         while not job.is_ready():
+                            time.sleep(self.sleeptime_in_requests)
                             pass
                         job.refresh()
                         break
@@ -473,8 +482,7 @@ class SplunkConnector(phantom.BaseConnector):
                 self.send_progress(status)
                 if stats['is_done'] == '1':
                     break
-                time.sleep(2)
-
+                time.sleep(self.sleeptime_in_requests)
             self.send_progress("Parsing results...")
 
             try:
@@ -1085,6 +1093,7 @@ class SplunkConnector(phantom.BaseConnector):
             for attempt_count in range(0, RETRY_LIMIT):
                 try:
                     while not job.is_ready():
+                        time.sleep(self.sleeptime_in_requests)
                         pass
                     job.refresh()
                     break
@@ -1107,7 +1116,7 @@ class SplunkConnector(phantom.BaseConnector):
             if stats['is_done'] == '1':
                 result_count = stats['result_count']
                 break
-            time.sleep(2)
+            time.sleep(self.sleeptime_in_requests)
 
         self.send_progress("Parsing results...")
         result_index = 0
@@ -1178,12 +1187,14 @@ if __name__ == '__main__':
     argparser.add_argument('input_test_json', help='Input Test JSON file')
     argparser.add_argument('-u', '--username', help='username', required=False)
     argparser.add_argument('-p', '--password', help='password', required=False)
+    argparser.add_argument('-v', '--verify', action='store_true', help='verify', required=False, default=False)
 
     args = argparser.parse_args()
     session_id = None
 
     username = args.username
     password = args.password
+    verify = args.verify
 
     if (username is not None and password is None):
 
@@ -1195,7 +1206,7 @@ if __name__ == '__main__':
         login_url = BaseConnector._get_phantom_base_url() + "login"
         try:
             print("Accessing the Login page")
-            r = requests.get(login_url, verify=False)
+            r = requests.get(login_url, verify=verify)   # nosemgrep: python.requests.best-practice.use-timeout.use-timeout
             csrftoken = r.cookies['csrftoken']
 
             data = dict()
@@ -1208,15 +1219,16 @@ if __name__ == '__main__':
             headers['Referer'] = login_url
 
             print("Logging into Platform to get the session id")
-            r2 = requests.post(login_url, verify=False, data=data, headers=headers)
+            r2 = requests.post(login_url,    # nosemgrep: python.requests.best-practice.use-timeout.use-timeout
+                                verify=verify, data=data, headers=headers)
             session_id = r2.cookies['sessionid']
         except Exception as e:
             print("Unable to get session id from the platfrom. Error: " + str(e))
-            exit(1)
+            sys.exit(1)
 
     if (len(sys.argv) < 2):
         print("No test json specified as input")
-        exit(0)
+        sys.exit(0)
 
     with open(sys.argv[1]) as f:
         in_json = f.read()
@@ -1232,4 +1244,4 @@ if __name__ == '__main__':
         ret_val = connector._handle_action(json.dumps(in_json), None)
         print(json.dumps(json.loads(ret_val), indent=4))
 
-    exit(0)
+    sys.exit(0)
