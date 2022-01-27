@@ -28,8 +28,11 @@ from io import BytesIO
 from urllib.error import HTTPError as UrllibHTTPError  # noqa
 from urllib.error import URLError  # noqa
 from urllib.parse import urlencode, urlparse  # noqa
-from urllib.request import (ProxyHandler, Request, build_opener,  # noqa
-                            install_opener, urlopen)
+from urllib.request import ProxyHandler  # noqa
+from urllib.request import Request  # noqa
+from urllib.request import build_opener  # noqa
+from urllib.request import install_opener  # noqa
+from urllib.request import urlopen  # noqa
 
 import phantom.app as phantom
 import pytz
