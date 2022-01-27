@@ -107,6 +107,14 @@ and limitations under the License.
         </ul>
       </li>
       <li>
+        sleeptime_in_requests:
+        <ul>
+          <li>The time to wait for next REST call</li>
+          <li>It allows the user to add sleep time between the REST calls while performing the "run_query"
+            and "update_event" action.</li>
+        </ul>
+      </li>
+      <li>
         on_poll_display:
         <ul>
           <li>Fields to save with On Poll</li>
@@ -306,6 +314,27 @@ and limitations under the License.
         <li>Ellipsis</li>
       </ul>
     There can exist more such characters apart from the ones listed above.
+    </p>
+    <h2>Port Information</h2>
+    <p>
+        The app uses HTTP/ HTTPS protocol for communicating with the Splunk server. Below are the default ports used by Splunk SOAR.
+        <table>
+            <tr class=plain>
+                <th>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SERVICE NAME</th>
+                <th>TRANSPORT PROTOCOL</th>
+                <th>PORT</th>
+            </tr>
+            <tr>
+                <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;http</td>
+                <td>tcp</td>
+                <td>80</td>
+            </tr>
+            <tr>
+                <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;https</td>
+                <td>tcp</td>
+                <td>443</td>
+            </tr>
+        </table>
     </p>
   </body>
 </html>
