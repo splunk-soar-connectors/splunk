@@ -124,8 +124,8 @@ Please check the permissions for the state file as mentioned below.
         removed.
 -   sleeptime_in_requests:
     -   The time to wait for next REST call
-    -   It allows the user to add sleep time between the REST calls while performing the "run_query"
-        and "update_event" action.
+    -   It allows the user to add sleep time between the REST calls while performing the "run query", 
+        "update event", "get host events" and "on poll" action.
 -   on_poll_display:
     -   Fields to save with On Poll
     -   Users can select the fields from the events which the user wants to ingest in the artifact
