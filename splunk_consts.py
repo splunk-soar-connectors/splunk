@@ -162,3 +162,5 @@ SPLUNK_RID_SID_NOTABLE_QUERY += r' (rid::" . rid . " OR orig_rid::" . rid . ") )
 SPLUNK_RID_SID_NOTABLE_QUERY += r' | table search] `notable` | table event_id'
 SPLUNK_SEARCH_AUDIT_INDEX_QUERY = "search index=_audit action=alert_fired {0} | head {1} | \
             fields ss_name sid trigger_time severity"
+
+SPLUNK_DEFAULT_REQUEST_TIMEOUT = 60  # in seconds
