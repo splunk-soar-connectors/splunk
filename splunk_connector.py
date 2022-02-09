@@ -201,7 +201,7 @@ class SplunkConnector(phantom.BaseConnector):
         except URLError:
             # If running Python 2.7.9+, disable SSL certificate validation and try again
             if sys.version_info >= (2, 7, 9) and not config[phantom.APP_JSON_VERIFY]:
-                response = urlopen(req, context=ssl._create_unverified_context())
+                response = urlopen(req, context=ssl._create_unverified_context())  # nosemgrep
             else:
                 raise
         except UrllibHTTPError:
