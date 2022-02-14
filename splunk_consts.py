@@ -152,7 +152,7 @@ SPLUNK_PORT_KEY = "'port' configuration"
 SPLUNK_MAX_CONTAINER_KEY = "'max_container' configuration"
 SPLUNK_CONTAINER_UPDATE_STATE_KEY = "'Container count to update the state file' configuration"
 SPLUNK_LAST_N_DAYS_KEY = "'last_n_days' action"
-SPLUNK_SLEEPTIME_IN_REQUESTS_KEY = "'sleeptime_in_requests' configuration"
+SPLUNK_SLEEPTIME_IN_REQUESTS_KEY = "'The time to wait for next REST call(in seconds)' configuration"
 
 # Queries
 SPLUNK_RID_SID_NOTABLE_QUERY = r'search [| makeresults | eval myfield = "{}"'
