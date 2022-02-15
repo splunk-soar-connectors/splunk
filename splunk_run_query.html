@@ -10,7 +10,7 @@
 {% block widget_content %} <!-- Main Start Block -->
 
 <!-- File: splunk_run_query.html
-  Copyright (c) 2014-2021 Splunk Inc.
+  Copyright (c) 2014-2022 Splunk Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -149,7 +149,7 @@ and limitations under the License.
                         {% endfor %}
                     </tr>
                 </thead>
-                <tbody>    
+                <tbody>
                     {% for item in result.processed_data %}
                         <tr>
                             {% for header in result.headers %}
@@ -170,7 +170,7 @@ and limitations under the License.
                                     {% endifequal %}
                                 {% endfor %}
                             {% endfor %}
-                        </tr>  
+                        </tr>
                     {% endfor %}
                 </tbody>
             </table>

@@ -1,6 +1,6 @@
 # File: splunk_connector.py
 #
-# Copyright (c) 2014-2021 Splunk Inc.
+# Copyright (c) 2014-2022 Splunk Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import os
 import re
 import ssl
 import sys
+import tempfile
 import time
 from builtins import map  # noqa
 from builtins import range  # noqa
@@ -42,6 +43,7 @@ from dateutil.parser import parse as dateutil_parse
 from future.standard_library import install_aliases
 from past.utils import old_div  # noqa
 from phantom.base_connector import BaseConnector
+from phantom.vault import Vault
 from pytz import timezone
 from splunklib.binding import HTTPError
 
@@ -199,7 +201,7 @@ class SplunkConnector(phantom.BaseConnector):
         except URLError:
             # If running Python 2.7.9+, disable SSL certificate validation and try again
             if sys.version_info >= (2, 7, 9) and not config[phantom.APP_JSON_VERIFY]:
-                response = urlopen(req, context=ssl._create_unverified_context())
+                response = urlopen(req, context=ssl._create_unverified_context())  # nosemgrep
             else:
                 raise
         except UrllibHTTPError:
@@ -315,7 +317,7 @@ class SplunkConnector(phantom.BaseConnector):
         self.debug_print('Making REST call to {0}'.format(url))
 
         try:
-            response = method(url, data=data, params=params,
+            response = method(url, data=data, params=params,  # nosemgrep
                     auth=(config.get(phantom.APP_JSON_USERNAME), config.get(phantom.APP_JSON_PASSWORD)),
                     verify=config[phantom.APP_JSON_VERIFY])
         except Exception as e:
@@ -918,6 +920,7 @@ class SplunkConnector(phantom.BaseConnector):
         search_command = param.get(consts.SPLUNK_JSON_COMMAND)
         search_string = param.get(consts.SPLUNK_JSON_QUERY)
         po = param.get(consts.SPLUNK_JSON_PARSE_ONLY, False)
+        attach_result = param.get(consts.SPLUNK_JSON_ATTACH_RESULT, False)
 
         try:
             if not search_command:
@@ -929,7 +932,7 @@ class SplunkConnector(phantom.BaseConnector):
         except:
             return action_result.set_status(phantom.APP_ERROR, "Error occurred while parsing the search query")
 
-        return self._run_query(search_query, action_result, parse_only=po)
+        return self._run_query(search_query, action_result, attach_result, parse_only=po)
 
     def _get_tz_str_from_epoch(self, time_format_str, epoch_milli):
 
@@ -1028,7 +1031,7 @@ class SplunkConnector(phantom.BaseConnector):
         self.save_progress(consts.SPLUNK_SUCC_CONNECTIVITY_TEST)
         return action_result.set_status(phantom.APP_SUCCESS, consts.SPLUNK_SUCC_CONNECTIVITY_TEST)
 
-    def _run_query(self, search_query, action_result, kwargs_create=dict(), parse_only=True):
+    def _run_query(self, search_query, action_result, attach_result=False, kwargs_create=dict(), parse_only=True):
         """Function that executes the query on splunk"""
 
         RETRY_LIMIT = self.retry_count
@@ -1121,11 +1124,14 @@ class SplunkConnector(phantom.BaseConnector):
                 error_code=error_code, error_msg=error_msg)
             return action_result.set_status(phantom.APP_ERROR, error_text)
 
+        data = []
+
         for result in results:
 
             if isinstance(result, dict):
 
                 action_result.add_data(result)
+                data.append(result)
 
             result_index += 1
 
@@ -1133,8 +1139,48 @@ class SplunkConnector(phantom.BaseConnector):
                 status = "Finished parsing {0:.1%} of results".format((float(result_index) / float(result_count)))
                 self.send_progress(status)
 
+        if attach_result:
+            self.add_json_result(action_result, data)
+
         summary[consts.SPLUNK_JSON_TOTAL_EVENTS] = result_index
         return action_result.set_status(phantom.APP_SUCCESS)
+
+    def add_json_result(self, action_result, data):
+
+        tmp_dir = tempfile.mkdtemp(prefix='splunk_result_attach')
+        file_path = "{}/splunk_run_query_result.json".format(tmp_dir)
+        vault_attach_dict = {}
+
+        vault_attach_dict[phantom.APP_JSON_ACTION_NAME] = self.get_action_name()
+        vault_attach_dict[phantom.APP_JSON_APP_RUN_ID] = self.get_app_run_id()
+
+        try:
+            with open(file_path, 'w') as f:
+                json.dump(data, f)
+
+        except Exception as e:
+            error_code, error_msg = self._get_error_message_from_exception(e)
+            msg = "Error occurred while adding file to Vault. Error Details: {}".format(error_msg)
+            self.debug_print(msg)
+            return phantom.APP_ERROR
+
+        container_id = self.get_container_id()
+
+        vault_ret = {}
+
+        try:
+            vault_ret = Vault.add_attachment(file_path, container_id, 'splunk_run_query_result.json', vault_attach_dict)
+
+        except Exception as e:
+            error_code, error_msg = self._get_error_message_from_exception(e)
+            err = "Error Code: {0}. Error Message: {1}".format(error_code, error_msg)
+            self.debug_print(phantom.APP_ERR_FILE_ADD_TO_VAULT.format(err))
+            return action_result.set_status(phantom.APP_ERROR, phantom.APP_ERR_FILE_ADD_TO_VAULT.format(err))
+
+        if (not vault_ret.get('succeeded')):
+            err = "Failed to add file to Vault: {0}".format(json.dumps(vault_ret))
+            self.debug_print(err)
+            return action_result.set_status(phantom.APP_ERROR, err)
 
     def handle_action(self, param):
         """Function that handles all the actions
