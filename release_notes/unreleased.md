@@ -1,2 +1,1 @@
 **Unreleased**
-* Added a new 'attach_result' parameter in 'run query' action [PAPP-8315]
