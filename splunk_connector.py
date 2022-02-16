@@ -189,7 +189,8 @@ class SplunkConnector(phantom.BaseConnector):
 
         # Validte if user has entered more than 120 seconds
         if self.sleeptime_in_requests >= 120:
-            return self.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_INVALID_VALUE_INTEGER.format(param=consts.SPLUNK_SLEEPTIME_IN_REQUESTS_KEY))
+            return self.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_INVALID_VALUE_INTEGER.format(
+                param=consts.SPLUNK_SLEEPTIME_IN_REQUESTS_KEY))
 
         self.remove_empty_cef = config.get("remove_empty_cef", False)
 
