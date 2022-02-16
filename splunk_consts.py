@@ -71,6 +71,7 @@ SPLUNK_JSON_SOURCE_TYPE = "source_type"
 SPLUNK_JSON_LAST_N_DAYS = "last_n_days"
 SPLUNK_JSON_TOTAL_EVENTS = "total_events"
 SPLUNK_JSON_UPDATED_EVENT_ID = "updated_event_id"
+SPLUNK_JSON_ATTACH_RESULT = "attach_result"
 
 # Default values
 SPLUNK_DEFAULT_EVENT_COUNT = 10
