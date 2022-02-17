@@ -187,7 +187,7 @@
             "default": false
         },
         "sleeptime_in_requests": {
-            "description": "The time to wait for next REST call(in seconds)",
+            "description": "The time to wait for next REST call(max 120 seconds)",
             "data_type": "numeric",
             "order": 18,
             "default": 1
