@@ -1,5 +1,5 @@
 Splunk SOAR Splunk
-Copyright (c) 2014-2021 Splunk Inc.
+Copyright (c) 2014-2022 Splunk Inc.
 
 Third-party Software Attributions:
 
@@ -49,6 +49,6 @@ Copyright 2003-2004 Lawrence E
 Copyright 2006 Bob Ippolito
 
 Library: splunk-sdk
-Version: 1.6.11
+Version: 1.6.18
 License: Apache 2.0
-Unknown copyright
+Copyright 2011-2015 Copyright

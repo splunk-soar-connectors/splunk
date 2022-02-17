@@ -2,7 +2,7 @@
 # Splunk
 
 Publisher: Splunk  
-Connector Version: 2\.6\.7  
+Connector Version: 2\.7\.0  
 Product Vendor: Splunk Inc\.  
 Product Name: Splunk Enterprise  
 Product Version Supported (regex): "\.\*"  
@@ -11,7 +11,7 @@ Minimum Product Version: 5\.1\.0
 This app integrates with Splunk to update data on the device, in addition to investigate and ingestion actions
 
 [comment]: # " File: README.md"
-[comment]: # "  Copyright (c) 2014-2021 Splunk Inc."
+[comment]: # "  Copyright (c) 2014-2022 Splunk Inc."
 [comment]: # ""
 [comment]: # "Licensed under the Apache License, Version 2.0 (the 'License');"
 [comment]: # "you may not use this file except in compliance with the License."
@@ -413,11 +413,13 @@ PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 **query** |  required  | Query to run \(in Splunk Processing Language\) | string |  `splunk query` 
 **display** |  optional  | Display fields \(comma\-separated\) | string | 
 **parse\_only** |  optional  | Parse only | boolean | 
+**attach\_result** |  optional  | Attach result to the vault | boolean | 
 
 #### Action Output
 DATA PATH | TYPE | CONTAINS
 --------- | ---- | --------
 action\_result\.status | string | 
+action\_result\.parameter\.attach\_result | boolean | 
 action\_result\.parameter\.command | string | 
 action\_result\.parameter\.display | string | 
 action\_result\.parameter\.parse\_only | boolean | 
@@ -433,6 +435,7 @@ action\_result\.data\.\*\.\_sourcetype | string |
 action\_result\.data\.\*\.\_subsecond | string | 
 action\_result\.data\.\*\.\_time | string | 
 action\_result\.data\.\*\.a | string | 
+action\_result\.data\.\*\.content\.app | string | 
 action\_result\.data\.\*\.content\.host | string | 
 action\_result\.data\.\*\.content\.info | string | 
 action\_result\.data\.\*\.content\.search | string | 
@@ -440,8 +443,11 @@ action\_result\.data\.\*\.content\.search\_type | string |
 action\_result\.data\.\*\.content\.sid | string | 
 action\_result\.data\.\*\.content\.source | string | 
 action\_result\.data\.\*\.content\.sourcetype | string | 
+action\_result\.data\.\*\.content\.uri | string | 
+action\_result\.data\.\*\.content\.view | string | 
 action\_result\.data\.\*\.count | string | 
 action\_result\.data\.\*\.count\(host\) | string | 
+action\_result\.data\.\*\.event | string | 
 action\_result\.data\.\*\.host | string |  `host name` 
 action\_result\.data\.\*\.index | string | 
 action\_result\.data\.\*\.is\_Acceleration\_Jobs | string | 
@@ -459,6 +465,7 @@ action\_result\.data\.\*\.is\_not\_Subsearch\_Jobs | string |
 action\_result\.data\.\*\.linecount | string | 
 action\_result\.data\.\*\.source | string | 
 action\_result\.data\.\*\.sourcetype | string | 
+action\_result\.data\.\*\.spent | string | 
 action\_result\.data\.\*\.splunk\_server | string |  `host name` 
 action\_result\.data\.\*\.user | string | 
 action\_result\.data\.\*\.values\(source\) | string | 
