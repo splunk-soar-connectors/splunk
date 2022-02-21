@@ -1,2 +1,2 @@
 **Unreleased**
-* Added sleeptime between REST calls to increase the performance [PAPP-23575]
+* Added sleeptime between REST calls to improve the performance [PAPP-23575]
