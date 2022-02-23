@@ -5,13 +5,13 @@
     "publisher": "Splunk",
     "type": "siem",
     "main_module": "splunk_connector.py",
-    "app_version": "2.7.0",
+    "app_version": "2.7.0-fdse.1",
     "utctime_updated": "2022-01-20T21:07:16.000000Z",
     "package_name": "phantom_splunk",
     "product_name": "Splunk Enterprise",
     "product_vendor": "Splunk Inc.",
     "product_version_regex": ".*",
-    "min_phantom_version": "5.1.0",
+    "min_phantom_version": "5.0.0",
     "fips_compliant": true,
     "python_version": "3",
     "latest_tested_versions": [
@@ -440,6 +440,20 @@
                     "data_type": "boolean",
                     "order": 4,
                     "default": false
+                },
+                "ph": {
+                    "data_type": "ph",
+                    "order": 5
+                },
+                "start_time": {
+                    "description": "Earliest time modifier",
+                    "data_type": "string",
+                    "order": 5
+                },
+                "end_time": {
+                    "description": "Latest time modifier",
+                    "data_type": "string",
+                    "order": 6
                 }
             },
             "render": {

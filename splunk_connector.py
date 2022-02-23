@@ -922,6 +922,17 @@ class SplunkConnector(phantom.BaseConnector):
         po = param.get(consts.SPLUNK_JSON_PARSE_ONLY, False)
         attach_result = param.get(consts.SPLUNK_JSON_ATTACH_RESULT, False)
 
+        start_time = phantom.get_value(param, consts.SPLUNK_JSON_START_TIME)
+        end_time = phantom.get_value(param, consts.SPLUNK_JSON_END_TIME)
+
+        kwargs = {
+        }
+
+        if start_time:
+            kwargs["earliest_time"] = start_time
+        if end_time:
+            kwargs["latest_time"] = end_time
+
         try:
             if not search_command:
                 if (search_string[0] != '|') and (search_string.find('search', 0) != 0):
@@ -932,7 +943,7 @@ class SplunkConnector(phantom.BaseConnector):
         except:
             return action_result.set_status(phantom.APP_ERROR, "Error occurred while parsing the search query")
 
-        return self._run_query(search_query, action_result, attach_result, parse_only=po)
+        return self._run_query(search_query, action_result, attach_result, kwargs_create=kwargs, parse_only=po)
 
     def _get_tz_str_from_epoch(self, time_format_str, epoch_milli):
 
