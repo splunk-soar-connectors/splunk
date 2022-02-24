@@ -448,12 +448,12 @@
                 "start_time": {
                     "description": "Earliest time modifier",
                     "data_type": "string",
-                    "order": 5
+                    "order": 6
                 },
                 "end_time": {
                     "description": "Latest time modifier",
                     "data_type": "string",
-                    "order": 6
+                    "order": 7
                 }
             },
             "render": {
