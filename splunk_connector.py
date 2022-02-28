@@ -64,7 +64,7 @@ class RetVal(tuple):
 class SplunkConnector(phantom.BaseConnector):
 
     ACTION_ID_POST_DATA = "post_data"
-    ACTION_ID_RUN_QUERY = "execute_search"
+    ACTION_ID_RUN_QUERY = "run_query"
     ACTION_ID_UPDATE_EVENT = "update_event"
     ACTION_ID_GET_HOST_EVENTS = "get_host_events"
 
@@ -683,6 +683,7 @@ class SplunkConnector(phantom.BaseConnector):
         """Executes the query to get events pertaining to a host
             Gets the events for a host for the last 'N' number of days
         """
+        self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
 
         action_result = self.add_action_result(phantom.ActionResult(dict(param)))
 
@@ -700,6 +701,7 @@ class SplunkConnector(phantom.BaseConnector):
 
         search_query = 'search host="{0}"{1}'.format(ip_hostname, ' earliest=-{0}d'.format(last_n_days) if last_n_days else '')
 
+        self.debug_print("search_query: {0}".format(search_query))
         return self._run_query(search_query, action_result)
 
     def _get_fips_enabled(self):
