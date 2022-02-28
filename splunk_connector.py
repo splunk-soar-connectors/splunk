@@ -929,6 +929,7 @@ class SplunkConnector(phantom.BaseConnector):
 
     def _handle_run_query(self, param):
 
+        self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
         action_result = self.add_action_result(phantom.ActionResult(dict(param)))
 
         # Connect
@@ -950,6 +951,7 @@ class SplunkConnector(phantom.BaseConnector):
         except:
             return action_result.set_status(phantom.APP_ERROR, "Error occurred while parsing the search query")
 
+        self.debug_print("search_query: {0}".format(search_query))
         return self._run_query(search_query, action_result, attach_result, parse_only=po)
 
     def _get_tz_str_from_epoch(self, time_format_str, epoch_milli):
