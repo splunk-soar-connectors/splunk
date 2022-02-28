@@ -429,16 +429,22 @@
                     "data_type": "string",
                     "order": 2
                 },
-                "parse_only": {
-                    "description": "Parse only",
-                    "data_type": "boolean",
+                "range": {
+                    "description": "Events range to return (min_offset-max_offset)",
+                    "data_type": "string",
                     "order": 3,
-                    "default": false
+                    "default": "0-50000"
                 },
                 "attach_result": {
                     "description": "Attach result to the vault",
                     "data_type": "boolean",
                     "order": 4,
+                    "default": false
+                },
+                "parse_only": {
+                    "description": "Parse only",
+                    "data_type": "boolean",
+                    "order": 5,
                     "default": false
                 }
             },

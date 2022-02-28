@@ -77,6 +77,9 @@ class SplunkConnector(phantom.BaseConnector):
         self._splunk_status_dict = None
         self.container_update_state = None
         self.remove_empty_cef = None
+        self.sleeptime_in_requests = None
+        self.offset = 50000
+        self.count = 50000
 
     def _get_error_message_from_exception(self, e):
         """ This method is used to get appropriate error message from the exception.
@@ -280,6 +283,25 @@ class SplunkConnector(phantom.BaseConnector):
 
         return phantom.APP_SUCCESS, parameter
 
+    def _validate_range(self, results_range, action_result):
+
+        try:
+            mini, maxi = (int(x) for x in results_range.split('-'))
+        except Exception:
+            return action_result.set_status(phantom.APP_ERROR, "Unable to parse the range. Please specify the range as min_offset-max_offset")
+
+        if mini < 0 or maxi < 0:
+            return action_result.set_status(phantom.APP_ERROR, "Invalid min or max offset value specified in range")
+
+        if mini > maxi:
+            return action_result.set_status(phantom.APP_ERROR, "Invalid range value, min_offset greater than max_offset")
+
+        if maxi > consts.SPLUNK_MAX_END_OFFSET_VAL:
+            return action_result.set_status(
+                phantom.APP_ERROR, "Invalid range value. The max_offset value cannot be greater than {0}".format(consts.SPLUNK_MAX_END_OFFSET_VAL))
+
+        return phantom.APP_SUCCESS
+
     def _handle_py_ver_compat_for_input_str(self, input_str, always_encode=False):
         """
         This method returns the encoded|original string based on the Python version.
@@ -441,7 +463,6 @@ class SplunkConnector(phantom.BaseConnector):
         self.debug_print("kwargs_create", kwargs_create)
 
         # Create the job
-
         for search_attempt_count in range(0, RETRY_LIMIT):
             for attempt_count in range(0, RETRY_LIMIT):
                 try:
@@ -475,7 +496,7 @@ class SplunkConnector(phantom.BaseConnector):
                 self.send_progress(status)
                 if stats['is_done'] == '1':
                     break
-                time.sleep(2)
+                time.sleep(self.sleeptime_in_requests)
 
             self.send_progress("Parsing results...")
 
@@ -490,6 +511,7 @@ class SplunkConnector(phantom.BaseConnector):
             for result in results:
                 if isinstance(result, dict):
                     return result
+
             time.sleep(20)
 
         return action_result.set_status(phantom.APP_ERROR)
@@ -921,6 +943,11 @@ class SplunkConnector(phantom.BaseConnector):
         search_string = param.get(consts.SPLUNK_JSON_QUERY)
         po = param.get(consts.SPLUNK_JSON_PARSE_ONLY, False)
         attach_result = param.get(consts.SPLUNK_JSON_ATTACH_RESULT, False)
+        results_range = param.get(consts.SPLUNK_JSON_RANGE, "0-50000")
+
+        ret_val = self._validate_range(results_range, action_result)
+        if phantom.is_fail(ret_val):
+            return action_result.get_status()
 
         try:
             if not search_command:
@@ -932,7 +959,7 @@ class SplunkConnector(phantom.BaseConnector):
         except:
             return action_result.set_status(phantom.APP_ERROR, "Error occurred while parsing the search query")
 
-        return self._run_query(search_query, action_result, attach_result, parse_only=po)
+        return self._run_query(search_query, action_result, results_range, attach_result, parse_only=po)
 
     def _get_tz_str_from_epoch(self, time_format_str, epoch_milli):
 
@@ -1031,7 +1058,7 @@ class SplunkConnector(phantom.BaseConnector):
         self.save_progress(consts.SPLUNK_SUCC_CONNECTIVITY_TEST)
         return action_result.set_status(phantom.APP_SUCCESS, consts.SPLUNK_SUCC_CONNECTIVITY_TEST)
 
-    def _run_query(self, search_query, action_result, attach_result=False, kwargs_create=dict(), parse_only=True):
+    def _run_query(self, search_query, action_result, results_range=consts.SPLUNK_DEFAULT_RANGE_VALUE, attach_result=False, kwargs_create=dict(), parse_only=True):
         """Function that executes the query on splunk"""
 
         RETRY_LIMIT = self.retry_count
@@ -1112,38 +1139,70 @@ class SplunkConnector(phantom.BaseConnector):
                 break
             time.sleep(2)
 
-        self.send_progress("Parsing results...")
-        result_index = 0
-        ten_percent = float(result_count) * 0.10
+        data, result_index = self._get_results(self, action_result, result_count, results_range, job)
 
-        try:
-            results = splunk_results.ResultsReader(job.results(count=kwargs_create.get('max_count', 0)))
-        except Exception as e:
-            error_code, error_msg = self._get_error_message_from_exception(e)
-            error_text = consts.SPLUNK_EXCEPTION_ERROR_MESSAGE.format(msg="Error retrieving results",
-                error_code=error_code, error_msg=error_msg)
-            return action_result.set_status(phantom.APP_ERROR, error_text)
-
-        data = []
-
-        for result in results:
-
-            if isinstance(result, dict):
-
-                action_result.add_data(result)
-                data.append(result)
-
-            result_index += 1
-
-            if (result_index % ten_percent) == 0:
-                status = "Finished parsing {0:.1%} of results".format((float(result_index) / float(result_count)))
-                self.send_progress(status)
+        self.debug_print("data--------------: {0}".format(data))
+        if phantom.is_fail(data):
+            return self.get_status()
 
         if attach_result:
             self.add_json_result(action_result, data)
 
         summary[consts.SPLUNK_JSON_TOTAL_EVENTS] = result_index
         return action_result.set_status(phantom.APP_SUCCESS)
+
+    def _get_results(self, action_result, result_count, results_range, job):
+        self.send_progress("Parsing results...")
+        result_index = 0
+        start_val = 0
+        end_val = 0
+        ten_percent = float(result_count) * 0.10
+
+        # IndexedPageItemView
+        start_val, end_val = (int(x) for x in results_range.split('-'))
+
+        total_records_asked = end_val - start_val
+        if total_records_asked > 50000:
+            return action_result.set_status(
+                phantom.APP_ERROR, "Invalid range value. The difference between the range value cannot be greater than {0}".format(consts.SPLUNK_MAX_DIFFERENCE_BETWEEN_RANGE))
+
+        self.debug_print("----------total results: {0}".format(int(result_count)))
+        while (start_val < end_val):
+            kwargs_paginate = {"count": total_records_asked,
+                            "offset": start_val}
+            self.debug_print("-------- paginator query: {0}".format(kwargs_paginate))
+            # Get the search results and display them
+            blocksearch_results = job.results(**kwargs_paginate)
+
+            try:
+                results = splunk_results.ResultsReader(blocksearch_results)
+            except Exception as e:
+                error_code, error_msg = self._get_error_message_from_exception(e)
+                error_text = consts.SPLUNK_EXCEPTION_ERROR_MESSAGE.format(msg="Error retrieving results",
+                    error_code=error_code, error_msg=error_msg)
+                return action_result.set_status(phantom.APP_ERROR, error_text)
+
+            data = []
+
+            for result in results:
+
+                if isinstance(result, dict):
+
+                    action_result.add_data(result)
+                    data.append(result)
+
+                result_index += 1
+
+                if (result_index % ten_percent) == 0:
+                    status = "Finished parsing {0:.1%} of results".format((float(result_index) / float(result_count)))
+                    self.send_progress(status)
+            self.debug_print("---------- length of result: {0}".format(len(data)))
+
+            # Increase the offset to get the next set of results
+            start_val += total_records_asked
+
+        self.debug_print("--------- offset: {0}".format(self.offset))
+        return data, result_index
 
     def add_json_result(self, action_result, data):
 
