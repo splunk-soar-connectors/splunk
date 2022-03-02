@@ -189,7 +189,7 @@ class SplunkConnector(phantom.BaseConnector):
         if phantom.is_fail(ret_val):
             return self.get_status()
 
-        # Validte if user has entered more than 120 seconds
+        # Validate if user has entered more than 120 seconds
         if self.sleeptime_in_requests > 120:
             return self.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_INVALID_VALUE_INTEGER.format(
                 param=consts.SPLUNK_SLEEPTIME_IN_REQUESTS_KEY))
