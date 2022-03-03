@@ -11,7 +11,7 @@ Minimum Product Version: 5\.1\.0
 This app integrates with Splunk to update data on the device, in addition to investigate and ingestion actions
 
 [comment]: # " File: README.md"
-[comment]: # "  Copyright (c) 2014-2022 Splunk Inc."
+[comment]: # "  Copyright (c) 2016-2022 Splunk Inc."
 [comment]: # ""
 [comment]: # "Licensed under the Apache License, Version 2.0 (the 'License');"
 [comment]: # "you may not use this file except in compliance with the License."
@@ -292,8 +292,6 @@ special characters:
 -   Ellipsis
 
 There can exist more such characters apart from the ones listed above.
-
-
 ### Configuration Variables
 The below configuration variables are required for this Connector to operate.  These variables are specified when configuring a Splunk Enterprise asset in SOAR.
 
@@ -317,7 +315,6 @@ VARIABLE | REQUIRED | TYPE | DESCRIPTION
 **container\_name\_values** |  optional  | string | Values to append to container name
 **retry\_count** |  optional  | numeric | Number of retries
 **remove\_empty\_cef** |  optional  | boolean | Remove CEF fields having empty values from the artifact
-
 ### Supported Actions  
 [test connectivity](#action-test-connectivity) - Validate the asset configuration for connectivity\. This action logs into the device to check the connection and credentials  
 [get host events](#action-get-host-events) - Get events pertaining to a host that have occurred in the last 'N' days  

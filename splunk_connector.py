@@ -1,6 +1,6 @@
 # File: splunk_connector.py
 #
-# Copyright (c) 2014-2022 Splunk Inc.
+# Copyright (c) 2016-2022 Splunk Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,7 +29,11 @@ from io import BytesIO
 from urllib.error import HTTPError as UrllibHTTPError  # noqa
 from urllib.error import URLError  # noqa
 from urllib.parse import urlencode, urlparse  # noqa
-from urllib.request import ProxyHandler, Request, build_opener, install_opener, urlopen  # noqa
+from urllib.request import ProxyHandler  # noqa
+from urllib.request import Request  # noqa
+from urllib.request import build_opener  # noqa
+from urllib.request import install_opener  # noqa
+from urllib.request import urlopen  # noqa
 
 import phantom.app as phantom
 import pytz
@@ -60,7 +64,7 @@ class RetVal(tuple):
 class SplunkConnector(phantom.BaseConnector):
 
     ACTION_ID_POST_DATA = "post_data"
-    ACTION_ID_RUN_QUERY = "execute_search"
+    ACTION_ID_RUN_QUERY = "run_query"
     ACTION_ID_UPDATE_EVENT = "update_event"
     ACTION_ID_GET_HOST_EVENTS = "get_host_events"
 
@@ -77,6 +81,7 @@ class SplunkConnector(phantom.BaseConnector):
         self._splunk_status_dict = None
         self.container_update_state = None
         self.remove_empty_cef = None
+        self.sleeptime_in_requests = None
 
     def _get_error_message_from_exception(self, e):
         """ This method is used to get appropriate error message from the exception.
@@ -177,6 +182,17 @@ class SplunkConnector(phantom.BaseConnector):
             consts.SPLUNK_CONTAINER_UPDATE_STATE_KEY)
         if phantom.is_fail(ret_val):
             return self.get_status()
+
+        # Validate sleeptime_in_requests
+        ret_val, self.sleeptime_in_requests = self._validate_integer(self, config.get('sleeptime_in_requests', 1),
+                                                                    consts.SPLUNK_SLEEPTIME_IN_REQUESTS_KEY)
+        if phantom.is_fail(ret_val):
+            return self.get_status()
+
+        # Validate if user has entered more than 120 seconds
+        if self.sleeptime_in_requests > 120:
+            return self.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_INVALID_SLEEP_TIME.format(
+                param=consts.SPLUNK_SLEEPTIME_IN_REQUESTS_KEY))
 
         self.remove_empty_cef = config.get("remove_empty_cef", False)
 
@@ -458,6 +474,7 @@ class SplunkConnector(phantom.BaseConnector):
                 for attempt_count in range(0, RETRY_LIMIT):
                     try:
                         while not job.is_ready():
+                            time.sleep(self.sleeptime_in_requests)
                             pass
                         job.refresh()
                         break
@@ -475,8 +492,7 @@ class SplunkConnector(phantom.BaseConnector):
                 self.send_progress(status)
                 if stats['is_done'] == '1':
                     break
-                time.sleep(2)
-
+                time.sleep(self.sleeptime_in_requests)
             self.send_progress("Parsing results...")
 
             try:
@@ -667,6 +683,7 @@ class SplunkConnector(phantom.BaseConnector):
         """Executes the query to get events pertaining to a host
             Gets the events for a host for the last 'N' number of days
         """
+        self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
 
         action_result = self.add_action_result(phantom.ActionResult(dict(param)))
 
@@ -684,6 +701,7 @@ class SplunkConnector(phantom.BaseConnector):
 
         search_query = 'search host="{0}"{1}'.format(ip_hostname, ' earliest=-{0}d'.format(last_n_days) if last_n_days else '')
 
+        self.debug_print("search_query: {0}".format(search_query))
         return self._run_query(search_query, action_result)
 
     def _get_fips_enabled(self):
@@ -911,6 +929,7 @@ class SplunkConnector(phantom.BaseConnector):
 
     def _handle_run_query(self, param):
 
+        self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
         action_result = self.add_action_result(phantom.ActionResult(dict(param)))
 
         # Connect
@@ -932,6 +951,7 @@ class SplunkConnector(phantom.BaseConnector):
         except:
             return action_result.set_status(phantom.APP_ERROR, "Error occurred while parsing the search query")
 
+        self.debug_print("search_query: {0}".format(search_query))
         return self._run_query(search_query, action_result, attach_result, parse_only=po)
 
     def _get_tz_str_from_epoch(self, time_format_str, epoch_milli):
@@ -1088,6 +1108,7 @@ class SplunkConnector(phantom.BaseConnector):
             for attempt_count in range(0, RETRY_LIMIT):
                 try:
                     while not job.is_ready():
+                        time.sleep(self.sleeptime_in_requests)
                         pass
                     job.refresh()
                     break
@@ -1110,7 +1131,7 @@ class SplunkConnector(phantom.BaseConnector):
             if stats['is_done'] == '1':
                 result_count = stats['result_count']
                 break
-            time.sleep(2)
+            time.sleep(self.sleeptime_in_requests)
 
         self.send_progress("Parsing results...")
         result_index = 0
