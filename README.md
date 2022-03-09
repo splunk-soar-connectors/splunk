@@ -2,7 +2,7 @@
 # Splunk
 
 Publisher: Splunk  
-Connector Version: 2\.7\.0  
+Connector Version: 2\.8\.0  
 Product Vendor: Splunk Inc\.  
 Product Name: Splunk Enterprise  
 Product Version Supported (regex): "\.\*"  
@@ -11,7 +11,7 @@ Minimum Product Version: 5\.1\.0
 This app integrates with Splunk to update data on the device, in addition to investigate and ingestion actions
 
 [comment]: # " File: README.md"
-[comment]: # "  Copyright (c) 2014-2022 Splunk Inc."
+[comment]: # "  Copyright (c) 2016-2022 Splunk Inc."
 [comment]: # ""
 [comment]: # "Licensed under the Apache License, Version 2.0 (the 'License');"
 [comment]: # "you may not use this file except in compliance with the License."
@@ -122,6 +122,10 @@ Please check the permissions for the state file as mentioned below.
     -   It allows the user to remove CEF fields having empty values from the artifact during
         ingestion. If the value of the parameter is 'true', CEF fields having empty values will be
         removed.
+-   sleeptime_in_requests:
+    -   The time to wait for next REST call(max 120 seconds)
+    -   It allows the user to add sleep time between the REST calls while performing the
+        "run_query", "update_event", "get host events" and "on poll" action.
 -   on_poll_display:
     -   Fields to save with On Poll
     -   Users can select the fields from the events which the user wants to ingest in the artifact
@@ -293,6 +297,16 @@ special characters:
 
 There can exist more such characters apart from the ones listed above.
 
+## Port Information
+
+The app uses HTTP/ HTTPS protocol for communicating with the Splunk server. Below are the default
+ports used by Splunk SOAR.
+
+|         SERVICE NAME | TRANSPORT PROTOCOL | PORT |
+|----------------------|--------------------|------|
+|         http         | tcp                | 80   |
+|         https        | tcp                | 443  |
+
 
 ### Configuration Variables
 The below configuration variables are required for this Connector to operate.  These variables are specified when configuring a Splunk Enterprise asset in SOAR.
@@ -317,6 +331,7 @@ VARIABLE | REQUIRED | TYPE | DESCRIPTION
 **container\_name\_values** |  optional  | string | Values to append to container name
 **retry\_count** |  optional  | numeric | Number of retries
 **remove\_empty\_cef** |  optional  | boolean | Remove CEF fields having empty values from the artifact
+**sleeptime\_in\_requests** |  optional  | numeric | The time to wait for next REST call \(max 120 seconds\)
 
 ### Supported Actions  
 [test connectivity](#action-test-connectivity) - Validate the asset configuration for connectivity\. This action logs into the device to check the connection and credentials  
