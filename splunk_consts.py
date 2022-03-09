@@ -1,6 +1,6 @@
 # File: splunk_consts.py
 #
-# Copyright (c) 2014-2022 Splunk Inc.
+# Copyright (c) 2016-2022 Splunk Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ SPLUNK_UNICODE_DAMMIT_TYPE_ERROR_MESSAGE = "Error occurred while connecting to t
     configuration and|or the action parameters."
 SPLUNK_EXCEPTION_ERROR_MESSAGE = "{msg}. Error Code: {error_code}. Error Message: {error_msg}"
 SPLUNK_JOB_FIELD_NOT_FOUND_MESSAGE = "{field} not found"
-
+SPLUNK_ERR_INVALID_SLEEP_TIME = "Please provide a value <= 120 seconds in the {param} parameter"
 # Progress messages
 SPLUNK_PROG_GOT_JOB_ID = "Got job id '{job_id}'"
 SPLUNK_PROG_TIME_RANGE = "Using range '{range}'"
@@ -153,6 +153,7 @@ SPLUNK_PORT_KEY = "'port' configuration"
 SPLUNK_MAX_CONTAINER_KEY = "'max_container' configuration"
 SPLUNK_CONTAINER_UPDATE_STATE_KEY = "'Container count to update the state file' configuration"
 SPLUNK_LAST_N_DAYS_KEY = "'last_n_days' action"
+SPLUNK_SLEEPTIME_IN_REQUESTS_KEY = "'The time to wait for next REST call (max 120 seconds)' configuration"
 
 # Queries
 SPLUNK_RID_SID_NOTABLE_QUERY = r'search [| makeresults | eval myfield = "{}"'
