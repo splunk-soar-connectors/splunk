@@ -928,7 +928,12 @@ class SplunkConnector(phantom.BaseConnector):
         return severity
 
     def _handle_run_query(self, param):
+        """Perform Splunk run query
 
+        How we run Splunk search: https://dev.splunk.com/enterprise/docs/devtools/python/sdk-python/howtousesplunkpython/howtorunsearchespython/ # noqa
+        Raw REST endpoint: https://docs.splunk.com/Documentation/Splunk/latest/RESTREF/RESTsearch#search.2Fjobs
+        Time modifiers: https://docs.splunk.com/Documentation/Splunk/8.2.5/SearchReference/SearchTimeModifiers
+        """
         self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
         action_result = self.add_action_result(phantom.ActionResult(dict(param)))
 
@@ -941,12 +946,11 @@ class SplunkConnector(phantom.BaseConnector):
         po = param.get(consts.SPLUNK_JSON_PARSE_ONLY, False)
         attach_result = param.get(consts.SPLUNK_JSON_ATTACH_RESULT, False)
 
+        # More info on valid time modifier at https://docs.splunk.com/Documentation/Splunk/8.2.5/SearchReference/SearchTimeModifiers # noqa
         start_time = phantom.get_value(param, consts.SPLUNK_JSON_START_TIME)
         end_time = phantom.get_value(param, consts.SPLUNK_JSON_END_TIME)
-
-        kwargs = {
-        }
-
+        self.debug_print('Run query with timeframe (%s, %s)' % (start_time, end_time))
+        kwargs = {}
         if start_time:
             kwargs["earliest_time"] = start_time
         if end_time:
@@ -1064,7 +1068,7 @@ class SplunkConnector(phantom.BaseConnector):
 
     def _run_query(self, search_query, action_result, attach_result=False, kwargs_create=dict(), parse_only=True):
         """Function that executes the query on splunk"""
-
+        self.debug_print('Start run query')
         RETRY_LIMIT = self.retry_count
         summary = action_result.update_summary({})
         summary["sid"] = "Search ID not created"
@@ -1075,6 +1079,7 @@ class SplunkConnector(phantom.BaseConnector):
                 self._service.parse(search_query, parse_only=parse_only)
                 break
             except HTTPError as e:
+                self.debug_print('Failed to validate search query: Reason: %s' % e)
                 if (phantom.is_fail(self._connect(action_result))):
                     return action_result.get_status()
                 if attempt_count == RETRY_LIMIT - 1:
@@ -1083,6 +1088,7 @@ class SplunkConnector(phantom.BaseConnector):
                         error_code=error_code, error_msg=error_msg)
                     return action_result.set_status(phantom.APP_ERROR, error_text, query=search_query)
             except Exception as e:
+                self.debug_print('Failed to validate search query: Reason: %s' % e)
                 if (phantom.is_fail(self._connect(action_result))):
                     return action_result.get_status()
                 if attempt_count == RETRY_LIMIT - 1:
@@ -1107,6 +1113,7 @@ class SplunkConnector(phantom.BaseConnector):
                 job = self._service.jobs.create(search_query, **kwargs_create)
                 break
             except Exception as e:
+                self.debug_print('Failed to create job: Reason: %s' % e)
                 if attempt_count == RETRY_LIMIT - 1:
                     error_code, error_msg = self._get_error_message_from_exception(e)
                     error_text = consts.SPLUNK_EXCEPTION_ERROR_MESSAGE.format(msg=consts.SPLUNK_ERR_UNABLE_TO_CREATE_JOB,
@@ -1175,6 +1182,7 @@ class SplunkConnector(phantom.BaseConnector):
             self.add_json_result(action_result, data)
 
         summary[consts.SPLUNK_JSON_TOTAL_EVENTS] = result_index
+        self.debug_print('Done run query')
         return action_result.set_status(phantom.APP_SUCCESS)
 
     def add_json_result(self, action_result, data):
