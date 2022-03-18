@@ -454,11 +454,19 @@
                 "start_time": {
                     "description": "Earliest time modifier",
                     "data_type": "string",
+                    "example_values": [
+                        "-2d",
+                        "2022-03-18T16:12:07.130+00:00"
+                    ],
                     "order": 6
                 },
                 "end_time": {
                     "description": "Latest time modifier",
                     "data_type": "string",
+                    "example_values": [
+                        "-2d",
+                        "2022-03-18T16:12:09.130+00:00"
+                    ],
                     "order": 7
                 }
             },
