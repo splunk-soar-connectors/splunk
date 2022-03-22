@@ -1,2 +1,1 @@
 **Unreleased**
-* Added 2 new fields ("start_time" and "end_time") to "run query" action [PAPP-24566]

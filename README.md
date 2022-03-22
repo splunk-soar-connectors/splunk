@@ -2,7 +2,7 @@
 # Splunk
 
 Publisher: Splunk  
-Connector Version: 2\.8\.0  
+Connector Version: 2\.9\.0  
 Product Vendor: Splunk Inc\.  
 Product Name: Splunk Enterprise  
 Product Version Supported (regex): "\.\*"  
@@ -419,7 +419,7 @@ Run a search query on the Splunk device\. Please escape any quotes that are part
 Type: **investigate**  
 Read only: **True**
 
-By default, the widget for the &quot;run query&quot; action will show the host, time, and raw fields\. If you would like to see specific fields parsed out, they can be listed in a comma\-separated format in the &quot;display&quot; parameter\.<br><br>Please keep in mind that Splunk does not always return all possible fields\. Splunk may not return fields that are calculated or not present in the event\.<br><br>To work around this you can force Splunk to return specific fields by using the &quot;fields&quot;\. By appending &quot;\| fields \+ \*&quot; to your query, Splunk will return every field\. You can replace the asterisk with a comma\-separated list of fields to only return specific fields\.<br><br>Finally, some searches \(such as those based on data models\) can contain name\-spaced fields\. If a data model called &quot;my\_model&quot; with a search &quot;my\_search&quot; has a field &quot;hash&quot; then the field will be named &quot;my\_search\.hash&quot; and that is what must be used in the Splunk fields command and the display parameter\. If using a non\-global lookup file that is only accessible by a specific Splunk App, make sure to note the specific Splunk App in your asset configuration\. The <b>parse\_only</b> parameter, if <b>True</b>, it disables the expansion of search due to evaluation of sub\-searches, time term expansion, lookups, tags, eventtypes, and sourcetype alias\. This parameter is used for the validation of the Splunk query before fetching the results\.
+By default, the widget for the &quot;run query&quot; action will show the host, time, and raw fields\. If you would like to see specific fields parsed out, they can be listed in a comma\-separated format in the &quot;display&quot; parameter\.<br><br>Please keep in mind that Splunk does not always return all possible fields\. Splunk may not return fields that are calculated or not present in the event\.<br><br>To work around this you can force Splunk to return specific fields by using the &quot;fields&quot;\. By appending &quot;\| fields \+ \*&quot; to your query, Splunk will return every field\. You can replace the asterisk with a comma\-separated list of fields to only return specific fields\.<br><br>Finally, some searches \(such as those based on data models\) can contain name\-spaced fields\. If a data model called &quot;my\_model&quot; with a search &quot;my\_search&quot; has a field &quot;hash&quot; then the field will be named &quot;my\_search\.hash&quot; and that is what must be used in the Splunk fields command and the display parameter\. If using a non\-global lookup file that is only accessible by a specific Splunk App, make sure to note the specific Splunk App in your asset configuration\. The <b>parse\_only</b> parameter, if <b>True</b>, it disables the expansion of search due to evaluation of sub\-searches, time term expansion, lookups, tags, eventtypes, and sourcetype alias\. This parameter is used for the validation of the Splunk query before fetching the results\.<br><br>Learn more below\:<ul><li><a href='https\://docs\.splunk\.com/Documentation/Splunk/8\.2\.5/SearchReference/SearchTimeModifiers' target='\_blank'>Time modifiers</a></li><li><a href='https\://docs\.splunk\.com/Documentation/Splunk/latest/RESTREF/RESTsearch\#search\.2Fjobs' target='\_blank'>Splunk REST APIs</a></li><li><a href='https\://dev\.splunk\.com/enterprise/docs/devtools/python/sdk\-python/howtousesplunkpython/howtorunsearchespython/' target='\_blank'>Splunk SDK</a></li></ul>
 
 #### Action Parameters
 PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
@@ -429,6 +429,8 @@ PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 **display** |  optional  | Display fields \(comma\-separated\) | string | 
 **parse\_only** |  optional  | Parse only | boolean | 
 **attach\_result** |  optional  | Attach result to the vault | boolean | 
+**start\_time** |  optional  | Earliest time modifier | string | 
+**end\_time** |  optional  | Latest time modifier | string | 
 
 #### Action Output
 DATA PATH | TYPE | CONTAINS
