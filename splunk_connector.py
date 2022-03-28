@@ -204,8 +204,7 @@ class SplunkConnector(phantom.BaseConnector):
         return phantom.APP_SUCCESS
 
     def request(self, url, message, **kwargs):
-        ''' Splunk SDK Proxy handler
-        '''
+        """Splunk SDK Proxy handler"""
         method = message['method'].lower()
         config = self.get_config()
         data = message.get('body', "") if method == 'post' else None
@@ -213,7 +212,7 @@ class SplunkConnector(phantom.BaseConnector):
         req = Request(url, data, headers)
         try:
             response = urlopen(req)
-            print(response)
+            self.debug_print(response)
         except URLError:
             # If running Python 2.7.9+, disable SSL certificate validation and try again
             if sys.version_info >= (2, 7, 9) and not config[phantom.APP_JSON_VERIFY]:
