@@ -758,7 +758,7 @@ class SplunkConnector(phantom.BaseConnector):
             Therefore, 'container_count' parameter will be ignored".format(int(search_params['max_count'])))
             search_params.pop('max_count')
 
-        ret_val = self._run_query(search_query, action_result, search_params, parse_only=po)
+        ret_val = self._run_query(search_query, action_result, kwargs_create=search_params, parse_only=po)
         if phantom.is_fail(ret_val):
             self.save_progress(action_result.get_message())
             return action_result.set_status(phantom.APP_ERROR)
@@ -966,7 +966,7 @@ class SplunkConnector(phantom.BaseConnector):
             return action_result.set_status(phantom.APP_ERROR, "Error occurred while parsing the search query")
 
         self.debug_print("search_query: {0}".format(search_query))
-        return self._run_query(search_query, action_result, attach_result, kwargs_create=kwargs, parse_only=po)
+        return self._run_query(search_query, action_result, attach_result=attach_result, kwargs_create=kwargs, parse_only=po)
 
     def _get_tz_str_from_epoch(self, time_format_str, epoch_milli):
 
@@ -1040,7 +1040,7 @@ class SplunkConnector(phantom.BaseConnector):
 
         self.debug_print("query", query)
 
-        self._run_query(query, action_result, kwargs_create)
+        self._run_query(query, action_result, kwargs_create=kwargs_create)
 
         return action_result.get_status()
 
