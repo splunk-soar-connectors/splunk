@@ -5,13 +5,13 @@
     "publisher": "Splunk",
     "type": "siem",
     "main_module": "splunk_connector.py",
-    "app_version": "2.9.0",
+    "app_version": "2.10.0",
     "utctime_updated": "2022-02-04T02:22:09.000000Z",
     "package_name": "phantom_splunk",
     "product_name": "Splunk Enterprise",
     "product_vendor": "Splunk Inc.",
     "product_version_regex": ".*",
-    "min_phantom_version": "5.1.0",
+    "min_phantom_version": "5.2.0",
     "fips_compliant": true,
     "python_version": "3",
     "latest_tested_versions": [
@@ -65,7 +65,7 @@
             },
             {
                 "module": "soupsieve",
-                "input_file": "wheels/py3/soupsieve-2.3.1-py3-none-any.whl"
+                "input_file": "wheels/py3/soupsieve-2.3.2.post1-py3-none-any.whl"
             },
             {
                 "module": "splunk_sdk",
@@ -73,7 +73,7 @@
             },
             {
                 "module": "urllib3",
-                "input_file": "wheels/shared/urllib3-1.26.8-py2.py3-none-any.whl"
+                "input_file": "wheels/shared/urllib3-1.26.9-py2.py3-none-any.whl"
             }
         ]
     },
@@ -237,14 +237,6 @@
             },
             "output": [
                 {
-                    "data_path": "action_result.status",
-                    "data_type": "string",
-                    "example_values": [
-                        "success",
-                        "failed"
-                    ]
-                },
-                {
                     "data_path": "action_result.parameter.ip_hostname",
                     "data_type": "string",
                     "example_values": [
@@ -331,6 +323,21 @@
                     ]
                 },
                 {
+                    "data_path": "action_result.status",
+                    "data_type": "string",
+                    "example_values": [
+                        "success",
+                        "failed"
+                    ]
+                },
+                {
+                    "data_path": "action_result.message",
+                    "data_type": "string",
+                    "example_values": [
+                        "Sid: 1621953772.25264, Total events: 1"
+                    ]
+                },
+                {
                     "data_path": "action_result.summary.sid",
                     "data_type": "string",
                     "example_values": [
@@ -340,13 +347,6 @@
                 {
                     "data_path": "action_result.summary.total_events",
                     "data_type": "numeric"
-                },
-                {
-                    "data_path": "action_result.message",
-                    "data_type": "string",
-                    "example_values": [
-                        "Sid: 1621953772.25264, Total events: 1"
-                    ]
                 },
                 {
                     "data_path": "summary.total_objects",
@@ -454,19 +454,11 @@
                 "start_time": {
                     "description": "Earliest time modifier",
                     "data_type": "string",
-                    "example_values": [
-                        "-2d",
-                        "2022-03-18T16:12:07.130+00:00"
-                    ],
                     "order": 6
                 },
                 "end_time": {
                     "description": "Latest time modifier",
                     "data_type": "string",
-                    "example_values": [
-                        "-2d",
-                        "2022-03-18T16:12:09.130+00:00"
-                    ],
                     "order": 7
                 }
             },
@@ -478,14 +470,6 @@
                 "title": "Search Results"
             },
             "output": [
-                {
-                    "data_path": "action_result.status",
-                    "data_type": "string",
-                    "example_values": [
-                        "success",
-                        "failed"
-                    ]
-                },
                 {
                     "data_path": "action_result.parameter.attach_result",
                     "data_type": "boolean",
@@ -510,6 +494,14 @@
                     ]
                 },
                 {
+                    "data_path": "action_result.parameter.end_time",
+                    "data_type": "string",
+                    "example_values": [
+                        "-2d",
+                        "2022-03-18T16:12:09.130+00:00"
+                    ]
+                },
+                {
                     "data_path": "action_result.parameter.parse_only",
                     "data_type": "boolean",
                     "example_values": [
@@ -525,6 +517,14 @@
                     ],
                     "example_values": [
                         "\"Send to test\""
+                    ]
+                },
+                {
+                    "data_path": "action_result.parameter.start_time",
+                    "data_type": "string",
+                    "example_values": [
+                        "-2d",
+                        "2022-03-18T16:12:07.130+00:00"
                     ]
                 },
                 {
@@ -764,6 +764,21 @@
                     "example_value": "/opt/splunk/var/log/splunk/scheduler.log"
                 },
                 {
+                    "data_path": "action_result.status",
+                    "data_type": "string",
+                    "example_values": [
+                        "success",
+                        "failed"
+                    ]
+                },
+                {
+                    "data_path": "action_result.message",
+                    "data_type": "string",
+                    "example_values": [
+                        "Sid: 1612177958.977510, Total events: 2"
+                    ]
+                },
+                {
                     "data_path": "action_result.summary.sid",
                     "data_type": "string",
                     "example_values": [
@@ -775,13 +790,6 @@
                     "data_type": "numeric",
                     "example_values": [
                         2
-                    ]
-                },
-                {
-                    "data_path": "action_result.message",
-                    "data_type": "string",
-                    "example_values": [
-                        "Sid: 1612177958.977510, Total events: 2"
                     ]
                 },
                 {
@@ -870,16 +878,6 @@
             },
             "output": [
                 {
-                    "data_path": "action_result.status",
-                    "data_type": "string",
-                    "example_values": [
-                        "success",
-                        "failed"
-                    ],
-                    "column_name": "Status",
-                    "column_order": 0
-                },
-                {
                     "data_path": "action_result.parameter.comment",
                     "data_type": "string",
                     "example_values": [
@@ -962,6 +960,25 @@
                     ]
                 },
                 {
+                    "data_path": "action_result.status",
+                    "data_type": "string",
+                    "example_values": [
+                        "success",
+                        "failed"
+                    ],
+                    "column_name": "Status",
+                    "column_order": 0
+                },
+                {
+                    "data_path": "action_result.message",
+                    "data_type": "string",
+                    "example_values": [
+                        "Updated event id: 2CF264EE-6016-4F6A-BCC3-4B7251E113F7@@notable@@035142b19c09ab645c6bbfb847e866f4"
+                    ],
+                    "column_name": "Message",
+                    "column_order": 1
+                },
+                {
                     "data_path": "action_result.summary.sid",
                     "data_type": "string",
                     "example_values": [
@@ -974,15 +991,6 @@
                     "example_values": [
                         "2CF264EE-6016-4F6A-BCC3-4B7251E113F7@@notable@@035142b19c09ab645c6bbfb847e866f4"
                     ]
-                },
-                {
-                    "data_path": "action_result.message",
-                    "data_type": "string",
-                    "example_values": [
-                        "Updated event id: 2CF264EE-6016-4F6A-BCC3-4B7251E113F7@@notable@@035142b19c09ab645c6bbfb847e866f4"
-                    ],
-                    "column_name": "Message",
-                    "column_order": 1
                 },
                 {
                     "data_path": "summary.total_objects",
@@ -1051,16 +1059,6 @@
             },
             "output": [
                 {
-                    "data_path": "action_result.status",
-                    "data_type": "string",
-                    "column_name": "Status",
-                    "column_order": 0,
-                    "example_values": [
-                        "success",
-                        "failed"
-                    ]
-                },
-                {
                     "data_path": "action_result.parameter.data",
                     "data_type": "string",
                     "example_values": [
@@ -1104,8 +1102,14 @@
                     "data_type": "string"
                 },
                 {
-                    "data_path": "action_result.summary",
-                    "data_type": "string"
+                    "data_path": "action_result.status",
+                    "data_type": "string",
+                    "column_name": "Status",
+                    "column_order": 0,
+                    "example_values": [
+                        "success",
+                        "failed"
+                    ]
                 },
                 {
                     "data_path": "action_result.message",
@@ -1115,6 +1119,10 @@
                     ],
                     "column_name": "Message",
                     "column_order": 1
+                },
+                {
+                    "data_path": "action_result.summary",
+                    "data_type": "string"
                 },
                 {
                     "data_path": "summary.total_objects",
@@ -1184,7 +1192,7 @@
             },
             {
                 "module": "soupsieve",
-                "input_file": "wheels/py3/soupsieve-2.3.1-py3-none-any.whl"
+                "input_file": "wheels/py3/soupsieve-2.3.2.post1-py3-none-any.whl"
             },
             {
                 "module": "splunk_sdk",
@@ -1192,7 +1200,7 @@
             },
             {
                 "module": "urllib3",
-                "input_file": "wheels/shared/urllib3-1.26.8-py2.py3-none-any.whl"
+                "input_file": "wheels/shared/urllib3-1.26.9-py2.py3-none-any.whl"
             }
         ]
     }

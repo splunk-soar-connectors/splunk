@@ -1,1 +1,2 @@
 **Unreleased**
+* Fixed an issue in On Poll action where the index time was not honored during scheduled ingestion [PAPP-25411]
