@@ -2,11 +2,11 @@
 # Splunk
 
 Publisher: Splunk  
-Connector Version: 2\.9\.0  
+Connector Version: 2\.10\.0  
 Product Vendor: Splunk Inc\.  
 Product Name: Splunk Enterprise  
 Product Version Supported (regex): "\.\*"  
-Minimum Product Version: 5\.1\.0  
+Minimum Product Version: 5\.2\.0  
 
 This app integrates with Splunk to update data on the device, in addition to investigate and ingestion actions
 
@@ -370,7 +370,6 @@ PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 #### Action Output
 DATA PATH | TYPE | CONTAINS
 --------- | ---- | --------
-action\_result\.status | string | 
 action\_result\.parameter\.ip\_hostname | string |  `ip`  `host name` 
 action\_result\.parameter\.last\_n\_days | numeric | 
 action\_result\.data\.\*\.\_bkt | string | 
@@ -387,9 +386,10 @@ action\_result\.data\.\*\.linecount | string |
 action\_result\.data\.\*\.source | string | 
 action\_result\.data\.\*\.sourcetype | string | 
 action\_result\.data\.\*\.splunk\_server | string |  `host name` 
+action\_result\.status | string | 
+action\_result\.message | string | 
 action\_result\.summary\.sid | string | 
 action\_result\.summary\.total\_events | numeric | 
-action\_result\.message | string | 
 summary\.total\_objects | numeric | 
 summary\.total\_objects\_successful | numeric |   
 
@@ -435,12 +435,13 @@ PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 #### Action Output
 DATA PATH | TYPE | CONTAINS
 --------- | ---- | --------
-action\_result\.status | string | 
 action\_result\.parameter\.attach\_result | boolean | 
 action\_result\.parameter\.command | string | 
 action\_result\.parameter\.display | string | 
+action\_result\.parameter\.end\_time | string | 
 action\_result\.parameter\.parse\_only | boolean | 
 action\_result\.parameter\.query | string |  `splunk query` 
+action\_result\.parameter\.start\_time | string | 
 action\_result\.data\.\*\.\_bkt | string | 
 action\_result\.data\.\*\.\_cd | string | 
 action\_result\.data\.\*\.\_indextime | string | 
@@ -486,9 +487,10 @@ action\_result\.data\.\*\.spent | string |
 action\_result\.data\.\*\.splunk\_server | string |  `host name` 
 action\_result\.data\.\*\.user | string | 
 action\_result\.data\.\*\.values\(source\) | string | 
+action\_result\.status | string | 
+action\_result\.message | string | 
 action\_result\.summary\.sid | string | 
 action\_result\.summary\.total\_events | numeric | 
-action\_result\.message | string | 
 summary\.total\_objects | numeric | 
 summary\.total\_objects\_successful | numeric |   
 
@@ -514,7 +516,6 @@ PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 #### Action Output
 DATA PATH | TYPE | CONTAINS
 --------- | ---- | --------
-action\_result\.status | string | 
 action\_result\.parameter\.comment | string | 
 action\_result\.parameter\.event\_ids | string |  `splunk notable event id` 
 action\_result\.parameter\.integer\_status | numeric | 
@@ -526,9 +527,10 @@ action\_result\.data\.\*\.failure\_count | numeric |
 action\_result\.data\.\*\.message | string | 
 action\_result\.data\.\*\.success | boolean | 
 action\_result\.data\.\*\.success\_count | numeric | 
+action\_result\.status | string | 
+action\_result\.message | string | 
 action\_result\.summary\.sid | string | 
 action\_result\.summary\.updated\_event\_id | string | 
-action\_result\.message | string | 
 summary\.total\_objects | numeric | 
 summary\.total\_objects\_successful | numeric |   
 
@@ -552,14 +554,14 @@ PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 #### Action Output
 DATA PATH | TYPE | CONTAINS
 --------- | ---- | --------
-action\_result\.status | string | 
 action\_result\.parameter\.data | string | 
 action\_result\.parameter\.host | string |  `ip`  `host name` 
 action\_result\.parameter\.index | string | 
 action\_result\.parameter\.source | string | 
 action\_result\.parameter\.source\_type | string | 
 action\_result\.data | string | 
-action\_result\.summary | string | 
+action\_result\.status | string | 
 action\_result\.message | string | 
+action\_result\.summary | string | 
 summary\.total\_objects | numeric | 
 summary\.total\_objects\_successful | numeric | 
