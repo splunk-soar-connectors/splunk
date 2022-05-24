@@ -245,7 +245,6 @@ class SplunkConnector(phantom.BaseConnector):
         config = self.get_config()
 
         username = config.get('username', None)
-
         kwargs_config_flags = {
                 'host': self.splunk_server,
                 'port': self.port,
@@ -254,6 +253,10 @@ class SplunkConnector(phantom.BaseConnector):
                 'owner': config.get('splunk_owner', None),
                 'app': config.get('splunk_app', None)}
 
+        # token-based authentication
+        if username is None:
+            self.save_progress(f'Using token-based authentication')
+            kwargs_config_flags["token"] = kwargs_config_flags.pop("password")
         self.save_progress(phantom.APP_PROG_CONNECTING_TO_ELLIPSES, self.splunk_server)
 
         proxy_param = None
@@ -331,9 +334,21 @@ class SplunkConnector(phantom.BaseConnector):
         url = '{0}services/{1}'.format(self._base_url, endpoint)
         self.debug_print('Making REST call to {0}'.format(url))
 
+        username = config.get(phantom.APP_JSON_USERNAME, None)
+        password = config.get(phantom.APP_JSON_PASSWORD)
+        auth, auth_header = None, None
+
+        if username is None:
+            # Splunk token-based authentication
+            self.debug_print('Username is none. Using token-based authentication.')
+            auth_header = {'Authorization': 'Bearer {token}'.format(token=password)}
+        else:
+            # Splunk username/password based authentication
+            auth=(username, password)
         try:
             response = method(url, data=data, params=params,  # nosemgrep
-                    auth=(config.get(phantom.APP_JSON_USERNAME), config.get(phantom.APP_JSON_PASSWORD)),
+                    auth=auth,
+                    headers=auth_header,
                     verify=config[phantom.APP_JSON_VERIFY])
         except Exception as e:
             error_code, error_msg = self._get_error_message_from_exception(e)

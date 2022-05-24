@@ -3,6 +3,26 @@
     "name": "Splunk",
     "description": "This app integrates with Splunk to update data on the device, in addition to investigate and ingestion actions",
     "publisher": "Splunk",
+    "contributors": [
+        {
+            "name": "Mayur Pipaliya"
+        },
+        {
+            "name": "Chetan Pangam"
+        },
+        {
+            "name": "Govind Salinas"
+        },
+        {
+            "name": "Atif Mahadik"
+        },
+        {
+            "name": "Alexandra Lomotan"
+        },
+        {
+            "name": "Philip Royer"
+        }
+    ],
     "type": "siem",
     "main_module": "splunk_connector.py",
     "app_version": "2.10.0",
@@ -92,11 +112,14 @@
         },
         "username": {
             "description": "Username",
+            "verbose": "Note: When username is empty, app will use the token for authentication.",
+
             "order": 2,
             "data_type": "string"
         },
         "password": {
-            "description": "Password",
+            "description": "Password / Token",
+            "verbose": "Enter your Splunk password or authentication token here. Note: When intending to use the token authentication, keep username empty.",
             "order": 3,
             "data_type": "password"
         },
