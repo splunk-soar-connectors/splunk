@@ -256,7 +256,7 @@ class SplunkConnector(phantom.BaseConnector):
         # token-based authentication
         if username is None:
             self.save_progress(f'Using token-based authentication')
-            kwargs_config_flags["token"] = kwargs_config_flags.pop("password")
+            kwargs_config_flags["splunkToken"] = kwargs_config_flags.pop("password")
         self.save_progress(phantom.APP_PROG_CONNECTING_TO_ELLIPSES, self.splunk_server)
 
         proxy_param = None
