@@ -255,7 +255,7 @@ class SplunkConnector(phantom.BaseConnector):
 
         # token-based authentication
         if username is None:
-            self.save_progress(f'Using token-based authentication')
+            self.save_progress('Using token-based authentication')
             kwargs_config_flags["splunkToken"] = kwargs_config_flags.pop("password")
         self.save_progress(phantom.APP_PROG_CONNECTING_TO_ELLIPSES, self.splunk_server)
 
@@ -344,7 +344,7 @@ class SplunkConnector(phantom.BaseConnector):
             auth_header = {'Authorization': 'Bearer {token}'.format(token=password)}
         else:
             # Splunk username/password based authentication
-            auth=(username, password)
+            auth = (username, password)
         try:
             response = method(url, data=data, params=params,  # nosemgrep
                     auth=auth,
