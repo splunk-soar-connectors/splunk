@@ -40,7 +40,8 @@ SPLUNK_UNICODE_DAMMIT_TYPE_ERROR_MESSAGE = "Error occurred while connecting to t
 SPLUNK_EXCEPTION_ERROR_MESSAGE = "{msg}. Error Code: {error_code}. Error Message: {error_msg}"
 SPLUNK_JOB_FIELD_NOT_FOUND_MESSAGE = "{field} not found"
 SPLUNK_ERR_INVALID_SLEEP_TIME = "Please provide a value <= 120 seconds in the {param} parameter"
-SPLUNK_ERR_REQUIRED_CONFIG_PARAMS = 'Please provide either API token or username and password in the asset configuration parameters for authentication'
+SPLUNK_ERR_REQUIRED_CONFIG_PARAMS = "Please provide either API token or username and password in the asset \
+    configuration parameters for authentication"
 
 # Progress messages
 SPLUNK_PROG_GOT_JOB_ID = "Got job id '{job_id}'"

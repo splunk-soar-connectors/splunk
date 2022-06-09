@@ -238,8 +238,8 @@ class SplunkConnector(phantom.BaseConnector):
         }
 
     def handler(self, proxy):
-        ''' Splunk SDK Proxy Request Handler
-        '''
+        """ Splunk SDK Proxy Request Handler
+        """
         proxy_handler = ProxyHandler({'http': proxy, 'https': proxy})
         opener = build_opener(proxy_handler)
         install_opener(opener)
