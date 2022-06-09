@@ -40,6 +40,8 @@ SPLUNK_UNICODE_DAMMIT_TYPE_ERROR_MESSAGE = "Error occurred while connecting to t
 SPLUNK_EXCEPTION_ERROR_MESSAGE = "{msg}. Error Code: {error_code}. Error Message: {error_msg}"
 SPLUNK_JOB_FIELD_NOT_FOUND_MESSAGE = "{field} not found"
 SPLUNK_ERR_INVALID_SLEEP_TIME = "Please provide a value <= 120 seconds in the {param} parameter"
+SPLUNK_ERR_REQUIRED_CONFIG_PARAMS = 'Please provide either API token or username and password in the asset configuration parameters for authentication'
+
 # Progress messages
 SPLUNK_PROG_GOT_JOB_ID = "Got job id '{job_id}'"
 SPLUNK_PROG_TIME_RANGE = "Using range '{range}'"
@@ -72,6 +74,7 @@ SPLUNK_JSON_LAST_N_DAYS = "last_n_days"
 SPLUNK_JSON_TOTAL_EVENTS = "total_events"
 SPLUNK_JSON_UPDATED_EVENT_ID = "updated_event_id"
 SPLUNK_JSON_ATTACH_RESULT = "attach_result"
+SPLUNK_JSON_API_KEY = "api_token"
 
 # Default values
 SPLUNK_DEFAULT_EVENT_COUNT = 10

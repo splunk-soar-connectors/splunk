@@ -128,6 +128,10 @@ class SplunkConnector(phantom.BaseConnector):
         except:
             return phantom.APP_ERROR
 
+        self._username = config.get(phantom.APP_JSON_USERNAME)
+        self._password = config.get(phantom.APP_JSON_PASSWORD)
+        self._api_token = config.get(consts.SPLUNK_JSON_API_KEY)
+
         self._base_url = 'https://{0}:{1}/'.format(self.splunk_server, config.get(phantom.APP_JSON_PORT, 8089))
         self._state = self.load_state()
         if not self._state:
@@ -142,6 +146,10 @@ class SplunkConnector(phantom.BaseConnector):
                     corresponding state file (refer readme file for more information)")
                 return phantom.APP_ERROR
         self._proxy = {}
+
+        # Either username and password or API token must be provided
+        if not self._api_token and (not self._username or not self._password):
+            return self.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_REQUIRED_CONFIG_PARAMS)
 
         env_vars = config.get('_reserved_environment_variables', {})
         if 'HTTP_PROXY' in env_vars:
@@ -244,19 +252,21 @@ class SplunkConnector(phantom.BaseConnector):
 
         config = self.get_config()
 
-        username = config.get('username', None)
         kwargs_config_flags = {
                 'host': self.splunk_server,
                 'port': self.port,
-                'username': username,
-                'password': config.get('password', None),
+                'username': self._username,
+                'password': self._password,
                 'owner': config.get('splunk_owner', None),
                 'app': config.get('splunk_app', None)}
 
         # token-based authentication
-        if username is None:
+        if self._api_token:
             self.save_progress('Using token-based authentication')
-            kwargs_config_flags["splunkToken"] = kwargs_config_flags.pop("password")
+            kwargs_config_flags["splunkToken"] = self._api_token
+            kwargs_config_flags.pop(phantom.APP_JSON_USERNAME)
+            kwargs_config_flags.pop(phantom.APP_JSON_PASSWORD)
+
         self.save_progress(phantom.APP_PROG_CONNECTING_TO_ELLIPSES, self.splunk_server)
 
         proxy_param = None
@@ -334,21 +344,19 @@ class SplunkConnector(phantom.BaseConnector):
         url = '{0}services/{1}'.format(self._base_url, endpoint)
         self.debug_print('Making REST call to {0}'.format(url))
 
-        username = config.get(phantom.APP_JSON_USERNAME, None)
-        password = config.get(phantom.APP_JSON_PASSWORD)
-        auth, auth_header = None, None
+        auth, auth_headers = None, None
 
-        if username is None:
+        if self._api_token:
             # Splunk token-based authentication
-            self.debug_print('Username is none. Using token-based authentication.')
-            auth_header = {'Authorization': 'Bearer {token}'.format(token=password)}
+            self.debug_print('Using token-based authentication')
+            auth_headers = {'Authorization': 'Bearer {token}'.format(token=self._api_token)}
         else:
             # Splunk username/password based authentication
-            auth = (username, password)
+            auth = (self._username, self._password)
         try:
             response = method(url, data=data, params=params,  # nosemgrep
                     auth=auth,
-                    headers=auth_header,
+                    headers=auth_headers,
                     verify=config[phantom.APP_JSON_VERIFY])
         except Exception as e:
             error_code, error_msg = self._get_error_message_from_exception(e)
