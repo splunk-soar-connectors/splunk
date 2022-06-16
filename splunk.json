@@ -25,7 +25,7 @@
     ],
     "type": "siem",
     "main_module": "splunk_connector.py",
-    "app_version": "2.2.0",
+    "app_version": "2.11.0",
     "utctime_updated": "2022-02-04T02:22:09.000000Z",
     "package_name": "phantom_splunk",
     "product_name": "Splunk Enterprise",
@@ -49,7 +49,7 @@
             },
             {
                 "module": "certifi",
-                "input_file": "wheels/shared/certifi-2021.10.8-py2.py3-none-any.whl"
+                "input_file": "wheels/py3/certifi-2022.5.18.1-py3-none-any.whl"
             },
             {
                 "module": "chardet",
@@ -180,7 +180,7 @@
         "max_container": {
             "data_type": "numeric",
             "order": 13,
-            "description": "Max events to ingest for Scheduled Polling(Default: 100)",
+            "description": "Max events to ingest for Scheduled Polling (Default: 100)",
             "default": 100
         },
         "container_update_state": {
@@ -261,6 +261,14 @@
                 "title": "Search Results"
             },
             "output": [
+                {
+                    "data_path": "action_result.status",
+                    "data_type": "string",
+                    "example_values": [
+                        "success",
+                        "failed"
+                    ]
+                },
                 {
                     "data_path": "action_result.parameter.ip_hostname",
                     "data_type": "string",
@@ -348,21 +356,6 @@
                     ]
                 },
                 {
-                    "data_path": "action_result.status",
-                    "data_type": "string",
-                    "example_values": [
-                        "success",
-                        "failed"
-                    ]
-                },
-                {
-                    "data_path": "action_result.message",
-                    "data_type": "string",
-                    "example_values": [
-                        "Sid: 1621953772.25264, Total events: 1"
-                    ]
-                },
-                {
                     "data_path": "action_result.summary.sid",
                     "data_type": "string",
                     "example_values": [
@@ -372,6 +365,13 @@
                 {
                     "data_path": "action_result.summary.total_events",
                     "data_type": "numeric"
+                },
+                {
+                    "data_path": "action_result.message",
+                    "data_type": "string",
+                    "example_values": [
+                        "Sid: 1621953772.25264, Total events: 1"
+                    ]
                 },
                 {
                     "data_path": "summary.total_objects",
@@ -496,6 +496,14 @@
             },
             "output": [
                 {
+                    "data_path": "action_result.status",
+                    "data_type": "string",
+                    "example_values": [
+                        "success",
+                        "failed"
+                    ]
+                },
+                {
                     "data_path": "action_result.parameter.attach_result",
                     "data_type": "boolean",
                     "example_values": [
@@ -597,6 +605,13 @@
                     "column_name": "Time",
                     "column_order": 1,
                     "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.data.*._value",
+                    "data_type": "string",
+                    "example_values": [
+                        "184"
+                    ]
                 },
                 {
                     "data_path": "action_result.data.*.a",
@@ -789,21 +804,6 @@
                     "example_value": "/opt/splunk/var/log/splunk/scheduler.log"
                 },
                 {
-                    "data_path": "action_result.status",
-                    "data_type": "string",
-                    "example_values": [
-                        "success",
-                        "failed"
-                    ]
-                },
-                {
-                    "data_path": "action_result.message",
-                    "data_type": "string",
-                    "example_values": [
-                        "Sid: 1612177958.977510, Total events: 2"
-                    ]
-                },
-                {
                     "data_path": "action_result.summary.sid",
                     "data_type": "string",
                     "example_values": [
@@ -815,6 +815,13 @@
                     "data_type": "numeric",
                     "example_values": [
                         2
+                    ]
+                },
+                {
+                    "data_path": "action_result.message",
+                    "data_type": "string",
+                    "example_values": [
+                        "Sid: 1612177958.977510, Total events: 2"
                     ]
                 },
                 {
@@ -903,6 +910,16 @@
             },
             "output": [
                 {
+                    "data_path": "action_result.status",
+                    "data_type": "string",
+                    "example_values": [
+                        "success",
+                        "failed"
+                    ],
+                    "column_name": "Status",
+                    "column_order": 0
+                },
+                {
                     "data_path": "action_result.parameter.comment",
                     "data_type": "string",
                     "example_values": [
@@ -985,25 +1002,6 @@
                     ]
                 },
                 {
-                    "data_path": "action_result.status",
-                    "data_type": "string",
-                    "example_values": [
-                        "success",
-                        "failed"
-                    ],
-                    "column_name": "Status",
-                    "column_order": 0
-                },
-                {
-                    "data_path": "action_result.message",
-                    "data_type": "string",
-                    "example_values": [
-                        "Updated event id: 2CF264EE-6016-4F6A-BCC3-4B7251E113F7@@notable@@035142b19c09ab645c6bbfb847e866f4"
-                    ],
-                    "column_name": "Message",
-                    "column_order": 1
-                },
-                {
                     "data_path": "action_result.summary.sid",
                     "data_type": "string",
                     "example_values": [
@@ -1016,6 +1014,15 @@
                     "example_values": [
                         "2CF264EE-6016-4F6A-BCC3-4B7251E113F7@@notable@@035142b19c09ab645c6bbfb847e866f4"
                     ]
+                },
+                {
+                    "data_path": "action_result.message",
+                    "data_type": "string",
+                    "example_values": [
+                        "Updated event id: 2CF264EE-6016-4F6A-BCC3-4B7251E113F7@@notable@@035142b19c09ab645c6bbfb847e866f4"
+                    ],
+                    "column_name": "Message",
+                    "column_order": 1
                 },
                 {
                     "data_path": "summary.total_objects",
@@ -1084,6 +1091,16 @@
             },
             "output": [
                 {
+                    "data_path": "action_result.status",
+                    "data_type": "string",
+                    "column_name": "Status",
+                    "column_order": 0,
+                    "example_values": [
+                        "success",
+                        "failed"
+                    ]
+                },
+                {
                     "data_path": "action_result.parameter.data",
                     "data_type": "string",
                     "example_values": [
@@ -1127,14 +1144,8 @@
                     "data_type": "string"
                 },
                 {
-                    "data_path": "action_result.status",
-                    "data_type": "string",
-                    "column_name": "Status",
-                    "column_order": 0,
-                    "example_values": [
-                        "success",
-                        "failed"
-                    ]
+                    "data_path": "action_result.summary",
+                    "data_type": "string"
                 },
                 {
                     "data_path": "action_result.message",
@@ -1144,10 +1155,6 @@
                     ],
                     "column_name": "Message",
                     "column_order": 1
-                },
-                {
-                    "data_path": "action_result.summary",
-                    "data_type": "string"
                 },
                 {
                     "data_path": "summary.total_objects",
@@ -1181,7 +1188,7 @@
             },
             {
                 "module": "certifi",
-                "input_file": "wheels/shared/certifi-2021.10.8-py2.py3-none-any.whl"
+                "input_file": "wheels/py3/certifi-2022.5.18.1-py3-none-any.whl"
             },
             {
                 "module": "chardet",

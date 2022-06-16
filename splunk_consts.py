@@ -34,14 +34,15 @@ SPLUNK_ERR_INVALID_INTEGER = "Please provide a valid integer value in the {param
 SPLUNK_ERR_NON_NEGATIVE_INTEGER = "Please provide a valid non-negative integer value in the {param} parameter"
 SPLUNK_ERR_INVALID_PARAM = "Please provide non-zero positive integer in {param}"
 SPLUNK_ERR_MSG_UNAVAILABLE = "Error message unavailable. Please check the asset configuration and|or action parameters."
-SPLUNK_ERR_CODE_UNAVAILABLE = "Error code unavailable"
-SPLUNK_UNICODE_DAMMIT_TYPE_ERROR_MESSAGE = "Error occurred while connecting to the Splunk server. Please check the asset \
-    configuration and|or the action parameters."
-SPLUNK_EXCEPTION_ERROR_MESSAGE = "{msg}. Error Code: {error_code}. Error Message: {error_msg}"
+SPLUNK_EXCEPTION_ERROR_MESSAGE = "{msg}. {error_text}"
 SPLUNK_JOB_FIELD_NOT_FOUND_MESSAGE = "{field} not found"
 SPLUNK_ERR_INVALID_SLEEP_TIME = "Please provide a value <= 120 seconds in the {param} parameter"
 SPLUNK_ERR_REQUIRED_CONFIG_PARAMS = "Please provide either API token or username and password in the asset \
     configuration parameters for authentication"
+SPLUNK_STATE_FILE_CORRUPT_ERR = (
+    "Error occurred while loading the state file due to its unexpected format. "
+    "Resetting the state file with the default format. Please try again."
+)
 
 # Progress messages
 SPLUNK_PROG_GOT_JOB_ID = "Got job id '{job_id}'"
@@ -75,7 +76,7 @@ SPLUNK_JSON_LAST_N_DAYS = "last_n_days"
 SPLUNK_JSON_TOTAL_EVENTS = "total_events"
 SPLUNK_JSON_UPDATED_EVENT_ID = "updated_event_id"
 SPLUNK_JSON_ATTACH_RESULT = "attach_result"
-SPLUNK_JSON_API_KEY = "api_token"
+SPLUNK_JSON_API_KEY = "api_token"  # pragma: allowlist secret
 
 # Default values
 SPLUNK_DEFAULT_EVENT_COUNT = 10
