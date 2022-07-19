@@ -39,6 +39,7 @@ import phantom.app as phantom
 import pytz
 import requests
 import simplejson as json
+import splunklib.binding as splunk_binding
 import splunklib.client as splunk_client
 import splunklib.results as splunk_results
 from bs4 import BeautifulSoup, UnicodeDammit
@@ -98,8 +99,8 @@ class SplunkConnector(phantom.BaseConnector):
                     error_msg = e.args[1]
                 elif len(e.args) == 1:
                     error_msg = e.args[0]
-        except Exception:
-            self.debug_print("Error occurred while fetching exception information")
+        except Exception as e:
+            self.debug_print("Error occurred while fetching exception information. Details: {}".format(str(e)))
 
         if not error_code:
             error_text = "Error Message: {}".format(error_msg)
@@ -273,6 +274,10 @@ class SplunkConnector(phantom.BaseConnector):
                 self._service = splunk_client.connect(handler=self.handler(proxy_param), **kwargs_config_flags)
             else:
                 self._service = splunk_client.connect(**kwargs_config_flags)
+        except splunk_binding.HTTPError as e:
+            self.debug_print("Error occurred while connecting to the Splunk server. Details: {}".format(
+                self._get_error_message_from_exception(e)))
+            return action_result.set_status(phantom.APP_ERROR, "Error occurred while connecting to the Splunk server")
         except Exception as e:
             error_text = consts.SPLUNK_EXCEPTION_ERROR_MESSAGE.format(msg=consts.SPLUNK_ERR_CONNECTION_FAILED,
                 error_text=self._get_error_message_from_exception(e))
@@ -372,7 +377,8 @@ class SplunkConnector(phantom.BaseConnector):
         except Exception:
             error_text = response.text
 
-        error_text = self._handle_py_ver_compat_for_input_str(error_text)
+        if len(error_text) > 500:
+            error_text = 'Error occurred while connecting to the Splunk server'
 
         if response.status_code != 200:
             try:
