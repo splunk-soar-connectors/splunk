@@ -460,6 +460,17 @@
                     "description": "Latest time modifier",
                     "data_type": "string",
                     "order": 7
+                },
+                "search_mode": {
+                    "description": "Search mode",
+                    "data_type": "string",
+                    "value_list": [
+                        "fast",
+                        "verbose",
+                        "smart"
+                    ],
+                    "default": "smart",
+                    "order": 8
                 }
             },
             "render": {
