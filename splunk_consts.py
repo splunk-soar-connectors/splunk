@@ -43,6 +43,8 @@ SPLUNK_STATE_FILE_CORRUPT_ERR = (
     "Error occurred while loading the state file due to its unexpected format. "
     "Resetting the state file with the default format. Please try again."
 )
+SPLUNK_ERR_UNABLE_TO_PARSE_JSON_RESPONSE = "Unable to parse response as JSON. {error}"
+SPLUNK_ERR_EMPTY_RESPONSE = "Status Code {code}. Empty response and no information in the header."
 
 # Progress messages
 SPLUNK_PROG_GOT_JOB_ID = "Got job id '{job_id}'"
@@ -83,11 +85,6 @@ SPLUNK_DEFAULT_EVENT_COUNT = 10
 SPLUNK_DEFAULT_ALERT_COUNT = 100
 SPLUNK_DEFAULT_SOURCE = "Phantom"
 SPLUNK_DEFAULT_SOURCE_TYPE = "Automation/Orchestration Platform"
-
-# HTML search strings:
-SPLUNK_POST_DATA_WARN = '<msg type="WARN">'
-SPLUNK_SERVER_VERSION = '<s:key name="version">'
-SPLUNK_ES_NAME = '<title>SA-EndpointProtection</title>'
 
 # Numeric constants
 SPLUNK_MILLISECONDS_IN_A_DAY = 86400000

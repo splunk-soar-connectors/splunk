@@ -42,6 +42,7 @@ import simplejson as json
 import splunklib.binding as splunk_binding
 import splunklib.client as splunk_client
 import splunklib.results as splunk_results
+import xmltodict
 from bs4 import BeautifulSoup, UnicodeDammit
 from dateutil.parser import ParserError
 from dateutil.parser import parse as dateutil_parse
@@ -275,9 +276,13 @@ class SplunkConnector(phantom.BaseConnector):
             else:
                 self._service = splunk_client.connect(**kwargs_config_flags)
         except splunk_binding.HTTPError as e:
-            self.debug_print("Error occurred while connecting to the Splunk server. Details: {}".format(
-                self._get_error_message_from_exception(e)))
-            return action_result.set_status(phantom.APP_ERROR, "Error occurred while connecting to the Splunk server")
+            error_text = self._get_error_message_from_exception(e)
+            self.debug_print("Error occurred while connecting to the Splunk server. Details: {}".format(error_text))
+            if '405 Method Not Allowed' in error_text:
+                return action_result.set_status(phantom.APP_ERROR, "Error occurred while connecting to the Splunk server")
+            else:
+                return action_result.set_status(phantom.APP_ERROR,
+                                                "Error occurred while connecting to the Splunk server. Details: {}".format(error_text))
         except Exception as e:
             error_text = consts.SPLUNK_EXCEPTION_ERROR_MESSAGE.format(msg=consts.SPLUNK_ERR_CONNECTION_FAILED,
                 error_text=self._get_error_message_from_exception(e))
@@ -349,7 +354,7 @@ class SplunkConnector(phantom.BaseConnector):
             # Splunk username/password based authentication
             auth = (self._username, self._password)
         try:
-            response = method(url, data=data, params=params,
+            r = method(url, data=data, params=params,
                     auth=auth,
                     headers=auth_headers,
                     verify=config[phantom.APP_JSON_VERIFY],
@@ -359,60 +364,192 @@ class SplunkConnector(phantom.BaseConnector):
                 error_text=self._get_error_message_from_exception(e))
             return action_result.set_status(phantom.APP_ERROR, error_text), None
 
+        return self._process_response(r, action_result)
+
+    def _process_response(self, r, action_result):
+        """
+        Process API response.
+
+        :param r: response object
+        :param action_result: object of Action Result
+        :return: status phantom.APP_ERROR/phantom.APP_SUCCESS(along with appropriate message)
+        """
         # store the r_text in debug data, it will get dumped in the logs if an error occurs
         if hasattr(action_result, 'add_debug_data'):
-            if (response is not None):
-                action_result.add_debug_data({'r_status_code': response.status_code})
-                action_result.add_debug_data({'r_text': response.text})
-                action_result.add_debug_data({'r_headers': response.headers})
+            if (r is not None):
+                action_result.add_debug_data({'r_status_code': r.status_code})
+                action_result.add_debug_data({'r_text': r.text})
+                action_result.add_debug_data({'r_headers': r.headers})
             else:
                 action_result.add_debug_data({'r_text': 'r is None'})
 
+        # Process each 'Content-Type' of response separately
+        # Process a json response
+        if 'json' in r.headers.get('Content-Type', ''):
+            return self._process_json_response(r, action_result)
+
+        # Process an HTML response, Do this no matter what the api talks.
+        # There is a high chance of a PROXY in between phantom and the rest of
+        # world, in case of errors, PROXY's return HTML, this function parses
+        # the error and adds it to the action_result.
+        if 'html' in r.headers.get('Content-Type', ''):
+            return self._process_html_response(r, action_result)
+
+        if 'xml' in r.headers.get('Content-Type', ''):
+            return self._process_xml_response(r, action_result)
+
+        # it's not content-type that is to be parsed, handle an empty response
+        if not r.text:
+            return self._process_empty_response(r, action_result)
+
+        # everything else is actually an error at this point
+        error_text = r.text.replace('{', '{{').replace('}', '}}')
+        message = "Can't process response from server. Status Code: {} Data from server: {}".format(r.status_code, error_text)
+
+        return RetVal(action_result.set_status(phantom.APP_ERROR, message), None)
+
+    def _process_empty_response(self, response, action_result):
+        """
+        Process empty response.
+
+        :param response: response object
+        :param action_result: object of Action Result
+        :return: status phantom.APP_ERROR/phantom.APP_SUCCESS(along with appropriate message)
+        """
+        if response.status_code == 200:
+            return RetVal(phantom.APP_SUCCESS, {})
+
+        return RetVal(
+            action_result.set_status(
+                phantom.APP_ERROR, consts.SPLUNK_ERR_EMPTY_RESPONSE.format(code=response.status_code)
+            ), None
+        )
+
+    def _process_xml_response(self, r, action_result):
+
+        resp_json = None
+        try:
+            if r.text:
+                resp_json = xmltodict.parse(r.text)
+        except Exception as e:
+            error_message = self._get_error_message_from_exception(e)
+            return RetVal(action_result.set_status(phantom.APP_ERROR, "Unable to parse XML response. Error: {0}".format(error_message)))
+
+        if 200 <= r.status_code < 400:
+            return RetVal(phantom.APP_SUCCESS, resp_json)
+
+        error_type = resp_json.get('response', {}).get('messages', {}).get('msg', {}).get('@type')
+        error_message = resp_json.get('response', {}).get('messages', {}).get('msg', {}).get('#text')
+
+        if error_type or error_message:
+            error = 'ErrorType: {} ErrorMessage: {}'.format(error_type, error_message)
+        else:
+            error = 'Unable to parse xml response'
+
+        message = "Error from server. Status Code: {0} Data from server: {1}".format(
+                r.status_code, error)
+
+        return RetVal(action_result.set_status(phantom.APP_ERROR, message), resp_json)
+
+    def _process_html_response(self, response, action_result):
+        """
+        Process html response.
+
+        :param response: response object
+        :param action_result: object of Action Result
+        :return: status phantom.APP_ERROR/phantom.APP_SUCCESS(along with appropriate message)
+        """
+        # An html response, treat it like an error
+        status_code = response.status_code
+
         try:
             soup = BeautifulSoup(response.text, "html.parser")
+            # Remove the script, style, footer and navigation part from the HTML message
+            for element in soup(["script", "style", "footer", "nav"]):
+                element.extract()
             error_text = soup.text
             split_lines = error_text.split('\n')
             split_lines = [x.strip() for x in split_lines if x.strip()]
             error_text = '\n'.join(split_lines)
-        except Exception:
-            error_text = response.text
+        except:
+            error_text = consts.SPLUNK_ERR_UNABLE_TO_PARSE_JSON_RESPONSE
 
-        if len(error_text) > 500:
-            error_text = 'Error occurred while connecting to the Splunk server'
+        if not error_text:
+            error_text = "Empty response and no information received"
+        message = "Status Code: {}. Data from server:\n{}\n".format(status_code, error_text)
 
-        if response.status_code != 200:
-            try:
-                return action_result.set_status(phantom.APP_ERROR, "{}. {}".format(consts.SPLUNK_ERR_NOT_200, error_text)), None
-            except Exception:
-                return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_NOT_200), None
+        message = message.replace('{', '{{').replace('}', '}}')
 
-        if endpoint != 'notable_update':
-            return phantom.APP_SUCCESS, response.text
+        if len(message) > 500:
+            message = 'Error occurred while connecting to the Splunk ITSI server'
 
+        return RetVal(action_result.set_status(phantom.APP_ERROR, message), None)
+
+    def _process_json_response(self, r, action_result):
+        """
+        Process json response.
+
+        :param r: response object
+        :param action_result: object of Action Result
+        :return: status phantom.APP_ERROR/phantom.APP_SUCCESS(along with appropriate message)
+        """
+        status_code = r.status_code
+        # Try a json parse
         try:
-            resp_json = response.json()
+            resp_json = r.json()
         except Exception as e:
-            error_text = consts.SPLUNK_EXCEPTION_ERROR_MESSAGE.format(msg=consts.SPLUNK_ERR_NOT_JSON,
-                error_text=self._get_error_message_from_exception(e))
-            return action_result.set_status(phantom.APP_ERROR, error_text), None
+            error_msg = self._get_error_message_from_exception(e)
+            return RetVal(
+                action_result.set_status(
+                    phantom.APP_ERROR, consts.SPLUNK_ERR_UNABLE_TO_PARSE_JSON_RESPONSE.format(error=error_msg)
+                ), None
+            )
 
-        return phantom.APP_SUCCESS, resp_json
+        # Please specify the status codes here
+        if 200 <= r.status_code < 399:
+            return RetVal(phantom.APP_SUCCESS, resp_json)
+
+        if isinstance(resp_json, str):
+            message = "Error from server. Details: {}".format(resp_json)
+        elif resp_json.get('error') or resp_json.get('error_description'):
+            error = resp_json.get('error', 'Unavailable')
+            error_details = resp_json.get('error_description', 'Unavailable')
+            message = "Error from server. Status Code: {}. Error: {}. Error Details: {}".format(status_code, error, error_details)
+        elif resp_json.get('messages'):
+            if resp_json['messages']:
+                error_type = resp_json['messages'][0].get('type')
+                error_message = resp_json['messages'][0].get('text')
+
+                if error_type or error_message:
+                    error = 'ErrorType: {} ErrorMessage: {}'.format(error_type, error_message)
+                else:
+                    error = 'Unable to parse json response'
+            else:
+                error = 'Unable to parse json response'
+
+            message = "Error from server. Status Code: {0} Data from server: {1}".format(
+                    r.status_code, error)
+        else:
+            # You should process the error returned in the json
+            error_text = r.text.replace("{", "{{").replace("}", "}}")
+            message = "Error from server. Status Code: {}. Data from server: {}".format(status_code, error_text)
+
+        return RetVal(action_result.set_status(phantom.APP_ERROR, message), None)
 
     def _get_server_version(self, action_result):
 
-        endpoint = 'server/info'
+        endpoint = 'authentication/users?output_mode=json'
         ret_val, resp_data = self._make_rest_call_retry(action_result, endpoint, {}, method=requests.get)
 
         if phantom.is_fail(ret_val):
             return 'FAILURE'
 
-        if consts.SPLUNK_SERVER_VERSION not in resp_data:
-            return 'UNKNOWN'
+        splunk_version = resp_data.get('generator', {}).get('version')
 
-        begin_version = re.search(consts.SPLUNK_SERVER_VERSION, resp_data).end()
-        end_version = re.search('</s:key>', resp_data[begin_version:]).start()
+        if not splunk_version:
+            splunk_version = 'UNKNOWN'
 
-        return resp_data[begin_version:begin_version + end_version]
+        return splunk_version
 
     def _check_for_es(self, action_result):
 
@@ -569,8 +706,7 @@ class SplunkConnector(phantom.BaseConnector):
             return False
 
         self._splunk_status_dict = {}
-        resp_data_json = json.loads(resp_data)
-        entry = resp_data_json.get("entry")
+        entry = resp_data.get("entry")
 
         if not entry:
             return False

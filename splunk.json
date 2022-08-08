@@ -49,7 +49,7 @@
             },
             {
                 "module": "certifi",
-                "input_file": "wheels/py3/certifi-2022.5.18.1-py3-none-any.whl"
+                "input_file": "wheels/py3/certifi-2022.6.15-py3-none-any.whl"
             },
             {
                 "module": "chardet",
@@ -93,7 +93,11 @@
             },
             {
                 "module": "urllib3",
-                "input_file": "wheels/shared/urllib3-1.26.9-py2.py3-none-any.whl"
+                "input_file": "wheels/shared/urllib3-1.26.11-py2.py3-none-any.whl"
+            },
+            {
+                "module": "xmltodict",
+                "input_file": "wheels/shared/xmltodict-0.13.0-py2.py3-none-any.whl"
             }
         ]
     },
@@ -1188,7 +1192,7 @@
             },
             {
                 "module": "certifi",
-                "input_file": "wheels/py3/certifi-2022.5.18.1-py3-none-any.whl"
+                "input_file": "wheels/py3/certifi-2022.6.15-py3-none-any.whl"
             },
             {
                 "module": "chardet",
@@ -1232,7 +1236,11 @@
             },
             {
                 "module": "urllib3",
-                "input_file": "wheels/shared/urllib3-1.26.9-py2.py3-none-any.whl"
+                "input_file": "wheels/shared/urllib3-1.26.11-py2.py3-none-any.whl"
+            },
+            {
+                "module": "xmltodict",
+                "input_file": "wheels/shared/xmltodict-0.13.0-py2.py3-none-any.whl"
             }
         ]
     }
