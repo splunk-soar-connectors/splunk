@@ -151,9 +151,13 @@ class SplunkConnector(phantom.BaseConnector):
 
         if 'HTTP_PROXY' in os.environ:
             self._proxy['http'] = os.environ.get('HTTP_PROXY')
+        elif 'http_proxy' in os.environ:
+            self._proxy['http'] = os.environ.get('http_proxy')
 
         if 'HTTPS_PROXY' in os.environ:
             self._proxy['https'] = os.environ.get('HTTPS_PROXY')
+        elif 'https_proxy' in os.environ:
+            self._proxy['https'] = os.environ.get('https_proxy')
 
         self._container_name_prefix = config.get('container_name_prefix', '')
         container_name_values = config.get('container_name_values')
