@@ -29,7 +29,7 @@
             },
             {
                 "module": "certifi",
-                "input_file": "wheels/shared/certifi-2021.10.8-py2.py3-none-any.whl"
+                "input_file": "wheels/py3/certifi-2022.6.15-py3-none-any.whl"
             },
             {
                 "module": "chardet",
@@ -69,11 +69,11 @@
             },
             {
                 "module": "splunk_sdk",
-                "input_file": "wheels/py3/splunk_sdk-1.6.18-py3-none-any.whl"
+                "input_file": "wheels/py3/splunk_sdk-1.7.0-py3-none-any.whl"
             },
             {
                 "module": "urllib3",
-                "input_file": "wheels/shared/urllib3-1.26.9-py2.py3-none-any.whl"
+                "input_file": "wheels/shared/urllib3-1.26.11-py2.py3-none-any.whl"
             }
         ]
     },
@@ -1156,7 +1156,7 @@
             },
             {
                 "module": "certifi",
-                "input_file": "wheels/shared/certifi-2021.10.8-py2.py3-none-any.whl"
+                "input_file": "wheels/py3/certifi-2022.6.15-py3-none-any.whl"
             },
             {
                 "module": "chardet",
@@ -1196,11 +1196,11 @@
             },
             {
                 "module": "splunk_sdk",
-                "input_file": "wheels/py3/splunk_sdk-1.6.18-py3-none-any.whl"
+                "input_file": "wheels/py3/splunk_sdk-1.7.0-py3-none-any.whl"
             },
             {
                 "module": "urllib3",
-                "input_file": "wheels/shared/urllib3-1.26.9-py2.py3-none-any.whl"
+                "input_file": "wheels/shared/urllib3-1.26.11-py2.py3-none-any.whl"
             }
         ]
     }
