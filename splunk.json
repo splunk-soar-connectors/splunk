@@ -5,7 +5,7 @@
     "publisher": "Splunk",
     "type": "siem",
     "main_module": "splunk_connector.py",
-    "app_version": "2.10.1b",
+    "app_version": "2.10.1-beta",
     "utctime_updated": "2022-02-04T02:22:09.000000Z",
     "package_name": "phantom_splunk",
     "product_name": "Splunk Enterprise",
