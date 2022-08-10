@@ -149,15 +149,15 @@ class SplunkConnector(phantom.BaseConnector):
         if not self._api_token and (not self._username or not self._password):
             return self.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_REQUIRED_CONFIG_PARAMS)
 
-        if 'HTTP_PROXY' in os.environ:
-            self._proxy['http'] = os.environ.get('HTTP_PROXY')
-        elif 'http_proxy' in os.environ:
+        if 'http_proxy' in os.environ:
             self._proxy['http'] = os.environ.get('http_proxy')
+        elif 'HTTP_PROXY' in os.environ:
+            self._proxy['http'] = os.environ.get('HTTP_PROXY')
 
-        if 'HTTPS_PROXY' in os.environ:
-            self._proxy['https'] = os.environ.get('HTTPS_PROXY')
-        elif 'https_proxy' in os.environ:
+        if 'https_proxy' in os.environ:
             self._proxy['https'] = os.environ.get('https_proxy')
+        elif 'HTTPS_PROXY' in os.environ:
+            self._proxy['https'] = os.environ.get('HTTPS_PROXY')
 
         self._container_name_prefix = config.get('container_name_prefix', '')
         container_name_values = config.get('container_name_values')
