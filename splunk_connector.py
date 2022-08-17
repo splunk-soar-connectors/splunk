@@ -273,9 +273,18 @@ class SplunkConnector(phantom.BaseConnector):
         if self._proxy.get('https', None) is not None:
             proxy_param = self._proxy.get('https')
 
+        no_proxy_host = os.environ.get('no_proxy', os.environ.get('NO_PROXY'))
+        if self.splunk_server in no_proxy_host.split(","):
+            pass
+        elif self._api_token:
+            if any(proxy_var in os.environ for proxy_var in ['HTTPS_PROXY', 'https_proxy']):
+                self.save_progress("[-] Engaging Proxy")
+        else:
+            if any(proxy_var in os.environ for proxy_var in ['HTTPS_PROXY', 'https_proxy', 'HTTP_PROXY', 'http_proxy']):
+                self.save_progress("[-] Engaging Proxy")
+
         try:
             if proxy_param:
-                self.save_progress("[-] Engaging Proxy")
                 self._service = splunk_client.connect(handler=self.handler(proxy_param), **kwargs_config_flags)
             else:
                 self._service = splunk_client.connect(**kwargs_config_flags)
@@ -485,7 +494,7 @@ class SplunkConnector(phantom.BaseConnector):
         message = message.replace('{', '{{').replace('}', '}}')
 
         if len(message) > 500:
-            message = 'Error occurred while connecting to the Splunk ITSI server'
+            message = 'Error occurred while connecting to the Splunk server'
 
         return RetVal(action_result.set_status(phantom.APP_ERROR, message), None)
 
