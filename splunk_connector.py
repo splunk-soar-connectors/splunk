@@ -105,6 +105,15 @@ class SplunkConnector(phantom.BaseConnector):
             error_msg = consts.SPLUNK_ERR_MSG_UNAVAILABLE
 
         try:
+            if error_msg == consts.SPLUNK_ERR_MSG_UNAVAILABLE:
+                error_msg = str(e).strip().replace("'",'').replace("\"",'').replace("\n",'').replace("\r",'')
+                if len(error_msg) > 500:
+                    error_msg = '{} - truncated'.format(error_msg[:500])
+                error_msg = '{} ({})'.format(error_msg, sys.exc_info()[-1].tb_lineno)
+        except:
+            pass
+
+        try:
             error_msg = self._handle_py_ver_compat_for_input_str(error_msg)
         except TypeError:
             error_msg = consts.SPLUNK_UNICODE_DAMMIT_TYPE_ERROR_MESSAGE

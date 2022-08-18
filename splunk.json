@@ -3,6 +3,11 @@
     "name": "Splunk",
     "description": "This app integrates with Splunk to update data on the device, in addition to investigate and ingestion actions",
     "publisher": "Splunk",
+    "contributors": [
+      {
+        "Jeff Berry"
+      }
+    ],
     "type": "siem",
     "main_module": "splunk_connector.py",
     "app_version": "2.10.0",
