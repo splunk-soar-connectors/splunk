@@ -1,1 +1,1 @@
-**Unreleased**
+* Fixed issue with error logging
