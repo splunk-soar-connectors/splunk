@@ -35,8 +35,8 @@
     "fips_compliant": true,
     "python_version": "3",
     "latest_tested_versions": [
-        "On-premise, Splunk Enterprise Security v8.2.0",
-        "Cloud, Splunk Cloud Platform v8.2.2104"
+        "On-premise, Splunk Enterprise Security v9.0.0",
+        "Cloud, Splunk Cloud Platform v8.2.2112"
     ],
     "logo": "logo_splunk.svg",
     "logo_dark": "logo_splunk_dark.svg",
