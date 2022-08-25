@@ -429,7 +429,7 @@ class SplunkConnector(phantom.BaseConnector):
         :param action_result: object of Action Result
         :return: status phantom.APP_ERROR/phantom.APP_SUCCESS(along with appropriate message)
         """
-        if response.status_code == 200:
+        if response.status_code == 200 or response.status_code == 204:
             return RetVal(phantom.APP_SUCCESS, {})
 
         return RetVal(
