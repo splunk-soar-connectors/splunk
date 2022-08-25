@@ -106,7 +106,7 @@ class SplunkConnector(phantom.BaseConnector):
 
         try:
             if error_msg == consts.SPLUNK_ERR_MSG_UNAVAILABLE:
-                error_msg = str(e).strip().replace("'",'').replace("\"",'').replace("\n",'').replace("\r",'')
+                error_msg = str(e).strip().replace("'", '').replace("\"", '').replace("\n", '').replace("\r", '')
                 if len(error_msg) > 500:
                     error_msg = '{} - truncated'.format(error_msg[:500])
                 error_msg = '{} ({})'.format(error_msg, sys.exc_info()[-1].tb_lineno)
