@@ -273,7 +273,7 @@ class SplunkConnector(phantom.BaseConnector):
         if self._proxy.get('https', None) is not None:
             proxy_param = self._proxy.get('https')
 
-        no_proxy_host = os.environ.get('no_proxy', os.environ.get('NO_PROXY'))
+        no_proxy_host = os.environ.get('no_proxy', os.environ.get('NO_PROXY', ''))
         if self.splunk_server in no_proxy_host.split(","):
             pass
         elif self._api_token:
