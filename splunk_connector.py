@@ -46,7 +46,6 @@ import xmltodict
 from bs4 import BeautifulSoup, UnicodeDammit
 from dateutil.parser import ParserError
 from dateutil.parser import parse as dateutil_parse
-from future.standard_library import install_aliases
 from past.utils import old_div  # noqa
 from phantom.base_connector import BaseConnector
 from phantom.vault import Vault
@@ -54,8 +53,6 @@ from pytz import timezone
 from splunklib.binding import HTTPError
 
 import splunk_consts as consts
-
-install_aliases()
 
 
 class RetVal(tuple):

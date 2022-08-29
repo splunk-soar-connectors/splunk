@@ -56,10 +56,6 @@
                 "input_file": "wheels/shared/chardet-3.0.4-py2.py3-none-any.whl"
             },
             {
-                "module": "future",
-                "input_file": "wheels/py3/future-0.18.2-py3-none-any.whl"
-            },
-            {
                 "module": "idna",
                 "input_file": "wheels/shared/idna-2.10-py2.py3-none-any.whl"
             },
@@ -93,7 +89,7 @@
             },
             {
                 "module": "urllib3",
-                "input_file": "wheels/shared/urllib3-1.26.11-py2.py3-none-any.whl"
+                "input_file": "wheels/shared/urllib3-1.26.12-py2.py3-none-any.whl"
             },
             {
                 "module": "xmltodict",
@@ -1199,10 +1195,6 @@
                 "input_file": "wheels/shared/chardet-3.0.4-py2.py3-none-any.whl"
             },
             {
-                "module": "future",
-                "input_file": "wheels/py3/future-0.18.2-py3-none-any.whl"
-            },
-            {
                 "module": "idna",
                 "input_file": "wheels/shared/idna-2.10-py2.py3-none-any.whl"
             },
@@ -1236,7 +1228,7 @@
             },
             {
                 "module": "urllib3",
-                "input_file": "wheels/shared/urllib3-1.26.11-py2.py3-none-any.whl"
+                "input_file": "wheels/shared/urllib3-1.26.12-py2.py3-none-any.whl"
             },
             {
                 "module": "xmltodict",
