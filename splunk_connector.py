@@ -294,7 +294,7 @@ class SplunkConnector(phantom.BaseConnector):
                 return action_result.set_status(phantom.APP_ERROR,
                                                 "Error occurred while connecting to the Splunk server. Details: {}".format(error_text))
         except Exception as e:
-            error_text = consts.SPLUNK_EXCEPTION_ERROR_MESSAGE.format(msg=consts.SPLUNK_ERR_CONNECTION_FAILED,
+            error_text = consts.SPLUNK_EXCEPTION_ERR_MESSAGE.format(msg=consts.SPLUNK_ERR_CONNECTION_FAILED,
                 error_text=self._get_error_message_from_exception(e))
             return action_result.set_status(phantom.APP_ERROR, error_text)
 
@@ -370,7 +370,7 @@ class SplunkConnector(phantom.BaseConnector):
                     verify=config[phantom.APP_JSON_VERIFY],
                     timeout=consts.SPLUNK_DEFAULT_REQUEST_TIMEOUT)
         except Exception as e:
-            error_text = consts.SPLUNK_EXCEPTION_ERROR_MESSAGE.format(msg=consts.SPLUNK_ERR_CONNECTION_FAILED,
+            error_text = consts.SPLUNK_EXCEPTION_ERR_MESSAGE.format(msg=consts.SPLUNK_ERR_CONNECTION_FAILED,
                 error_text=self._get_error_message_from_exception(e))
             return action_result.set_status(phantom.APP_ERROR, error_text), None
 
@@ -599,12 +599,12 @@ class SplunkConnector(phantom.BaseConnector):
                 self._service.parse(search_query, parse_only=True)
                 break
             except HTTPError as e:
-                error_text = consts.SPLUNK_EXCEPTION_ERROR_MESSAGE.format(msg=consts.SPLUNK_ERR_INVALID_QUERY,
+                error_text = consts.SPLUNK_EXCEPTION_ERR_MESSAGE.format(msg=consts.SPLUNK_ERR_INVALID_QUERY,
                     error_text=self._get_error_message_from_exception(e))
                 return action_result.set_status(phantom.APP_ERROR, error_text, query=search_query)
             except Exception as e:
                 if attempt_count == RETRY_LIMIT - 1:
-                    error_text = consts.SPLUNK_EXCEPTION_ERROR_MESSAGE.format(msg=consts.SPLUNK_ERR_CONNECTION_FAILED,
+                    error_text = consts.SPLUNK_EXCEPTION_ERR_MESSAGE.format(msg=consts.SPLUNK_ERR_CONNECTION_FAILED,
                         error_text=self._get_error_message_from_exception(e))
                     return action_result.set_status(phantom.APP_ERROR, error_text)
 
@@ -627,7 +627,7 @@ class SplunkConnector(phantom.BaseConnector):
                     break
                 except Exception as e:
                     if attempt_count == RETRY_LIMIT - 1:
-                        error_text = consts.SPLUNK_EXCEPTION_ERROR_MESSAGE.format(msg=consts.SPLUNK_ERR_UNABLE_TO_CREATE_JOB,
+                        error_text = consts.SPLUNK_EXCEPTION_ERR_MESSAGE.format(msg=consts.SPLUNK_ERR_UNABLE_TO_CREATE_JOB,
                             error_text=self._get_error_message_from_exception(e))
                         return action_result.set_status(phantom.APP_ERROR, error_text)
 
@@ -641,7 +641,7 @@ class SplunkConnector(phantom.BaseConnector):
                         break
                     except Exception as e:
                         if attempt_count == RETRY_LIMIT - 1:
-                            error_text = consts.SPLUNK_EXCEPTION_ERROR_MESSAGE.format(msg=consts.SPLUNK_ERR_CONNECTION_FAILED,
+                            error_text = consts.SPLUNK_EXCEPTION_ERR_MESSAGE.format(msg=consts.SPLUNK_ERR_CONNECTION_FAILED,
                                 error_text=self._get_error_message_from_exception(e))
                             return action_result.set_status(phantom.APP_ERROR, error_text)
 
@@ -658,7 +658,7 @@ class SplunkConnector(phantom.BaseConnector):
             try:
                 results = splunk_results.ResultsReader(job.results(count=0))
             except Exception as e:
-                error_text = consts.SPLUNK_EXCEPTION_ERROR_MESSAGE.format(msg="Error retrieving results",
+                error_text = consts.SPLUNK_EXCEPTION_ERR_MESSAGE.format(msg="Error retrieving results",
                                                                           error_text=self._get_error_message_from_exception(e))
                 return action_result.set_status(phantom.APP_ERROR, error_text)
 
@@ -1028,12 +1028,12 @@ class SplunkConnector(phantom.BaseConnector):
             datetime_obj = dateutil_parse(start_time)
             return datetime_obj.astimezone(pytz.utc).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
         except ParserError as parse_err:
-            error_text = consts.SPLUNK_EXCEPTION_ERROR_MESSAGE.format(msg="ParserError while parsing _time",
+            error_text = consts.SPLUNK_EXCEPTION_ERR_MESSAGE.format(msg="ParserError while parsing _time",
                 error_text=self._get_error_message_from_exception(parse_err))
             self.save_progress(error_text)
             return None
         except Exception as e:
-            error_text = consts.SPLUNK_EXCEPTION_ERROR_MESSAGE.format(msg="Exception while parsing _time",
+            error_text = consts.SPLUNK_EXCEPTION_ERR_MESSAGE.format(msg="Exception while parsing _time",
                 error_text=self._get_error_message_from_exception(e))
             self.save_progress(error_text)
             return None
@@ -1239,7 +1239,7 @@ class SplunkConnector(phantom.BaseConnector):
                 if (phantom.is_fail(self._connect(action_result))):
                     return action_result.get_status()
                 if attempt_count == RETRY_LIMIT - 1:
-                    error_text = consts.SPLUNK_EXCEPTION_ERROR_MESSAGE.format(msg=consts.SPLUNK_ERR_INVALID_QUERY,
+                    error_text = consts.SPLUNK_EXCEPTION_ERR_MESSAGE.format(msg=consts.SPLUNK_ERR_INVALID_QUERY,
                         error_text=self._get_error_message_from_exception(e))
                     return action_result.set_status(phantom.APP_ERROR, error_text, query=search_query)
             except Exception as e:
@@ -1247,7 +1247,7 @@ class SplunkConnector(phantom.BaseConnector):
                 if (phantom.is_fail(self._connect(action_result))):
                     return action_result.get_status()
                 if attempt_count == RETRY_LIMIT - 1:
-                    error_text = consts.SPLUNK_EXCEPTION_ERROR_MESSAGE.format(msg=consts.SPLUNK_ERR_CONNECTION_FAILED,
+                    error_text = consts.SPLUNK_EXCEPTION_ERR_MESSAGE.format(msg=consts.SPLUNK_ERR_CONNECTION_FAILED,
                         error_text=self._get_error_message_from_exception(e))
                     return action_result.set_status(phantom.APP_ERROR, error_text)
 
@@ -1269,7 +1269,7 @@ class SplunkConnector(phantom.BaseConnector):
             except Exception as e:
                 self.debug_print('Failed to create job: Reason: %s' % e)
                 if attempt_count == RETRY_LIMIT - 1:
-                    error_text = consts.SPLUNK_EXCEPTION_ERROR_MESSAGE.format(msg=consts.SPLUNK_ERR_UNABLE_TO_CREATE_JOB,
+                    error_text = consts.SPLUNK_EXCEPTION_ERR_MESSAGE.format(msg=consts.SPLUNK_ERR_UNABLE_TO_CREATE_JOB,
                         error_text=self._get_error_message_from_exception(e))
                     return action_result.set_status(phantom.APP_ERROR, error_text)
 
@@ -1285,7 +1285,7 @@ class SplunkConnector(phantom.BaseConnector):
                     break
                 except Exception as e:
                     if attempt_count == RETRY_LIMIT - 1:
-                        error_text = consts.SPLUNK_EXCEPTION_ERROR_MESSAGE.format(msg=consts.SPLUNK_ERR_CONNECTION_FAILED,
+                        error_text = consts.SPLUNK_EXCEPTION_ERR_MESSAGE.format(msg=consts.SPLUNK_ERR_CONNECTION_FAILED,
                             error_text=self._get_error_message_from_exception(e))
                         return action_result.set_status(phantom.APP_ERROR, error_text)
 
@@ -1310,7 +1310,7 @@ class SplunkConnector(phantom.BaseConnector):
         try:
             results = splunk_results.ResultsReader(job.results(count=kwargs_create.get('max_count', 0)))
         except Exception as e:
-            error_text = consts.SPLUNK_EXCEPTION_ERROR_MESSAGE.format(msg="Error retrieving results",
+            error_text = consts.SPLUNK_EXCEPTION_ERR_MESSAGE.format(msg="Error retrieving results",
                 error_text=self._get_error_message_from_exception(e))
             return action_result.set_status(phantom.APP_ERROR, error_text)
 
