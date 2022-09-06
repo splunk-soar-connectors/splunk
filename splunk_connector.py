@@ -675,7 +675,10 @@ class SplunkConnector(phantom.BaseConnector):
         index = param.get(consts.SPLUNK_JSON_INDEX)
         source = param.get(consts.SPLUNK_JSON_SOURCE, consts.SPLUNK_DEFAULT_SOURCE)
         source_type = param.get(consts.SPLUNK_JSON_SOURCE_TYPE, consts.SPLUNK_DEFAULT_SOURCE_TYPE)
-        post_data = param[consts.SPLUNK_JSON_DATA], always_encode=True
+        try:
+            post_data = UnicodeDammit(param[consts.SPLUNK_JSON_DATA]).unicode_markup.encode('utf-8')
+        except Exception as e:
+            self._dump_error_log(e, "Error while encoding data.")
 
         get_params = {'source': source, 'sourcetype': source_type}
 
@@ -1026,7 +1029,7 @@ class SplunkConnector(phantom.BaseConnector):
             datetime_obj = dateutil_parse(start_time)
             return datetime_obj.astimezone(pytz.utc).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
         except ParserError as parse_err:
-            self._dump_error_log(e, "ParserError while parsing _time.")
+            self._dump_error_log(parse_err, "ParserError while parsing _time.")
             error_text = consts.SPLUNK_EXCEPTION_ERR_MESSAGE.format(msg="ParserError while parsing _time",
                 error_text=self._get_error_message_from_exception(parse_err))
             self.save_progress(error_text)

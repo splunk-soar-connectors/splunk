@@ -569,6 +569,20 @@
                     ]
                 },
                 {
+                    "data_path": "action_result.data.*._key",
+                    "data_type": "string",
+                    "example_values": [
+                        "1659398400|_audit"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*._origtime",
+                    "data_type": "string",
+                    "example_values": [
+                        "1659398400"
+                    ]
+                },
+                {
                     "data_path": "action_result.data.*._bkt",
                     "data_type": "string"
                 },
