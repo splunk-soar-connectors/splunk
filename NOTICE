@@ -10,13 +10,6 @@ Copyright 2004-2017 Leonard Richardson
 Copyright 2004-2019 Leonard Richardson
 Copyright 2018 Isaac Muse
 
-Library: future
-Version: 0.18.2
-License: MIT
-Copyright 2013-2019 Python Charmers Pty Ltd, Australia
-Copyright 2013-2019 Python Charmers Pty Ltd, Australia
-Copyright 2013-2019 Python Charmers Pty Ltd, Australia
-
 Library: python-dateutil
 Version: 2.8.1
 License: Apache 2.0
