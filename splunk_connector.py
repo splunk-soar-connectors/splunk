@@ -21,6 +21,7 @@ import ssl
 import sys
 import tempfile
 import time
+import traceback
 from builtins import map  # noqa
 from builtins import range  # noqa
 from builtins import str  # noqa
@@ -90,6 +91,7 @@ class SplunkConnector(phantom.BaseConnector):
         error_code = None
         error_msg = consts.SPLUNK_ERR_MSG_UNAVAILABLE
 
+        self._dump_error_log(traceback.format_stack(e))
         try:
             if hasattr(e, "args"):
                 if len(e.args) > 1:
@@ -1269,7 +1271,6 @@ class SplunkConnector(phantom.BaseConnector):
         for attempt_count in range(0, RETRY_LIMIT):
             try:
                 job = self._service.jobs.create(search_query, **kwargs_create)
-                self.debug_print("Job ---> {}".format(job))
                 break
             except Exception as e:
                 self._dump_error_log(e, 'Failed to create job.')
