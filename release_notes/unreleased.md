@@ -1,2 +1,3 @@
 **Unreleased**
-* Improve error logging
+* Improved error logging
+* Removed python 2 related code
