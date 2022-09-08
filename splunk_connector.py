@@ -91,7 +91,7 @@ class SplunkConnector(phantom.BaseConnector):
         error_code = None
         error_msg = consts.SPLUNK_ERR_MSG_UNAVAILABLE
 
-        self._dump_error_log(traceback.format_stack(e))
+        self.error_print("Traceback: {}".format(traceback.format_stack()))
         try:
             if hasattr(e, "args"):
                 if len(e.args) > 1:
