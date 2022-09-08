@@ -5,6 +5,9 @@
     "publisher": "Splunk",
     "contributors": [
         {
+            "name": "Jeff Berry"
+        },
+        {
             "name": "Mayur Pipaliya"
         },
         {
@@ -400,24 +403,29 @@
             "parameters": {
                 "container_id": {
                     "description": "Parameter ignored in this app",
-                    "data_type": "numeric"
+                    "data_type": "numeric",
+                    "order": 0
                 },
                 "start_time": {
                     "description": "Parameter ignored in this app",
-                    "data_type": "numeric"
+                    "data_type": "numeric",
+                    "order": 1
                 },
                 "end_time": {
                     "description": "Parameter ignored in this app",
-                    "data_type": "numeric"
+                    "data_type": "numeric",
+                    "order": 2
                 },
                 "container_count": {
                     "description": "Maximum number of events to query for",
                     "data_type": "numeric",
-                    "default": 100
+                    "default": 100,
+                    "order": 3
                 },
                 "artifact_count": {
                     "description": "Parameter ignored in this app",
-                    "data_type": "numeric"
+                    "data_type": "numeric",
+                    "order": 4
                 }
             },
             "output": [],
@@ -558,6 +566,20 @@
                     "example_values": [
                         "-2d",
                         "2022-03-18T16:12:07.130+00:00"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*._key",
+                    "data_type": "string",
+                    "example_values": [
+                        "1659398400|_audit"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*._origtime",
+                    "data_type": "string",
+                    "example_values": [
+                        "1659398400"
                     ]
                 },
                 {
