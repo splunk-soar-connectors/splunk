@@ -44,6 +44,7 @@ SPLUNK_STATE_FILE_CORRUPT_ERR = (
     "Resetting the state file with the default format. Please try again."
 )
 SPLUNK_ERR_UNABLE_TO_PARSE_JSON_RESPONSE = "Unable to parse response as JSON. {error}"
+SPLUNK_ERR_UNABLE_TO_PARSE_HTML_RESPONSE = "Unable to parse HTML response. {error}"
 SPLUNK_ERR_EMPTY_RESPONSE = "Status Code {code}. Empty response and no information in the header."
 
 # Progress messages

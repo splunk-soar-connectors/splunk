@@ -2,7 +2,7 @@
 # Splunk
 
 Publisher: Splunk  
-Connector Version: 2\.11\.0  
+Connector Version: 2\.11\.1  
 Product Vendor: Splunk Inc\.  
 Product Name: Splunk Enterprise  
 Product Version Supported (regex): "\.\*"  
@@ -456,6 +456,8 @@ action\_result\.parameter\.end\_time | string |
 action\_result\.parameter\.parse\_only | boolean | 
 action\_result\.parameter\.query | string |  `splunk query` 
 action\_result\.parameter\.start\_time | string | 
+action\_result\.data\.\*\.\_key | string | 
+action\_result\.data\.\*\.\_origtime | string | 
 action\_result\.data\.\*\.\_bkt | string | 
 action\_result\.data\.\*\.\_cd | string | 
 action\_result\.data\.\*\.\_indextime | string | 
