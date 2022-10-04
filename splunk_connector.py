@@ -656,7 +656,7 @@ class SplunkConnector(phantom.BaseConnector):
             self.send_progress("Parsing results...")
 
             try:
-                results = splunk_results.ResultsReader(job.results(count=0))
+                results = splunk_results.JSONResultsReader(job.results(count=0, output_mode='json'))
             except Exception as e:
                 error_text = consts.SPLUNK_EXCEPTION_ERR_MESSAGE.format(msg="Error retrieving results",
                                                                           error_text=self._get_error_message_from_exception(e))
@@ -1317,7 +1317,7 @@ class SplunkConnector(phantom.BaseConnector):
         ten_percent = float(result_count) * 0.10
 
         try:
-            results = splunk_results.ResultsReader(job.results(count=kwargs_create.get('max_count', 0)))
+            results = splunk_results.JSONResultsReader(job.results(count=kwargs_create.get('max_count', 0), output_mode='json'))
         except Exception as e:
             self._dump_error_log(e)
             error_text = consts.SPLUNK_EXCEPTION_ERR_MESSAGE.format(msg="Error retrieving results",
