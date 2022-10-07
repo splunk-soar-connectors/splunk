@@ -1,1 +1,3 @@
 **Unreleased**
+* Added search_mode parameter to "run query" action with fast, verbose, and smart as possible values [PAPP-10085]
+* Update Splunk SDK to 1.7.2 and changed ResultsReader to JSONResultsReader [PAPP-27658]
