@@ -1328,10 +1328,11 @@ class SplunkConnector(phantom.BaseConnector):
 
         for result in results:
 
-            if isinstance(result, dict):
+            if not isinstance(result, dict):
+                continue
 
-                action_result.add_data(result)
-                data.append(result)
+            action_result.add_data(result)
+            data.append(result)
 
             result_index += 1
 
