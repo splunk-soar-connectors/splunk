@@ -2,7 +2,7 @@
 # Splunk
 
 Publisher: Splunk  
-Connector Version: 2\.11\.1  
+Connector Version: 2\.12\.0  
 Product Vendor: Splunk Inc\.  
 Product Name: Splunk Enterprise  
 Product Version Supported (regex): "\.\*"  
@@ -444,6 +444,7 @@ PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 **attach\_result** |  optional  | Attach result to the vault | boolean | 
 **start\_time** |  optional  | Earliest time modifier | string | 
 **end\_time** |  optional  | Latest time modifier | string | 
+**search\_mode** |  optional  | Search mode | string | 
 
 #### Action Output
 DATA PATH | TYPE | CONTAINS

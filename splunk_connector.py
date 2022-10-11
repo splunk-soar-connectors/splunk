@@ -656,7 +656,7 @@ class SplunkConnector(phantom.BaseConnector):
             self.send_progress("Parsing results...")
 
             try:
-                results = splunk_results.ResultsReader(job.results(count=0))
+                results = splunk_results.JSONResultsReader(job.results(count=0, output_mode='json'))
             except Exception as e:
                 error_text = consts.SPLUNK_EXCEPTION_ERR_MESSAGE.format(msg="Error retrieving results",
                                                                           error_text=self._get_error_message_from_exception(e))
@@ -1106,6 +1106,7 @@ class SplunkConnector(phantom.BaseConnector):
         search_string = param.get(consts.SPLUNK_JSON_QUERY)
         po = param.get(consts.SPLUNK_JSON_PARSE_ONLY, False)
         attach_result = param.get(consts.SPLUNK_JSON_ATTACH_RESULT, False)
+        search_mode = param.get(consts.SPLUNK_JSON_SEARCH_MODE, consts.SPLUNK_SEARCH_MODE_SMART)
 
         # More info on valid time modifier at https://docs.splunk.com/Documentation/Splunk/8.2.5/SearchReference/SearchTimeModifiers # noqa
         start_time = phantom.get_value(param, consts.SPLUNK_JSON_START_TIME)
@@ -1116,6 +1117,8 @@ class SplunkConnector(phantom.BaseConnector):
             kwargs["earliest_time"] = start_time
         if end_time:
             kwargs["latest_time"] = end_time
+
+        kwargs["adhoc_search_level"] = search_mode
 
         try:
             if not search_command:
@@ -1314,7 +1317,7 @@ class SplunkConnector(phantom.BaseConnector):
         ten_percent = float(result_count) * 0.10
 
         try:
-            results = splunk_results.ResultsReader(job.results(count=kwargs_create.get('max_count', 0)))
+            results = splunk_results.JSONResultsReader(job.results(count=kwargs_create.get('max_count', 0), output_mode='json'))
         except Exception as e:
             self._dump_error_log(e)
             error_text = consts.SPLUNK_EXCEPTION_ERR_MESSAGE.format(msg="Error retrieving results",
@@ -1325,10 +1328,11 @@ class SplunkConnector(phantom.BaseConnector):
 
         for result in results:
 
-            if isinstance(result, dict):
+            if not isinstance(result, dict):
+                continue
 
-                action_result.add_data(result)
-                data.append(result)
+            action_result.add_data(result)
+            data.append(result)
 
             result_index += 1
 

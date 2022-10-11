@@ -79,6 +79,7 @@ SPLUNK_JSON_LAST_N_DAYS = "last_n_days"
 SPLUNK_JSON_TOTAL_EVENTS = "total_events"
 SPLUNK_JSON_UPDATED_EVENT_ID = "updated_event_id"
 SPLUNK_JSON_ATTACH_RESULT = "attach_result"
+SPLUNK_JSON_SEARCH_MODE = "search_mode"
 SPLUNK_JSON_API_KEY = "api_token"  # pragma: allowlist secret
 
 # Default values
@@ -168,3 +169,8 @@ SPLUNK_SEARCH_AUDIT_INDEX_QUERY = "search index=_audit action=alert_fired {0} | 
             fields ss_name sid trigger_time severity"
 
 SPLUNK_DEFAULT_REQUEST_TIMEOUT = 60  # in seconds
+
+# Search Modes
+SPLUNK_SEARCH_MODE_SMART = "smart"
+SPLUNK_SEARCH_MODE_FAST = "fast"
+SPLUNK_SEARCH_MODE_VERBOSE = "verbose"

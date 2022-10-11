@@ -28,7 +28,7 @@
     ],
     "type": "siem",
     "main_module": "splunk_connector.py",
-    "app_version": "2.11.1",
+    "app_version": "2.12.0",
     "utctime_updated": "2022-09-08T08:47:45.000000Z",
     "package_name": "phantom_splunk",
     "product_name": "Splunk Enterprise",
@@ -88,7 +88,7 @@
             },
             {
                 "module": "splunk_sdk",
-                "input_file": "wheels/py3/splunk_sdk-1.6.18-py3-none-any.whl"
+                "input_file": "wheels/py3/splunk_sdk-1.7.2-py3-none-any.whl"
             },
             {
                 "module": "urllib3",
@@ -493,6 +493,17 @@
                     "description": "Latest time modifier",
                     "data_type": "string",
                     "order": 7
+                },
+                "search_mode": {
+                    "description": "Search mode",
+                    "data_type": "string",
+                    "value_list": [
+                        "fast",
+                        "verbose",
+                        "smart"
+                    ],
+                    "default": "smart",
+                    "order": 8
                 }
             },
             "render": {
@@ -1246,7 +1257,7 @@
             },
             {
                 "module": "splunk_sdk",
-                "input_file": "wheels/py3/splunk_sdk-1.6.18-py3-none-any.whl"
+                "input_file": "wheels/py3/splunk_sdk-1.7.2-py3-none-any.whl"
             },
             {
                 "module": "urllib3",
