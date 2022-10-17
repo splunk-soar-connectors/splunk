@@ -240,7 +240,7 @@ class SplunkConnector(phantom.BaseConnector):
         return {
             'status': response.code,
             'reason': response.msg,
-            'headers': dict(response.info()),
+            'headers': response.getheaders(),
             'body': BytesIO(response.read())
         }
 
