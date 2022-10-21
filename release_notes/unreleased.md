@@ -1,1 +1,3 @@
-* Fixed load balancer sticky sessions cookie persistence bug  
+**Unreleased**
+
+* Fixed load balancer sticky sessions related cookie persistence bug [PAPP-27448, PAPP-26097]
