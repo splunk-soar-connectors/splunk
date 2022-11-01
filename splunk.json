@@ -28,13 +28,13 @@
     ],
     "type": "siem",
     "main_module": "splunk_connector.py",
-    "app_version": "2.12.0",
+    "app_version": "2.13.0",
     "utctime_updated": "2022-09-08T08:47:45.000000Z",
     "package_name": "phantom_splunk",
     "product_name": "Splunk Enterprise",
     "product_vendor": "Splunk Inc.",
     "product_version_regex": ".*",
-    "min_phantom_version": "5.3.0",
+    "min_phantom_version": "5.3.5",
     "fips_compliant": true,
     "python_version": "3",
     "latest_tested_versions": [
@@ -52,7 +52,7 @@
             },
             {
                 "module": "certifi",
-                "input_file": "wheels/py3/certifi-2022.6.15-py3-none-any.whl"
+                "input_file": "wheels/py3/certifi-2022.9.24-py3-none-any.whl"
             },
             {
                 "module": "chardet",
@@ -559,6 +559,13 @@
                     "example_values": [
                         true,
                         false
+                    ]
+                },
+                {
+                    "data_path": "action_result.parameter.search_mode",
+                    "data_type": "string",
+                    "example_values": [
+                        "smart"
                     ]
                 },
                 {
@@ -1221,7 +1228,7 @@
             },
             {
                 "module": "certifi",
-                "input_file": "wheels/py3/certifi-2022.6.15-py3-none-any.whl"
+                "input_file": "wheels/py3/certifi-2022.9.24-py3-none-any.whl"
             },
             {
                 "module": "chardet",
