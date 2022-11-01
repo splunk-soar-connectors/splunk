@@ -969,7 +969,7 @@ class SplunkConnector(phantom.BaseConnector):
             # if fips is not enabled, we should continue with our existing md5 usage for generating SDIs
             # to not impact existing customers
             if not fips_enabled:
-                sdi = hashlib.md5(input_str).hexdigest()
+                sdi = hashlib.md5(input_str).hexdigest()    # nosemgrep
             else:
                 sdi = hashlib.sha256(input_str).hexdigest()
 
