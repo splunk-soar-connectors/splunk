@@ -308,7 +308,7 @@ class SplunkConnector(phantom.BaseConnector):
                                                 "Error occurred while connecting to the Splunk server. Details: {}".format(error_text))
         except Exception as e:
             self._dump_error_log(e)
-            error_text = consts.SPLUNK_EXCEPTION_ERR_MESSAGE.format(msg=consts.SPLUNK_ERR_CONNECTION_FAILED,
+            error_text = consts.SPLUNK_EXCEPTION_ERR_MESSAGE.format(msg=consts.SPLUNK_ERR_CONNECTIVITY_FAILED,
                 error_text=self._get_error_message_from_exception(e))
             return action_result.set_status(phantom.APP_ERROR, error_text)
 
@@ -369,7 +369,7 @@ class SplunkConnector(phantom.BaseConnector):
                     verify=config[phantom.APP_JSON_VERIFY],
                     timeout=consts.SPLUNK_DEFAULT_REQUEST_TIMEOUT)
         except Exception as e:
-            error_text = consts.SPLUNK_EXCEPTION_ERR_MESSAGE.format(msg=consts.SPLUNK_ERR_CONNECTION_FAILED,
+            error_text = consts.SPLUNK_EXCEPTION_ERR_MESSAGE.format(msg=consts.SPLUNK_ERR_CONNECTIVITY_FAILED,
                 error_text=self._get_error_message_from_exception(e))
             return action_result.set_status(phantom.APP_ERROR, error_text), None
 
@@ -604,7 +604,7 @@ class SplunkConnector(phantom.BaseConnector):
                 return action_result.set_status(phantom.APP_ERROR, error_text, query=search_query)
             except Exception as e:
                 if attempt_count == RETRY_LIMIT - 1:
-                    error_text = consts.SPLUNK_EXCEPTION_ERR_MESSAGE.format(msg=consts.SPLUNK_ERR_CONNECTION_FAILED,
+                    error_text = consts.SPLUNK_EXCEPTION_ERR_MESSAGE.format(msg=consts.SPLUNK_ERR_CONNECTIVITY_FAILED,
                         error_text=self._get_error_message_from_exception(e))
                     return action_result.set_status(phantom.APP_ERROR, error_text)
 
@@ -641,7 +641,7 @@ class SplunkConnector(phantom.BaseConnector):
                         break
                     except Exception as e:
                         if attempt_count == RETRY_LIMIT - 1:
-                            error_text = consts.SPLUNK_EXCEPTION_ERR_MESSAGE.format(msg=consts.SPLUNK_ERR_CONNECTION_FAILED,
+                            error_text = consts.SPLUNK_EXCEPTION_ERR_MESSAGE.format(msg=consts.SPLUNK_ERR_CONNECTIVITY_FAILED,
                                 error_text=self._get_error_message_from_exception(e))
                             return action_result.set_status(phantom.APP_ERROR, error_text)
 
@@ -1228,8 +1228,8 @@ class SplunkConnector(phantom.BaseConnector):
         self.save_progress("Detected Splunk {0}server version {1}".format("ES " if is_es else "", version))
 
         self.debug_print("connect passed")
-        self.save_progress(consts.SPLUNK_SUCC_CONNECTIVITY_TEST)
-        return action_result.set_status(phantom.APP_SUCCESS, consts.SPLUNK_SUCC_CONNECTIVITY_TEST)
+        self.save_progress(consts.SPLUNK_SUCCESS_CONNECTIVITY_TEST)
+        return action_result.set_status(phantom.APP_SUCCESS, consts.SPLUNK_SUCCESS_CONNECTIVITY_TEST)
 
     def _run_query(self, search_query, action_result, attach_result=False, kwargs_create=dict(), parse_only=True):
         """Function that executes the query on splunk"""
@@ -1256,7 +1256,7 @@ class SplunkConnector(phantom.BaseConnector):
                 if (phantom.is_fail(self._connect(action_result))):
                     return action_result.get_status()
                 if attempt_count == RETRY_LIMIT - 1:
-                    error_text = consts.SPLUNK_EXCEPTION_ERR_MESSAGE.format(msg=consts.SPLUNK_ERR_CONNECTION_FAILED,
+                    error_text = consts.SPLUNK_EXCEPTION_ERR_MESSAGE.format(msg=consts.SPLUNK_ERR_CONNECTIVITY_FAILED,
                         error_text=self._get_error_message_from_exception(e))
                     return action_result.set_status(phantom.APP_ERROR, error_text)
 
@@ -1294,7 +1294,7 @@ class SplunkConnector(phantom.BaseConnector):
                     break
                 except Exception as e:
                     if attempt_count == RETRY_LIMIT - 1:
-                        error_text = consts.SPLUNK_EXCEPTION_ERR_MESSAGE.format(msg=consts.SPLUNK_ERR_CONNECTION_FAILED,
+                        error_text = consts.SPLUNK_EXCEPTION_ERR_MESSAGE.format(msg=consts.SPLUNK_ERR_CONNECTIVITY_FAILED,
                             error_text=self._get_error_message_from_exception(e))
                         return action_result.set_status(phantom.APP_ERROR, error_text)
 

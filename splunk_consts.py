@@ -16,17 +16,15 @@
 #
 # Success/Error status and messages
 SPLUNK_ERR_INVALID_QUERY = "Query invalid '{query}'"
-SPLUNK_SUCC_QUERY_EXECUTED = "Executed splunk query"
 SPLUNK_ERR_BAD_STATUS = "The supplied status is invalid"
 SPLUNK_ERR_CONNECTIVITY_TEST = "Connectivity test failed"
-SPLUNK_SUCC_CONNECTIVITY_TEST = "Connectivity test passed"
+SPLUNK_SUCCESS_CONNECTIVITY_TEST = "Connectivity test passed"
 SPLUNK_ERR_NOT_JSON = "Splunk server response was not JSON"
 SPLUNK_ERR_NOT_200 = "Splunk server returned error from API call"
-SPLUNK_ERR_CONNECTION_FAILED = "Failed to connect to splunk server"
+SPLUNK_ERR_CONNECTIVITY_FAILED = "Failed to connect to splunk server"
 SPLUNK_ERR_UNABLE_TO_CREATE_JOB = "Failed to get a job id from splunk server"
 SPLUNK_ERR_GET_EVENTS = "Error getting events for alert '{ss_name}' having sid '{sid}'"
 SPLUNK_ERR_NOT_ES = "This instance does not seem to be Splunk ES. This action cannot be run"
-SPLUNK_ERR_CONNECTION_NOT_PRE_ESTABLISHED = "Connection to splunk server not yet established"
 SPLUNK_ERR_INVALID_TIME_RANGE = "Invalid Time range specified, where the end time is less than start time"
 SPLUNK_ERR_NEED_PARAM = "One of comment, status, integer_status, urgency, or owner parameters needs to be supplied to run this \
     action"
