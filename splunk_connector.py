@@ -89,33 +89,33 @@ class SplunkConnector(phantom.BaseConnector):
         :return: error message
         """
         error_code = None
-        error_msg = consts.SPLUNK_ERR_MESSAGE_UNAVAILABLE
+        error_message = consts.SPLUNK_ERR_MESSAGE_UNAVAILABLE
 
         self.error_print("Traceback: {}".format(traceback.format_stack()))
         try:
             if hasattr(e, "args"):
                 if len(e.args) > 1:
                     error_code = e.args[0]
-                    error_msg = e.args[1]
+                    error_message = e.args[1]
                 elif len(e.args) == 1:
-                    error_msg = e.args[0]
+                    error_message = e.args[0]
             else:
-                error_msg = consts.SPLUNK_ERR_MESSAGE_UNAVAILABLE
+                error_message = consts.SPLUNK_ERR_MESSAGE_UNAVAILABLE
 
-            if error_msg == consts.SPLUNK_ERR_MESSAGE_UNAVAILABLE:
-                error_msg = str(e).strip().replace("'", '').replace("\"", '').replace("\n", '').replace("\r", '')
-                if len(error_msg) > 500:
-                    error_msg = '{} - truncated'.format(error_msg[:500])
-                error_msg = '{} ({})'.format(error_msg, sys.exc_info()[-1].tb_lineno)
+            if error_message == consts.SPLUNK_ERR_MESSAGE_UNAVAILABLE:
+                error_message = str(e).strip().replace("'", '').replace("\"", '').replace("\n", '').replace("\r", '')
+                if len(error_message) > 500:
+                    error_message = '{} - truncated'.format(error_message[:500])
+                error_message = '{} ({})'.format(error_message, sys.exc_info()[-1].tb_lineno)
         except Exception as e:
             self._dump_error_log(e, "Error occurred while fetching exception information")
 
             if not error_code:
-                error_msg = "Error Message: {}".format(error_msg)
+                error_message = "Error Message: {}".format(error_message)
             else:
-                error_msg = "Error Code: {}. Error Message: {}".format(error_code, error_msg)
+                error_message = "Error Code: {}. Error Message: {}".format(error_code, error_message)
 
-        return error_msg
+        return error_message
 
     def initialize(self):
 
@@ -481,8 +481,8 @@ class SplunkConnector(phantom.BaseConnector):
             split_lines = [x.strip() for x in split_lines if x.strip()]
             error_text = '\n'.join(split_lines)
         except Exception as e:
-            error_msg = self._get_error_message_from_exception(e)
-            error_text = consts.SPLUNK_ERR_UNABLE_TO_PARSE_HTML_RESPONSE.format(error=error_msg)
+            error_message = self._get_error_message_from_exception(e)
+            error_text = consts.SPLUNK_ERR_UNABLE_TO_PARSE_HTML_RESPONSE.format(error=error_message)
 
         if not error_text:
             error_text = "Empty response and no information received"
@@ -508,10 +508,10 @@ class SplunkConnector(phantom.BaseConnector):
         try:
             resp_json = r.json()
         except Exception as e:
-            error_msg = self._get_error_message_from_exception(e)
+            error_message = self._get_error_message_from_exception(e)
             return RetVal(
                 action_result.set_status(
-                    phantom.APP_ERROR, consts.SPLUNK_ERR_UNABLE_TO_PARSE_JSON_RESPONSE.format(error=error_msg)
+                    phantom.APP_ERROR, consts.SPLUNK_ERR_UNABLE_TO_PARSE_JSON_RESPONSE.format(error=error_message)
                 ), None
             )
 
@@ -1362,8 +1362,8 @@ class SplunkConnector(phantom.BaseConnector):
 
         except Exception as e:
             self._dump_error_log(e, "Error occurred while adding file to Vault.")
-            error_msg = self._get_error_message_from_exception(e)
-            msg = "Error occurred while adding file to Vault. Error Details: {}".format(error_msg)
+            error_message = self._get_error_message_from_exception(e)
+            msg = "Error occurred while adding file to Vault. Error Details: {}".format(error_message)
             self.debug_print(msg)
             return phantom.APP_ERROR
 
