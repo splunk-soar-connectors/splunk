@@ -89,7 +89,7 @@ class SplunkConnector(phantom.BaseConnector):
         :return: error message
         """
         error_code = None
-        error_msg = consts.SPLUNK_ERR_MSG_UNAVAILABLE
+        error_msg = consts.SPLUNK_ERR_MESSAGE_UNAVAILABLE
 
         self.error_print("Traceback: {}".format(traceback.format_stack()))
         try:
@@ -100,9 +100,9 @@ class SplunkConnector(phantom.BaseConnector):
                 elif len(e.args) == 1:
                     error_msg = e.args[0]
             else:
-                error_msg = consts.SPLUNK_ERR_MSG_UNAVAILABLE
+                error_msg = consts.SPLUNK_ERR_MESSAGE_UNAVAILABLE
 
-            if error_msg == consts.SPLUNK_ERR_MSG_UNAVAILABLE:
+            if error_msg == consts.SPLUNK_ERR_MESSAGE_UNAVAILABLE:
                 error_msg = str(e).strip().replace("'", '').replace("\"", '').replace("\n", '').replace("\r", '')
                 if len(error_msg) > 500:
                     error_msg = '{} - truncated'.format(error_msg[:500])

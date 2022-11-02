@@ -33,7 +33,7 @@ SPLUNK_ERR_NEED_PARAM = "One of comment, status, integer_status, urgency, or own
 SPLUNK_ERR_INVALID_INTEGER = "Please provide a valid integer value in the {param} parameter"
 SPLUNK_ERR_NON_NEGATIVE_INTEGER = "Please provide a valid non-negative integer value in the {param} parameter"
 SPLUNK_ERR_INVALID_PARAM = "Please provide non-zero positive integer in {param}"
-SPLUNK_ERR_MSG_UNAVAILABLE = "Error message unavailable. Please check the asset configuration and|or action parameters."
+SPLUNK_ERR_MESSAGE_UNAVAILABLE = "Error message unavailable. Please check the asset configuration and|or action parameters."
 SPLUNK_EXCEPTION_ERR_MESSAGE = "{msg}. {error_text}"
 SPLUNK_JOB_FIELD_NOT_FOUND_MESSAGE = "{field} not found"
 SPLUNK_ERR_INVALID_SLEEP_TIME = "Please provide a value <= 120 seconds in the {param} parameter"
