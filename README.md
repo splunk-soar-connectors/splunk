@@ -2,11 +2,11 @@
 # Splunk
 
 Publisher: Splunk  
-Connector Version: 2\.12\.0  
+Connector Version: 2\.13\.0  
 Product Vendor: Splunk Inc\.  
 Product Name: Splunk Enterprise  
 Product Version Supported (regex): "\.\*"  
-Minimum Product Version: 5\.3\.0  
+Minimum Product Version: 5\.3\.5  
 
 This app integrates with Splunk to update data on the device, in addition to investigate and ingestion actions
 
@@ -319,6 +319,8 @@ ports used by Splunk SOAR.
 |         http         | tcp                | 80   |
 |         https        | tcp                | 443  |
 
+8089 is the default port used by Splunk Server.
+
 
 ### Configuration Variables
 The below configuration variables are required for this Connector to operate.  These variables are specified when configuring a Splunk Enterprise asset in SOAR.
@@ -455,6 +457,7 @@ action\_result\.parameter\.command | string |
 action\_result\.parameter\.display | string | 
 action\_result\.parameter\.end\_time | string | 
 action\_result\.parameter\.parse\_only | boolean | 
+action\_result\.parameter\.search\_mode | string | 
 action\_result\.parameter\.query | string |  `splunk query` 
 action\_result\.parameter\.start\_time | string | 
 action\_result\.data\.\*\.\_key | string | 

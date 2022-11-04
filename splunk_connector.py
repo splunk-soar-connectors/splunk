@@ -89,33 +89,33 @@ class SplunkConnector(phantom.BaseConnector):
         :return: error message
         """
         error_code = None
-        error_msg = consts.SPLUNK_ERR_MSG_UNAVAILABLE
+        error_message = consts.SPLUNK_ERR_MESSAGE_UNAVAILABLE
 
         self.error_print("Traceback: {}".format(traceback.format_stack()))
         try:
             if hasattr(e, "args"):
                 if len(e.args) > 1:
                     error_code = e.args[0]
-                    error_msg = e.args[1]
+                    error_message = e.args[1]
                 elif len(e.args) == 1:
-                    error_msg = e.args[0]
+                    error_message = e.args[0]
             else:
-                error_msg = consts.SPLUNK_ERR_MSG_UNAVAILABLE
+                error_message = consts.SPLUNK_ERR_MESSAGE_UNAVAILABLE
 
-            if error_msg == consts.SPLUNK_ERR_MSG_UNAVAILABLE:
-                error_msg = str(e).strip().replace("'", '').replace("\"", '').replace("\n", '').replace("\r", '')
-                if len(error_msg) > 500:
-                    error_msg = '{} - truncated'.format(error_msg[:500])
-                error_msg = '{} ({})'.format(error_msg, sys.exc_info()[-1].tb_lineno)
+            if error_message == consts.SPLUNK_ERR_MESSAGE_UNAVAILABLE:
+                error_message = str(e).strip().replace("'", '').replace("\"", '').replace("\n", '').replace("\r", '')
+                if len(error_message) > 500:
+                    error_message = '{} - truncated'.format(error_message[:500])
+                error_message = '{} ({})'.format(error_message, sys.exc_info()[-1].tb_lineno)
         except Exception as e:
             self._dump_error_log(e, "Error occurred while fetching exception information")
 
             if not error_code:
-                error_msg = "Error Message: {}".format(error_msg)
+                error_message = "Error Message: {}".format(error_message)
             else:
-                error_msg = "Error Code: {}. Error Message: {}".format(error_code, error_msg)
+                error_message = "Error Code: {}. Error Message: {}".format(error_code, error_message)
 
-        return error_msg
+        return error_message
 
     def initialize(self):
 
@@ -240,7 +240,7 @@ class SplunkConnector(phantom.BaseConnector):
         return {
             'status': response.code,
             'reason': response.msg,
-            'headers': dict(response.info()),
+            'headers': response.getheaders(),
             'body': BytesIO(response.read())
         }
 
@@ -308,7 +308,7 @@ class SplunkConnector(phantom.BaseConnector):
                                                 "Error occurred while connecting to the Splunk server. Details: {}".format(error_text))
         except Exception as e:
             self._dump_error_log(e)
-            error_text = consts.SPLUNK_EXCEPTION_ERR_MESSAGE.format(msg=consts.SPLUNK_ERR_CONNECTION_FAILED,
+            error_text = consts.SPLUNK_EXCEPTION_ERR_MESSAGE.format(msg=consts.SPLUNK_ERR_CONNECTIVITY_FAILED,
                 error_text=self._get_error_message_from_exception(e))
             return action_result.set_status(phantom.APP_ERROR, error_text)
 
@@ -369,7 +369,7 @@ class SplunkConnector(phantom.BaseConnector):
                     verify=config[phantom.APP_JSON_VERIFY],
                     timeout=consts.SPLUNK_DEFAULT_REQUEST_TIMEOUT)
         except Exception as e:
-            error_text = consts.SPLUNK_EXCEPTION_ERR_MESSAGE.format(msg=consts.SPLUNK_ERR_CONNECTION_FAILED,
+            error_text = consts.SPLUNK_EXCEPTION_ERR_MESSAGE.format(msg=consts.SPLUNK_ERR_CONNECTIVITY_FAILED,
                 error_text=self._get_error_message_from_exception(e))
             return action_result.set_status(phantom.APP_ERROR, error_text), None
 
@@ -481,8 +481,8 @@ class SplunkConnector(phantom.BaseConnector):
             split_lines = [x.strip() for x in split_lines if x.strip()]
             error_text = '\n'.join(split_lines)
         except Exception as e:
-            error_msg = self._get_error_message_from_exception(e)
-            error_text = consts.SPLUNK_ERR_UNABLE_TO_PARSE_HTML_RESPONSE.format(error=error_msg)
+            error_message = self._get_error_message_from_exception(e)
+            error_text = consts.SPLUNK_ERR_UNABLE_TO_PARSE_HTML_RESPONSE.format(error=error_message)
 
         if not error_text:
             error_text = "Empty response and no information received"
@@ -508,10 +508,10 @@ class SplunkConnector(phantom.BaseConnector):
         try:
             resp_json = r.json()
         except Exception as e:
-            error_msg = self._get_error_message_from_exception(e)
+            error_message = self._get_error_message_from_exception(e)
             return RetVal(
                 action_result.set_status(
-                    phantom.APP_ERROR, consts.SPLUNK_ERR_UNABLE_TO_PARSE_JSON_RESPONSE.format(error=error_msg)
+                    phantom.APP_ERROR, consts.SPLUNK_ERR_UNABLE_TO_PARSE_JSON_RESPONSE.format(error=error_message)
                 ), None
             )
 
@@ -604,7 +604,7 @@ class SplunkConnector(phantom.BaseConnector):
                 return action_result.set_status(phantom.APP_ERROR, error_text, query=search_query)
             except Exception as e:
                 if attempt_count == RETRY_LIMIT - 1:
-                    error_text = consts.SPLUNK_EXCEPTION_ERR_MESSAGE.format(msg=consts.SPLUNK_ERR_CONNECTION_FAILED,
+                    error_text = consts.SPLUNK_EXCEPTION_ERR_MESSAGE.format(msg=consts.SPLUNK_ERR_CONNECTIVITY_FAILED,
                         error_text=self._get_error_message_from_exception(e))
                     return action_result.set_status(phantom.APP_ERROR, error_text)
 
@@ -641,7 +641,7 @@ class SplunkConnector(phantom.BaseConnector):
                         break
                     except Exception as e:
                         if attempt_count == RETRY_LIMIT - 1:
-                            error_text = consts.SPLUNK_EXCEPTION_ERR_MESSAGE.format(msg=consts.SPLUNK_ERR_CONNECTION_FAILED,
+                            error_text = consts.SPLUNK_EXCEPTION_ERR_MESSAGE.format(msg=consts.SPLUNK_ERR_CONNECTIVITY_FAILED,
                                 error_text=self._get_error_message_from_exception(e))
                             return action_result.set_status(phantom.APP_ERROR, error_text)
 
@@ -969,7 +969,7 @@ class SplunkConnector(phantom.BaseConnector):
             # if fips is not enabled, we should continue with our existing md5 usage for generating SDIs
             # to not impact existing customers
             if not fips_enabled:
-                sdi = hashlib.md5(input_str).hexdigest()
+                sdi = hashlib.md5(input_str).hexdigest()    # nosemgrep
             else:
                 sdi = hashlib.sha256(input_str).hexdigest()
 
@@ -1228,8 +1228,8 @@ class SplunkConnector(phantom.BaseConnector):
         self.save_progress("Detected Splunk {0}server version {1}".format("ES " if is_es else "", version))
 
         self.debug_print("connect passed")
-        self.save_progress(consts.SPLUNK_SUCC_CONNECTIVITY_TEST)
-        return action_result.set_status(phantom.APP_SUCCESS, consts.SPLUNK_SUCC_CONNECTIVITY_TEST)
+        self.save_progress(consts.SPLUNK_SUCCESS_CONNECTIVITY_TEST)
+        return action_result.set_status(phantom.APP_SUCCESS, consts.SPLUNK_SUCCESS_CONNECTIVITY_TEST)
 
     def _run_query(self, search_query, action_result, attach_result=False, kwargs_create=dict(), parse_only=True):
         """Function that executes the query on splunk"""
@@ -1256,7 +1256,7 @@ class SplunkConnector(phantom.BaseConnector):
                 if (phantom.is_fail(self._connect(action_result))):
                     return action_result.get_status()
                 if attempt_count == RETRY_LIMIT - 1:
-                    error_text = consts.SPLUNK_EXCEPTION_ERR_MESSAGE.format(msg=consts.SPLUNK_ERR_CONNECTION_FAILED,
+                    error_text = consts.SPLUNK_EXCEPTION_ERR_MESSAGE.format(msg=consts.SPLUNK_ERR_CONNECTIVITY_FAILED,
                         error_text=self._get_error_message_from_exception(e))
                     return action_result.set_status(phantom.APP_ERROR, error_text)
 
@@ -1294,7 +1294,7 @@ class SplunkConnector(phantom.BaseConnector):
                     break
                 except Exception as e:
                     if attempt_count == RETRY_LIMIT - 1:
-                        error_text = consts.SPLUNK_EXCEPTION_ERR_MESSAGE.format(msg=consts.SPLUNK_ERR_CONNECTION_FAILED,
+                        error_text = consts.SPLUNK_EXCEPTION_ERR_MESSAGE.format(msg=consts.SPLUNK_ERR_CONNECTIVITY_FAILED,
                             error_text=self._get_error_message_from_exception(e))
                         return action_result.set_status(phantom.APP_ERROR, error_text)
 
@@ -1362,8 +1362,8 @@ class SplunkConnector(phantom.BaseConnector):
 
         except Exception as e:
             self._dump_error_log(e, "Error occurred while adding file to Vault.")
-            error_msg = self._get_error_message_from_exception(e)
-            msg = "Error occurred while adding file to Vault. Error Details: {}".format(error_msg)
+            error_message = self._get_error_message_from_exception(e)
+            msg = "Error occurred while adding file to Vault. Error Details: {}".format(error_message)
             self.debug_print(msg)
             return phantom.APP_ERROR
 
