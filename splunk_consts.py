@@ -59,6 +59,7 @@ SPLUNK_PROG_JOB_ID_DONE_RETRIEVING_RESULTS = "Retrieving results for job id '{jo
 # Json keys
 SPLUNK_JSON_COMMAND = "command"
 SPLUNK_JSON_PARSE_ONLY = "parse_only"
+SPLUNK_JSON_ADD_RAW_DATA = "add_raw_field"
 SPLUNK_JSON_HOST = "host"
 SPLUNK_JSON_DATA = "data"
 SPLUNK_JSON_INDEX = "index"

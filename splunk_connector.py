@@ -1158,6 +1158,7 @@ class SplunkConnector(BaseConnector):
         po = param.get(consts.SPLUNK_JSON_PARSE_ONLY, False)
         attach_result = param.get(consts.SPLUNK_JSON_ATTACH_RESULT, False)
         search_mode = param.get(consts.SPLUNK_JSON_SEARCH_MODE, consts.SPLUNK_SEARCH_MODE_SMART)
+        add_raw = param.get(consts.SPLUNK_JSON_ADD_RAW_DATA)
 
         # More info on valid time modifier at https://docs.splunk.com/Documentation/Splunk/8.2.5/SearchReference/SearchTimeModifiers # noqa
         start_time = phantom.get_value(param, consts.SPLUNK_JSON_START_TIME)
@@ -1183,7 +1184,8 @@ class SplunkConnector(BaseConnector):
             return action_result.set_status(phantom.APP_ERROR, "Error occurred while parsing the search query")
 
         self.debug_print("search_query: {0}".format(search_query))
-        return self._run_query(search_query, action_result, attach_result=attach_result, kwargs_create=kwargs, parse_only=po)
+        return self._run_query(search_query, action_result, attach_result=attach_result,
+            kwargs_create=kwargs, parse_only=po, add_raw_field=add_raw)
 
     def _get_tz_str_from_epoch(self, time_format_str, epoch_milli):
 
@@ -1284,7 +1286,7 @@ class SplunkConnector(BaseConnector):
         self.save_progress(consts.SPLUNK_SUCCESS_CONNECTIVITY_TEST)
         return action_result.set_status(phantom.APP_SUCCESS, consts.SPLUNK_SUCCESS_CONNECTIVITY_TEST)
 
-    def _run_query(self, search_query, action_result, attach_result=False, kwargs_create=dict(), parse_only=True):
+    def _run_query(self, search_query, action_result, attach_result=False, kwargs_create=dict(), parse_only=True, add_raw_field=True):
         """Function that executes the query on splunk"""
         self.debug_print("Start run query")
         RETRY_LIMIT = self.retry_count
@@ -1373,6 +1375,9 @@ class SplunkConnector(BaseConnector):
 
             if not isinstance(result, dict):
                 continue
+
+            if not add_raw_field and result.get("_raw"):
+                del result["_raw"]
 
             action_result.add_data(result)
 
