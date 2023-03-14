@@ -953,17 +953,8 @@ class SplunkConnector(phantom.BaseConnector):
                 for k, v in list(item.items()):
                     cef[consts.CIM_CEF_MAP.get(k, k)] = v
 
-            raw = item.get("_raw", "")
-            if raw:
-                index = item.get("index", "")
-                source = item.get("source", "")
-                sourcetype = item.get("sourcetype", "")
-                input_str = "{}{}{}{}".format(raw, source, index, sourcetype)
-            else:
-                input_str = json.dumps(item)
-
-            if self._python_version == 3:
-                input_str = UnicodeDammit(input_str).unicode_markup.encode('utf-8')
+            input_str = json.dumps(item)
+            input_str = UnicodeDammit(input_str).unicode_markup.encode('utf-8')
 
             fips_enabled = self._get_fips_enabled()
             # if fips is not enabled, we should continue with our existing md5 usage for generating SDIs
