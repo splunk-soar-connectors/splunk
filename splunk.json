@@ -28,7 +28,7 @@
     ],
     "type": "siem",
     "main_module": "splunk_connector.py",
-    "app_version": "2.13.0",
+    "app_version": "2.14.0",
     "utctime_updated": "2022-09-08T08:47:45.000000Z",
     "package_name": "phantom_splunk",
     "product_name": "Splunk Enterprise",
@@ -92,7 +92,7 @@
             },
             {
                 "module": "urllib3",
-                "input_file": "wheels/shared/urllib3-1.26.12-py2.py3-none-any.whl"
+                "input_file": "wheels/shared/urllib3-1.26.13-py2.py3-none-any.whl"
             },
             {
                 "module": "xmltodict",
@@ -474,15 +474,17 @@
                     "order": 3,
                     "default": false
                 },
+                "add_raw_field": {
+                    "description": "Indest _raw field data",
+                    "data_type": "boolean",
+                    "order": 4,
+                    "default": true
+                },
                 "attach_result": {
                     "description": "Attach result to the vault",
                     "data_type": "boolean",
-                    "order": 4,
+                    "order": 5,
                     "default": false
-                },
-                "ph": {
-                    "data_type": "ph",
-                    "order": 5
                 },
                 "start_time": {
                     "description": "Earliest time modifier",
@@ -1268,7 +1270,7 @@
             },
             {
                 "module": "urllib3",
-                "input_file": "wheels/shared/urllib3-1.26.12-py2.py3-none-any.whl"
+                "input_file": "wheels/shared/urllib3-1.26.13-py2.py3-none-any.whl"
             },
             {
                 "module": "xmltodict",
