@@ -426,6 +426,13 @@
                     "description": "Parameter ignored in this app",
                     "data_type": "numeric",
                     "order": 4
+                },
+                "include_cim_fields": {
+                    "description": "Option to keep original Splunk CIM together with SOAR CEF fields",
+                    "data_type": "boolean",
+                    "order": 5,
+                    "default": false,
+                    "name": "include_cim_fields"
                 }
             },
             "output": [],
