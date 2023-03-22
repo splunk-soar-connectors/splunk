@@ -82,6 +82,7 @@ class SplunkConnector(phantom.BaseConnector):
         self.container_update_state = None
         self.remove_empty_cef = None
         self.sleeptime_in_requests = None
+        self.cim_cef_mapping = None
 
     def _get_error_message_from_exception(self, e):
         """ This method is used to get appropriate error message from the exception.
@@ -878,7 +879,7 @@ class SplunkConnector(phantom.BaseConnector):
             self.debug_print('FIPS is not enabled')
         return fips_enabled
 
-    def _on_poll(self, param):
+    def _on_poll(self, param):  # noqa: C901
 
         action_result = self.add_action_result(phantom.ActionResult(dict(param)))
 
@@ -889,6 +890,7 @@ class SplunkConnector(phantom.BaseConnector):
         search_command = config.get('on_poll_command')
         search_string = config.get('on_poll_query')
         po = config.get('on_poll_parse_only', False)
+        keep_cim_values = config.get('keep_cim_values', False)
 
         if not search_string:
             self.save_progress("Need to specify Query String to use polling")
@@ -951,7 +953,10 @@ class SplunkConnector(phantom.BaseConnector):
                     cef[name_mappings.get(consts.CIM_CEF_MAP.get(h, h), h)] = item.get(name_mappings.get(h, h))
             else:
                 for k, v in list(item.items()):
-                    cef[consts.CIM_CEF_MAP.get(k, k)] = v
+                    if keep_cim_values:
+                        cef[k] = v
+                    else:
+                        cef[consts.CIM_CEF_MAP.get(k, k)] = v
 
             raw = item.get("_raw", "")
             if raw:
