@@ -427,12 +427,12 @@
                     "data_type": "numeric",
                     "order": 4
                 },
-                "keep_cim_values": {
+                "include_cim_values": {
                     "description": "Option to ignore defalut mapping of Splunk CIM values to SOAR CEF values",
                     "data_type": "boolean",
                     "order": 5,
                     "default": false,
-                    "name": "keep_cim_values"
+                    "name": "include_cim_values"
                 }
             },
             "output": [],

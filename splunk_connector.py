@@ -890,7 +890,7 @@ class SplunkConnector(phantom.BaseConnector):
         search_command = config.get('on_poll_command')
         search_string = config.get('on_poll_query')
         po = config.get('on_poll_parse_only', False)
-        keep_cim_values = config.get('keep_cim_values', False)
+        include_cim_fields = param.get(consts.SPLUNK_JSON_INCLUDE_CIM, False)
 
         if not search_string:
             self.save_progress("Need to specify Query String to use polling")
@@ -953,7 +953,8 @@ class SplunkConnector(phantom.BaseConnector):
                     cef[name_mappings.get(consts.CIM_CEF_MAP.get(h, h), h)] = item.get(name_mappings.get(h, h))
             else:
                 for k, v in list(item.items()):
-                    if keep_cim_values:
+                    if include_cim_fields:
+                        cef[consts.CIM_CEF_MAP.get(k, k)] = v
                         cef[k] = v
                     else:
                         cef[consts.CIM_CEF_MAP.get(k, k)] = v

@@ -424,6 +424,7 @@ PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 **end\_time** |  optional  | Parameter ignored in this app | numeric | 
 **container\_count** |  optional  | Maximum number of events to query for | numeric | 
 **artifact\_count** |  optional  | Parameter ignored in this app | numeric | 
+**include\_cim\_fields** |  optional  | Option to include Splunk CIM fields | boolean | 
 
 #### Action Output
 No Output  
