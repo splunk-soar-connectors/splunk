@@ -432,7 +432,7 @@
                     "data_type": "boolean",
                     "order": 5,
                     "default": false,
-                    "name": "include_cim_values"
+                    "name": "include_cim_fields"
                 }
             },
             "output": [],
