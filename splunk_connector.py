@@ -82,7 +82,6 @@ class SplunkConnector(phantom.BaseConnector):
         self.container_update_state = None
         self.remove_empty_cef = None
         self.sleeptime_in_requests = None
-        self.cim_cef_mapping = None
 
     def _get_error_message_from_exception(self, e):
         """ This method is used to get appropriate error message from the exception.
