@@ -879,7 +879,7 @@ class SplunkConnector(phantom.BaseConnector):
             self.debug_print('FIPS is not enabled')
         return fips_enabled
 
-    def _on_poll(self, param):  # noqa: C901
+    def _on_poll(self, param):
 
         action_result = self.add_action_result(phantom.ActionResult(dict(param)))
 
@@ -954,8 +954,8 @@ class SplunkConnector(phantom.BaseConnector):
             else:
                 for k, v in list(item.items()):
                     cef[consts.CIM_CEF_MAP.get(k, k)] = v
-                    if include_cim_fields:
-                        cef[k] = v
+                    # Add original CIM fields if option is checked
+                    cef.update({k: v} if include_cim_fields else {})
 
             raw = item.get("_raw", "")
             if raw:
