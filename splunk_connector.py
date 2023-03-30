@@ -952,7 +952,8 @@ class SplunkConnector(phantom.BaseConnector):
             else:
                 for k, v in list(item.items()):
                     cef[consts.CIM_CEF_MAP.get(k, k)] = v
-
+            if "_serial" in item:
+                item.pop("_serial")
             input_str = json.dumps(item)
             input_str = UnicodeDammit(input_str).unicode_markup.encode('utf-8')
 
@@ -983,7 +984,8 @@ class SplunkConnector(phantom.BaseConnector):
                     if value is not None:
                         cleaned_cef[key] = value
                 cef = cleaned_cef
-
+            if "_serial" in cef:
+                cef.pop("_serial")
             artifact = [{
                     'cef': cef,
                     'name': 'Field Values',
