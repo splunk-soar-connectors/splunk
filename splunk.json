@@ -38,8 +38,8 @@
     "fips_compliant": true,
     "python_version": "3",
     "latest_tested_versions": [
-        "On-premise, Splunk Enterprise Security v9.0.0",
-        "Cloud, Splunk Cloud Platform v8.2.2112"
+        "On-premise, Splunk Enterprise Security v9.0.0, April 3 2023",
+        "Cloud, Splunk Cloud Platform v8.2.2112, April 3 2023"
     ],
     "logo": "logo_splunk.svg",
     "logo_dark": "logo_splunk_dark.svg",
@@ -52,7 +52,7 @@
             },
             {
                 "module": "certifi",
-                "input_file": "wheels/py3/certifi-2022.9.24-py3-none-any.whl"
+                "input_file": "wheels/py3/certifi-2022.12.7-py3-none-any.whl"
             },
             {
                 "module": "chardet",
@@ -92,7 +92,7 @@
             },
             {
                 "module": "urllib3",
-                "input_file": "wheels/shared/urllib3-1.26.12-py2.py3-none-any.whl"
+                "input_file": "wheels/shared/urllib3-1.26.15-py2.py3-none-any.whl"
             },
             {
                 "module": "xmltodict",
@@ -1228,7 +1228,7 @@
             },
             {
                 "module": "certifi",
-                "input_file": "wheels/py3/certifi-2022.9.24-py3-none-any.whl"
+                "input_file": "wheels/py3/certifi-2022.12.7-py3-none-any.whl"
             },
             {
                 "module": "chardet",
@@ -1260,7 +1260,7 @@
             },
             {
                 "module": "soupsieve",
-                "input_file": "wheels/py3/soupsieve-2.3.2.post1-py3-none-any.whl"
+                "input_file": "wheels/py3/soupsieve-2.4-py3-none-any.whl"
             },
             {
                 "module": "splunk_sdk",
@@ -1268,7 +1268,7 @@
             },
             {
                 "module": "urllib3",
-                "input_file": "wheels/shared/urllib3-1.26.12-py2.py3-none-any.whl"
+                "input_file": "wheels/shared/urllib3-1.26.15-py2.py3-none-any.whl"
             },
             {
                 "module": "xmltodict",
