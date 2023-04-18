@@ -1,6 +1,6 @@
 # File: splunk_connector.py
 #
-# Copyright (c) 2016-2022 Splunk Inc.
+# Copyright (c) 2016-2023 Splunk Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -941,6 +941,8 @@ class SplunkConnector(phantom.BaseConnector):
         for item in data:
             container = {}
             cef = {}
+            if "_serial" in item:
+                item.pop("_serial")
             if header_set:
                 name_mappings = {}
                 for k, v in list(item.items()):
@@ -952,18 +954,8 @@ class SplunkConnector(phantom.BaseConnector):
             else:
                 for k, v in list(item.items()):
                     cef[consts.CIM_CEF_MAP.get(k, k)] = v
-
-            raw = item.get("_raw", "")
-            if raw:
-                index = item.get("index", "")
-                source = item.get("source", "")
-                sourcetype = item.get("sourcetype", "")
-                input_str = "{}{}{}{}".format(raw, source, index, sourcetype)
-            else:
-                input_str = json.dumps(item)
-
-            if self._python_version == 3:
-                input_str = UnicodeDammit(input_str).unicode_markup.encode('utf-8')
+            input_str = json.dumps(item)
+            input_str = UnicodeDammit(input_str).unicode_markup.encode('utf-8')
 
             fips_enabled = self._get_fips_enabled()
             # if fips is not enabled, we should continue with our existing md5 usage for generating SDIs
@@ -992,7 +984,6 @@ class SplunkConnector(phantom.BaseConnector):
                     if value is not None:
                         cleaned_cef[key] = value
                 cef = cleaned_cef
-
             artifact = [{
                     'cef': cef,
                     'name': 'Field Values',
