@@ -942,6 +942,8 @@ class SplunkConnector(phantom.BaseConnector):
         for item in data:
             container = {}
             cef = {}
+            if "_serial" in item:
+                item.pop("_serial")
             if header_set:
                 name_mappings = {}
                 for k, v in list(item.items()):
@@ -995,7 +997,6 @@ class SplunkConnector(phantom.BaseConnector):
                     if value is not None:
                         cleaned_cef[key] = value
                 cef = cleaned_cef
-
             artifact = [{
                     'cef': cef,
                     'name': 'Field Values',
