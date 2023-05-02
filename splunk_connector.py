@@ -878,7 +878,7 @@ class SplunkConnector(phantom.BaseConnector):
             self.debug_print('FIPS is not enabled')
         return fips_enabled
 
-    def _on_poll(self, param):
+    def _on_poll(self, param):  # noqa: C901
 
         action_result = self.add_action_result(phantom.ActionResult(dict(param)))
 
