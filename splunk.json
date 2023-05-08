@@ -28,7 +28,7 @@
     ],
     "type": "siem",
     "main_module": "splunk_connector.py",
-    "app_version": "2.14.0",
+    "app_version": "2.15.0",
     "utctime_updated": "2022-09-08T08:47:45.000000Z",
     "package_name": "phantom_splunk",
     "product_name": "Splunk Enterprise",
@@ -38,8 +38,8 @@
     "fips_compliant": true,
     "python_version": "3",
     "latest_tested_versions": [
-        "On-premise, Splunk Enterprise Security v9.0.0, April 3 2023",
-        "Cloud, Splunk Cloud Platform v8.2.2112, April 3 2023"
+        "On-premise, Splunk Enterprise Security v9.0.0, May 8 2023",
+        "Cloud, Splunk Cloud Platform v8.2.2112, May 8 2023"
     ],
     "logo": "logo_splunk.svg",
     "logo_dark": "logo_splunk_dark.svg",
@@ -52,7 +52,7 @@
             },
             {
                 "module": "certifi",
-                "input_file": "wheels/py3/certifi-2022.12.7-py3-none-any.whl"
+                "input_file": "wheels/py3/certifi-2023.5.7-py3-none-any.whl"
             },
             {
                 "module": "chardet",
@@ -562,13 +562,6 @@
                     ]
                 },
                 {
-                    "data_path": "action_result.parameter.search_mode",
-                    "data_type": "string",
-                    "example_values": [
-                        "smart"
-                    ]
-                },
-                {
                     "data_path": "action_result.parameter.query",
                     "data_type": "string",
                     "contains": [
@@ -579,25 +572,18 @@
                     ]
                 },
                 {
+                    "data_path": "action_result.parameter.search_mode",
+                    "data_type": "string",
+                    "example_values": [
+                        "smart"
+                    ]
+                },
+                {
                     "data_path": "action_result.parameter.start_time",
                     "data_type": "string",
                     "example_values": [
                         "-2d",
                         "2022-03-18T16:12:07.130+00:00"
-                    ]
-                },
-                {
-                    "data_path": "action_result.data.*._key",
-                    "data_type": "string",
-                    "example_values": [
-                        "1659398400|_audit"
-                    ]
-                },
-                {
-                    "data_path": "action_result.data.*._origtime",
-                    "data_type": "string",
-                    "example_values": [
-                        "1659398400"
                     ]
                 },
                 {
@@ -613,9 +599,23 @@
                     "data_type": "string"
                 },
                 {
+                    "data_path": "action_result.data.*._key",
+                    "data_type": "string",
+                    "example_values": [
+                        "1659398400|_audit"
+                    ]
+                },
+                {
                     "data_path": "action_result.data.*._kv",
                     "data_type": "string",
                     "example_value": "1"
+                },
+                {
+                    "data_path": "action_result.data.*._origtime",
+                    "data_type": "string",
+                    "example_values": [
+                        "1659398400"
+                    ]
                 },
                 {
                     "data_path": "action_result.data.*._raw",
@@ -1228,7 +1228,7 @@
             },
             {
                 "module": "certifi",
-                "input_file": "wheels/py3/certifi-2022.12.7-py3-none-any.whl"
+                "input_file": "wheels/py3/certifi-2023.5.7-py3-none-any.whl"
             },
             {
                 "module": "chardet",
@@ -1260,7 +1260,7 @@
             },
             {
                 "module": "soupsieve",
-                "input_file": "wheels/py3/soupsieve-2.4-py3-none-any.whl"
+                "input_file": "wheels/py3/soupsieve-2.4.1-py3-none-any.whl"
             },
             {
                 "module": "splunk_sdk",

@@ -1340,15 +1340,17 @@ class SplunkConnector(phantom.BaseConnector):
 
     def add_json_result(self, action_result, data):
 
-        tmp_dir = tempfile.mkdtemp(prefix='splunk_result_attach')
-        file_path = "{}/splunk_run_query_result.json".format(tmp_dir)
+        if hasattr(Vault, 'get_vault_tmp_dir'):
+            tmp = tempfile.NamedTemporaryFile(dir=Vault.get_vault_tmp_dir(), delete=False)
+        else:
+            tmp = tempfile.NamedTemporaryFile(dir='/opt/phantom/vault/tmp/', delete=False)
         vault_attach_dict = {}
 
         vault_attach_dict[phantom.APP_JSON_ACTION_NAME] = self.get_action_name()
         vault_attach_dict[phantom.APP_JSON_APP_RUN_ID] = self.get_app_run_id()
 
         try:
-            with open(file_path, 'w') as f:
+            with open(tmp.name, 'w') as f:
                 json.dump(data, f)
 
         except Exception as e:
@@ -1363,7 +1365,7 @@ class SplunkConnector(phantom.BaseConnector):
         vault_ret = {}
 
         try:
-            vault_ret = Vault.add_attachment(file_path, container_id, 'splunk_run_query_result.json', vault_attach_dict)
+            vault_ret = Vault.add_attachment(tmp.name, container_id, 'splunk_run_query_result.json', vault_attach_dict)
 
         except Exception as e:
             self._dump_error_log(e)
