@@ -2,7 +2,7 @@
 # Splunk
 
 Publisher: Splunk  
-Connector Version: 2.14.0  
+Connector Version: 2.15.0  
 Product Vendor: Splunk Inc.  
 Product Name: Splunk Enterprise  
 Product Version Supported (regex): ".\*"  
@@ -457,15 +457,15 @@ action_result.parameter.command | string |  |   savedsearch
 action_result.parameter.display | string |  |   _time  index 
 action_result.parameter.end_time | string |  |   -2d  2022-03-18T16:12:09.130+00:00 
 action_result.parameter.parse_only | boolean |  |   True  False 
-action_result.parameter.search_mode | string |  |   smart 
 action_result.parameter.query | string |  `splunk query`  |   "Send to test" 
+action_result.parameter.search_mode | string |  |   smart 
 action_result.parameter.start_time | string |  |   -2d  2022-03-18T16:12:07.130+00:00 
-action_result.data.\*._key | string |  |   1659398400|_audit 
-action_result.data.\*._origtime | string |  |   1659398400 
 action_result.data.\*._bkt | string |  |  
 action_result.data.\*._cd | string |  |  
 action_result.data.\*._indextime | string |  |  
+action_result.data.\*._key | string |  |   1659398400|_audit 
 action_result.data.\*._kv | string |  |  
+action_result.data.\*._origtime | string |  |   1659398400 
 action_result.data.\*._raw | string |  |  
 action_result.data.\*._serial | string |  |  
 action_result.data.\*._si | string |  |  
