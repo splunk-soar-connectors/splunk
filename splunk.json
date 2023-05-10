@@ -55,7 +55,7 @@
             },
             {
                 "module": "certifi",
-                "input_file": "wheels/py3/certifi-2022.12.7-py3-none-any.whl"
+                "input_file": "wheels/py3/certifi-2023.5.7-py3-none-any.whl"
             },
             {
                 "module": "chardet",
@@ -222,6 +222,13 @@
             "data_type": "numeric",
             "order": 19,
             "default": 1
+        },
+        "include_cim_fields": {
+            "description": "Option to keep original Splunk CIM together with SOAR CEF fields",
+            "data_type": "boolean",
+            "order": 20,
+            "default": false,
+            "name": "include_cim_fields"
         }
     },
     "actions": [
@@ -429,13 +436,6 @@
                     "description": "Parameter ignored in this app",
                     "data_type": "numeric",
                     "order": 4
-                },
-                "include_cim_fields": {
-                    "description": "Option to keep original Splunk CIM together with SOAR CEF fields",
-                    "data_type": "boolean",
-                    "order": 5,
-                    "default": false,
-                    "name": "include_cim_fields"
                 }
             },
             "output": [],
@@ -1238,7 +1238,7 @@
             },
             {
                 "module": "certifi",
-                "input_file": "wheels/py3/certifi-2022.12.7-py3-none-any.whl"
+                "input_file": "wheels/py3/certifi-2023.5.7-py3-none-any.whl"
             },
             {
                 "module": "chardet",
