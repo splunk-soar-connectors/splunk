@@ -889,7 +889,7 @@ class SplunkConnector(phantom.BaseConnector):
         search_command = config.get('on_poll_command')
         search_string = config.get('on_poll_query')
         po = config.get('on_poll_parse_only', False)
-        include_cim_fields = config.get(consts.SPLUNK_JSON_INCLUDE_CIM, False)
+        include_cim_fields = config.get('include_cim_fields', False)
 
         if not search_string:
             self.save_progress("Need to specify Query String to use polling")
@@ -951,12 +951,15 @@ class SplunkConnector(phantom.BaseConnector):
                         # Use this to keep the orignal capitalization from splunk
                         name_mappings[k.lower()] = k
                 for h in header_set:
-                    cef[name_mappings.get(consts.CIM_CEF_MAP.get(h, h), h)] = item.get(name_mappings.get(h, h))
+                    cef_name = consts.CIM_CEF_MAP.get(h, h)
+                    cef[cef_name] = item.get(name_mappings.get(h, h))
+                    # Add original CIM fields if option is checked
+                    cef.update({name_mappings.get(h,h):item.get(name_mappings.get(h, h))} if include_cim_fields else {})
             else:
                 for k, v in list(item.items()):
                     cef[consts.CIM_CEF_MAP.get(k, k)] = v
                     # Add original CIM fields if option is checked
-                    cef.update({k: v} if include_cim_fields else {})
+                    cef.update({k:v} if include_cim_fields else {})
 
             raw = item.get("_raw", "")
             if raw:
