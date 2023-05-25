@@ -954,12 +954,12 @@ class SplunkConnector(phantom.BaseConnector):
                     cef_name = consts.CIM_CEF_MAP.get(h, h)
                     cef[cef_name] = item.get(name_mappings.get(h, h))
                     # Add original CIM fields if option is checked
-                    cef.update({name_mappings.get(h,h):item.get(name_mappings.get(h, h))} if include_cim_fields else {})
+                    cef.update({name_mappings.get(h, h): item.get(name_mappings.get(h, h))} if include_cim_fields else {})
             else:
                 for k, v in list(item.items()):
                     cef[consts.CIM_CEF_MAP.get(k, k)] = v
                     # Add original CIM fields if option is checked
-                    cef.update({k:v} if include_cim_fields else {})
+                    cef.update({k: v} if include_cim_fields else {})
 
             raw = item.get("_raw", "")
             if raw:
