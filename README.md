@@ -419,11 +419,12 @@ The configured query is what will be used during ingestion. If you only wish to 
 #### Action Parameters
 PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 --------- | -------- | ----------- | ---- | --------
-**container_id** |  optional  | Parameter ignored in this app | numeric | 
-**start_time** |  optional  | Parameter ignored in this app | numeric | 
-**end_time** |  optional  | Parameter ignored in this app | numeric | 
-**container_count** |  optional  | Maximum number of events to query for | numeric | 
-**artifact_count** |  optional  | Parameter ignored in this app | numeric | 
+**container\_id** |  optional  | Parameter ignored in this app | numeric | 
+**start\_time** |  optional  | Parameter ignored in this app | numeric | 
+**end\_time** |  optional  | Parameter ignored in this app | numeric | 
+**container\_count** |  optional  | Maximum number of events to query for | numeric | 
+**artifact\_count** |  optional  | Parameter ignored in this app | numeric | 
+**include\_cim\_fields** |  optional  | Option to include Splunk CIM fields | boolean | 
 
 #### Action Output
 No Output  

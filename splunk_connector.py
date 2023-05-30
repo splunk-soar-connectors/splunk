@@ -878,7 +878,7 @@ class SplunkConnector(phantom.BaseConnector):
             self.debug_print('FIPS is not enabled')
         return fips_enabled
 
-    def _on_poll(self, param):
+    def _on_poll(self, param):  # noqa: C901
 
         action_result = self.add_action_result(phantom.ActionResult(dict(param)))
 
@@ -889,6 +889,7 @@ class SplunkConnector(phantom.BaseConnector):
         search_command = config.get('on_poll_command')
         search_string = config.get('on_poll_query')
         po = config.get('on_poll_parse_only', False)
+        include_cim_fields = config.get('include_cim_fields', False)
 
         if not search_string:
             self.save_progress("Need to specify Query String to use polling")
@@ -950,12 +951,27 @@ class SplunkConnector(phantom.BaseConnector):
                         # Use this to keep the orignal capitalization from splunk
                         name_mappings[k.lower()] = k
                 for h in header_set:
-                    cef[name_mappings.get(consts.CIM_CEF_MAP.get(h, h), h)] = item.get(name_mappings.get(h, h))
+                    cef_name = consts.CIM_CEF_MAP.get(h, h)
+                    cef[cef_name] = item.get(name_mappings.get(h, h))
+                    # Add original CIM fields if option is checked
+                    cef.update({name_mappings.get(h, h): item.get(name_mappings.get(h, h))} if include_cim_fields else {})
             else:
                 for k, v in list(item.items()):
                     cef[consts.CIM_CEF_MAP.get(k, k)] = v
-            input_str = json.dumps(item)
-            input_str = UnicodeDammit(input_str).unicode_markup.encode('utf-8')
+                    # Add original CIM fields if option is checked
+                    cef.update({k: v} if include_cim_fields else {})
+
+            raw = item.get("_raw", "")
+            if raw:
+                index = item.get("index", "")
+                source = item.get("source", "")
+                sourcetype = item.get("sourcetype", "")
+                input_str = "{}{}{}{}".format(raw, source, index, sourcetype)
+            else:
+                input_str = json.dumps(item)
+
+            if self._python_version == 3:
+                input_str = UnicodeDammit(input_str).unicode_markup.encode('utf-8')
 
             fips_enabled = self._get_fips_enabled()
             # if fips is not enabled, we should continue with our existing md5 usage for generating SDIs
