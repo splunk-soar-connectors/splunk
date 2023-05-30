@@ -347,6 +347,7 @@ VARIABLE | REQUIRED | TYPE | DESCRIPTION
 **retry_count** |  optional  | numeric | Number of retries
 **remove_empty_cef** |  optional  | boolean | Remove CEF fields having empty values from the artifact
 **sleeptime_in_requests** |  optional  | numeric | The time to wait for next REST call (max 120 seconds)
+**include_cim_fields** |  optional  | boolean | Option to keep original Splunk CIM together with SOAR CEF fields
 
 ### Supported Actions  
 [test connectivity](#action-test-connectivity) - Validate the asset configuration for connectivity. This action logs into the device to check the connection and credentials  
@@ -419,12 +420,11 @@ The configured query is what will be used during ingestion. If you only wish to 
 #### Action Parameters
 PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 --------- | -------- | ----------- | ---- | --------
-**container\_id** |  optional  | Parameter ignored in this app | numeric | 
-**start\_time** |  optional  | Parameter ignored in this app | numeric | 
-**end\_time** |  optional  | Parameter ignored in this app | numeric | 
-**container\_count** |  optional  | Maximum number of events to query for | numeric | 
-**artifact\_count** |  optional  | Parameter ignored in this app | numeric | 
-**include\_cim\_fields** |  optional  | Option to include Splunk CIM fields | boolean | 
+**container_id** |  optional  | Parameter ignored in this app | numeric | 
+**start_time** |  optional  | Parameter ignored in this app | numeric | 
+**end_time** |  optional  | Parameter ignored in this app | numeric | 
+**container_count** |  optional  | Maximum number of events to query for | numeric | 
+**artifact_count** |  optional  | Parameter ignored in this app | numeric | 
 
 #### Action Output
 No Output  
