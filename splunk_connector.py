@@ -37,6 +37,7 @@ from urllib.request import install_opener  # noqa
 from urllib.request import urlopen  # noqa
 
 import phantom.app as phantom
+import phantom.rules as soar_vault
 import pytz
 import requests
 import simplejson as json
@@ -1381,7 +1382,7 @@ class SplunkConnector(phantom.BaseConnector):
         vault_ret = {}
 
         try:
-            vault_ret = Vault.vault_add(container_id, tmp.name, 'splunk_run_query_result.json', vault_attach_dict)
+            vault_ret = soar_vault.vault_add(container_id, tmp.name, 'splunk_run_query_result.json', vault_attach_dict)
 
         except Exception as e:
             self._dump_error_log(e)
