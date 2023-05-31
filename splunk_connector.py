@@ -1379,10 +1379,8 @@ class SplunkConnector(phantom.BaseConnector):
 
         container_id = self.get_container_id()
 
-        vault_ret = {}
-
         try:
-            vault_ret = soar_vault.vault_add(container_id, tmp.name, 'splunk_run_query_result.json', vault_attach_dict)
+            success, message, _ = soar_vault.vault_add(container_id, tmp.name, 'splunk_run_query_result.json', vault_attach_dict)
 
         except Exception as e:
             self._dump_error_log(e)
@@ -1390,8 +1388,8 @@ class SplunkConnector(phantom.BaseConnector):
             self.debug_print(phantom.APP_ERR_FILE_ADD_TO_VAULT.format(err))
             return action_result.set_status(phantom.APP_ERROR, phantom.APP_ERR_FILE_ADD_TO_VAULT.format(err))
 
-        if (not vault_ret.get('succeeded')):
-            err = "Failed to add file to Vault: {0}".format(json.dumps(vault_ret))
+        if not success:
+            err = "Failed to add file to Vault: {0}".format(message)
             self.debug_print(err)
             return action_result.set_status(phantom.APP_ERROR, err)
 
