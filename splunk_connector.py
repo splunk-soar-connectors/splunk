@@ -1381,7 +1381,7 @@ class SplunkConnector(phantom.BaseConnector):
         vault_ret = {}
 
         try:
-            vault_ret = Vault.vault_add(tmp.name, container_id, 'splunk_run_query_result.json', vault_attach_dict)
+            vault_ret = Vault.vault_add(container_id, tmp.name, 'splunk_run_query_result.json', vault_attach_dict)
 
         except Exception as e:
             self._dump_error_log(e)
