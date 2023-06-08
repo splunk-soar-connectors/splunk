@@ -122,16 +122,7 @@ class SplunkConnector(phantom.BaseConnector):
 
         config = self.get_config()
 
-        # Fetching the Python major version
-        try:
-            self._python_version = int(sys.version_info[0])
-        except Exception:
-            return self.set_status(phantom.APP_ERROR, "Error occurred while getting the Phantom server's Python major version")
-
-        try:
-            self.splunk_server = config[phantom.APP_JSON_DEVICE]
-        except Exception:
-            return phantom.APP_ERROR
+        self.splunk_server = config[phantom.APP_JSON_DEVICE]
 
         self._username = config.get(phantom.APP_JSON_USERNAME)
         self._password = config.get(phantom.APP_JSON_PASSWORD)
@@ -970,9 +961,6 @@ class SplunkConnector(phantom.BaseConnector):
                 input_str = "{}{}{}{}".format(raw, source, index, sourcetype)
             else:
                 input_str = json.dumps(item)
-
-            if self._python_version == 3:
-                input_str = UnicodeDammit(input_str).unicode_markup.encode('utf-8')
 
             fips_enabled = self._get_fips_enabled()
             # if fips is not enabled, we should continue with our existing md5 usage for generating SDIs
