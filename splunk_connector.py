@@ -37,6 +37,7 @@ from urllib.request import install_opener  # noqa
 from urllib.request import urlopen  # noqa
 
 import phantom.app as phantom
+import phantom.rules as soar_vault
 import pytz
 import requests
 import simplejson as json
@@ -121,16 +122,7 @@ class SplunkConnector(phantom.BaseConnector):
 
         config = self.get_config()
 
-        # Fetching the Python major version
-        try:
-            self._python_version = int(sys.version_info[0])
-        except Exception:
-            return self.set_status(phantom.APP_ERROR, "Error occurred while getting the Phantom server's Python major version")
-
-        try:
-            self.splunk_server = config[phantom.APP_JSON_DEVICE]
-        except Exception:
-            return phantom.APP_ERROR
+        self.splunk_server = config[phantom.APP_JSON_DEVICE]
 
         self._username = config.get(phantom.APP_JSON_USERNAME)
         self._password = config.get(phantom.APP_JSON_PASSWORD)
@@ -878,7 +870,7 @@ class SplunkConnector(phantom.BaseConnector):
             self.debug_print('FIPS is not enabled')
         return fips_enabled
 
-    def _on_poll(self, param):
+    def _on_poll(self, param):  # noqa: C901
 
         action_result = self.add_action_result(phantom.ActionResult(dict(param)))
 
@@ -889,6 +881,7 @@ class SplunkConnector(phantom.BaseConnector):
         search_command = config.get('on_poll_command')
         search_string = config.get('on_poll_query')
         po = config.get('on_poll_parse_only', False)
+        include_cim_fields = config.get('include_cim_fields', False)
 
         if not search_string:
             self.save_progress("Need to specify Query String to use polling")
@@ -950,10 +943,17 @@ class SplunkConnector(phantom.BaseConnector):
                         # Use this to keep the orignal capitalization from splunk
                         name_mappings[k.lower()] = k
                 for h in header_set:
-                    cef[name_mappings.get(consts.CIM_CEF_MAP.get(h, h), h)] = item.get(name_mappings.get(h, h))
+                    cef_name = consts.CIM_CEF_MAP.get(h, h)
+                    cef_key_value = name_mappings.get(h, h)
+                    cef[cef_name] = item.get(cef_key_value)
+                    # Add original CIM fields if option is checked
+                    cef.update({cef_key_value: item.get(cef_key_value)} if include_cim_fields else {})
             else:
                 for k, v in list(item.items()):
                     cef[consts.CIM_CEF_MAP.get(k, k)] = v
+                    # Add original CIM fields if option is checked
+                    cef.update({k: v} if include_cim_fields else {})
+
             input_str = json.dumps(item)
             input_str = UnicodeDammit(input_str).unicode_markup.encode('utf-8')
 
@@ -1340,15 +1340,17 @@ class SplunkConnector(phantom.BaseConnector):
 
     def add_json_result(self, action_result, data):
 
-        tmp_dir = tempfile.mkdtemp(prefix='splunk_result_attach')
-        file_path = "{}/splunk_run_query_result.json".format(tmp_dir)
+        if hasattr(Vault, 'get_vault_tmp_dir'):
+            tmp = tempfile.NamedTemporaryFile(dir=Vault.get_vault_tmp_dir(), delete=False)
+        else:
+            tmp = tempfile.NamedTemporaryFile(dir='/opt/phantom/vault/tmp/', delete=False)
         vault_attach_dict = {}
 
         vault_attach_dict[phantom.APP_JSON_ACTION_NAME] = self.get_action_name()
         vault_attach_dict[phantom.APP_JSON_APP_RUN_ID] = self.get_app_run_id()
 
         try:
-            with open(file_path, 'w') as f:
+            with open(tmp.name, 'w') as f:
                 json.dump(data, f)
 
         except Exception as e:
@@ -1360,10 +1362,8 @@ class SplunkConnector(phantom.BaseConnector):
 
         container_id = self.get_container_id()
 
-        vault_ret = {}
-
         try:
-            vault_ret = Vault.add_attachment(file_path, container_id, 'splunk_run_query_result.json', vault_attach_dict)
+            success, message, _ = soar_vault.vault_add(container_id, tmp.name, 'splunk_run_query_result.json', vault_attach_dict)
 
         except Exception as e:
             self._dump_error_log(e)
@@ -1371,8 +1371,8 @@ class SplunkConnector(phantom.BaseConnector):
             self.debug_print(phantom.APP_ERR_FILE_ADD_TO_VAULT.format(err))
             return action_result.set_status(phantom.APP_ERROR, phantom.APP_ERR_FILE_ADD_TO_VAULT.format(err))
 
-        if (not vault_ret.get('succeeded')):
-            err = "Failed to add file to Vault: {0}".format(json.dumps(vault_ret))
+        if not success:
+            err = "Failed to add file to Vault: {0}".format(message)
             self.debug_print(err)
             return action_result.set_status(phantom.APP_ERROR, err)
 

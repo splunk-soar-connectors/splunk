@@ -2,11 +2,11 @@
 # Splunk
 
 Publisher: Splunk  
-Connector Version: 2.14.0  
+Connector Version: 2.15.0  
 Product Vendor: Splunk Inc.  
 Product Name: Splunk Enterprise  
 Product Version Supported (regex): ".\*"  
-Minimum Product Version: 5.5.0  
+Minimum Product Version: 6.0.0  
 
 This app integrates with Splunk to update data on the device, in addition to investigate and ingestion actions
 
@@ -347,6 +347,7 @@ VARIABLE | REQUIRED | TYPE | DESCRIPTION
 **retry_count** |  optional  | numeric | Number of retries
 **remove_empty_cef** |  optional  | boolean | Remove CEF fields having empty values from the artifact
 **sleeptime_in_requests** |  optional  | numeric | The time to wait for next REST call (max 120 seconds)
+**include_cim_fields** |  optional  | boolean | Option to keep original Splunk CIM together with SOAR CEF fields
 
 ### Supported Actions  
 [test connectivity](#action-test-connectivity) - Validate the asset configuration for connectivity. This action logs into the device to check the connection and credentials  
@@ -457,15 +458,15 @@ action_result.parameter.command | string |  |   savedsearch
 action_result.parameter.display | string |  |   _time  index 
 action_result.parameter.end_time | string |  |   -2d  2022-03-18T16:12:09.130+00:00 
 action_result.parameter.parse_only | boolean |  |   True  False 
-action_result.parameter.search_mode | string |  |   smart 
 action_result.parameter.query | string |  `splunk query`  |   "Send to test" 
+action_result.parameter.search_mode | string |  |   smart 
 action_result.parameter.start_time | string |  |   -2d  2022-03-18T16:12:07.130+00:00 
-action_result.data.\*._key | string |  |   1659398400|_audit 
-action_result.data.\*._origtime | string |  |   1659398400 
 action_result.data.\*._bkt | string |  |  
 action_result.data.\*._cd | string |  |  
 action_result.data.\*._indextime | string |  |  
+action_result.data.\*._key | string |  |   1659398400|_audit 
 action_result.data.\*._kv | string |  |  
+action_result.data.\*._origtime | string |  |   1659398400 
 action_result.data.\*._raw | string |  |  
 action_result.data.\*._serial | string |  |  
 action_result.data.\*._si | string |  |  
