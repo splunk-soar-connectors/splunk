@@ -448,6 +448,8 @@ PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 **start_time** |  optional  | Earliest time modifier | string | 
 **end_time** |  optional  | Latest time modifier | string | 
 **search_mode** |  optional  | Search mode | string | 
+**offset** |  optional  | Offset | numeric | 
+**count** |  optional  | Total count (Note: 0 will consider as 50000) | numeric | 
 
 #### Action Output
 DATA PATH | TYPE | CONTAINS | EXAMPLE VALUES
