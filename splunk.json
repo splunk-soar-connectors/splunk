@@ -494,6 +494,18 @@
                     ],
                     "default": "smart",
                     "order": 8
+                },
+                "offset": {
+                    "description": "Offset",
+                    "data_type": "numeric",
+                    "default": 0,
+                    "order": 9
+                },
+                "count": {
+                    "description": "Total count (Note: 0 will consider as 50000)",
+                    "data_type": "numeric",
+                    "default": 50000,
+                    "order": 10
                 }
             },
             "render": {

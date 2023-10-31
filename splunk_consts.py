@@ -168,6 +168,8 @@ SPLUNK_SEARCH_AUDIT_INDEX_QUERY = "search index=_audit action=alert_fired {0} | 
 
 SPLUNK_DEFAULT_REQUEST_TIMEOUT = 60  # in seconds
 
+SPLUNK_RUN_QUERY_LIMIT = 50000
+
 # Search Modes
 SPLUNK_SEARCH_MODE_SMART = "smart"
 SPLUNK_SEARCH_MODE_FAST = "fast"

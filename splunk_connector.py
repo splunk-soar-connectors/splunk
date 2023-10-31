@@ -1080,6 +1080,7 @@ class SplunkConnector(phantom.BaseConnector):
         return severity
 
     def _handle_run_query(self, param):
+        self.debug_print("Handle Run Query Started.")
         """Perform Splunk run query
 
         How we run Splunk search: https://dev.splunk.com/enterprise/docs/devtools/python/sdk-python/howtousesplunkpython/howtorunsearchespython/ # noqa
@@ -1095,9 +1096,17 @@ class SplunkConnector(phantom.BaseConnector):
 
         search_command = param.get(consts.SPLUNK_JSON_COMMAND)
         search_string = param.get(consts.SPLUNK_JSON_QUERY)
+        self.debug_print(f"search_string::{search_string}")
+        self.debug_print(f"search_command::{search_command}")
         po = param.get(consts.SPLUNK_JSON_PARSE_ONLY, False)
         attach_result = param.get(consts.SPLUNK_JSON_ATTACH_RESULT, False)
         search_mode = param.get(consts.SPLUNK_JSON_SEARCH_MODE, consts.SPLUNK_SEARCH_MODE_SMART)
+        display = param.get("display")
+        self.debug_print(f"display::{display}")
+        offset = param.get("offset", 0)
+        count = param.get("count", consts.SPLUNK_RUN_QUERY_LIMIT)
+        self.debug_print(f"count:::{count}")
+        self.debug_print(f"Offset:::{offset}")            
 
         # More info on valid time modifier at https://docs.splunk.com/Documentation/Splunk/8.2.5/SearchReference/SearchTimeModifiers # noqa
         start_time = phantom.get_value(param, consts.SPLUNK_JSON_START_TIME)
@@ -1118,12 +1127,16 @@ class SplunkConnector(phantom.BaseConnector):
                 search_query = search_string
             else:
                 search_query = '{0} {1}'.format(search_command.strip(), search_string.strip())
+            if display and (search_string.find('table', 0) < 0):
+                self.debug_print("in table")
+                display_columns = ' | table {0}'.format(display.strip())   
+                search_query = search_query + display_columns 
         except Exception as e:
             self._dump_error_log(e)
             return action_result.set_status(phantom.APP_ERROR, "Error occurred while parsing the search query")
 
         self.debug_print("search_query: {0}".format(search_query))
-        return self._run_query(search_query, action_result, attach_result=attach_result, kwargs_create=kwargs, parse_only=po)
+        return self._run_query(search_query, action_result, attach_result=attach_result, kwargs_create=kwargs, parse_only=po, offset=offset, count=count)
 
     def _get_tz_str_from_epoch(self, time_format_str, epoch_milli):
 
@@ -1222,12 +1235,15 @@ class SplunkConnector(phantom.BaseConnector):
         self.save_progress(consts.SPLUNK_SUCCESS_CONNECTIVITY_TEST)
         return action_result.set_status(phantom.APP_SUCCESS, consts.SPLUNK_SUCCESS_CONNECTIVITY_TEST)
 
-    def _run_query(self, search_query, action_result, attach_result=False, kwargs_create=dict(), parse_only=True):
+    def _run_query(self, search_query, action_result, attach_result=False, kwargs_create=dict(), parse_only=True, offset=0, count=consts.SPLUNK_RUN_QUERY_LIMIT):
         """Function that executes the query on splunk"""
         self.debug_print('Start run query')
+        RUN_QUERY_LIMIT = consts.SPLUNK_RUN_QUERY_LIMIT
         RETRY_LIMIT = self.retry_count
         summary = action_result.update_summary({})
         summary["sid"] = "Search ID not created"
+        count = RUN_QUERY_LIMIT if count == 0 else count
+        self.debug_print(f"count::: {count}")
 
         # Validate the search query
         for attempt_count in range(0, RETRY_LIMIT):
@@ -1257,7 +1273,9 @@ class SplunkConnector(phantom.BaseConnector):
         self.save_progress(consts.SPLUNK_PROG_CREATING_SEARCH_JOB)
 
         # Set any search creation flags here
-        kwargs_create.update({'exec_mode': 'normal'})
+        max_count = count + offset
+        self.debug_print(f"max_count::{max_count}")
+        kwargs_create.update({'exec_mode': 'normal', 'max_count':max_count})
 
         self.debug_print("kwargs_create", kwargs_create)
 
@@ -1300,36 +1318,56 @@ class SplunkConnector(phantom.BaseConnector):
             self.send_progress(status)
             if stats['is_done'] == '1':
                 result_count = stats['result_count']
+                self.debug_print(f"status is job done result count: {result_count}")
                 break
             time.sleep(self.sleeptime_in_requests)
 
         self.send_progress("Parsing results...")
         result_index = 0
         ten_percent = float(result_count) * 0.10
-
-        try:
-            results = splunk_results.JSONResultsReader(job.results(count=kwargs_create.get('max_count', 0), output_mode='json'))
-        except Exception as e:
-            self._dump_error_log(e)
-            error_text = consts.SPLUNK_EXCEPTION_ERR_MESSAGE.format(msg="Error retrieving results",
-                error_text=self._get_error_message_from_exception(e))
-            return action_result.set_status(phantom.APP_ERROR, error_text)
-
         data = []
-
-        for result in results:
-
-            if not isinstance(result, dict):
-                continue
-
-            action_result.add_data(result)
-            data.append(result)
-
-            result_index += 1
-
-            if (result_index % ten_percent) == 0:
-                status = "Finished parsing {0:.1%} of results".format((float(result_index) / float(result_count)))
-                self.send_progress(status)
+        self.debug_print("job resultCount:::{}".format(job["resultCount"]))
+        self.debug_print("type of job resultCount:::{}".format(type(job["resultCount"])))
+        self.debug_print("type of job resultCount int:::{}".format(type(int(job["resultCount"]))))        
+        temp_count = count
+        temp_offset = offset
+        while(temp_offset < result_count):
+            self.debug_print(f"temp_count : {temp_count}")
+            self.debug_print(f"temp_offset : {temp_offset}")
+            
+            try:
+                job_results = job.results(count=temp_count, output_mode='json', offset=temp_offset)
+                self.debug_print(f"type of a:::{type(job_results)}")
+                results = splunk_results.JSONResultsReader(job_results)
+                self.debug_print(f"type of results:::{type(results)}")
+                self.debug_print(f"is intance dict results:::{isinstance(results, dict)}")
+                self.debug_print(f"is intance list results:::{isinstance(results, list)}")
+            
+            except Exception as e:
+                self._dump_error_log(e)
+                error_text = consts.SPLUNK_EXCEPTION_ERR_MESSAGE.format(msg="Error retrieving results",
+                    error_text=self._get_error_message_from_exception(e))
+                return action_result.set_status(phantom.APP_ERROR, error_text)
+            
+            # Adding every result in action_result and data
+            for result in results:
+                if not isinstance(result, dict):
+                    continue
+                
+                action_result.add_data(result)
+                data.append(result)
+                result_index += 1
+                if (result_index % ten_percent) == 0:
+                    status = "Finished parsing {0:.1%} of results".format((float(result_index) / float(result_count)))
+                    self.send_progress(status)
+            self.debug_print(f"while loop result index after for loop: {result_index}")        
+            
+            temp_offset = temp_offset + RUN_QUERY_LIMIT
+            temp_count = temp_count - RUN_QUERY_LIMIT
+            
+            if(temp_count <= 0):
+                self.debug_print("temp_count <= 0")
+                break
 
         if attach_result:
             self.add_json_result(action_result, data)
