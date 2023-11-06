@@ -138,7 +138,7 @@ class SplunkConnector(phantom.BaseConnector):
             self._state = self.load_state()
             if self._state is None:
                 self.debug_print("Please check the owner, owner group, and the permissions of the state file")
-                self.debug_print("The phantom user should have correct access rights and ownership for the \
+                self.debug_print("The splunk phantom user should have correct access rights and ownership for the \
                     corresponding state file (refer readme file for more information)")
                 return phantom.APP_ERROR
 
