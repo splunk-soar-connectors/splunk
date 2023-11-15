@@ -39,7 +39,7 @@ This app integrates with Splunk to update data on the device, in addition to inv
 ## Splunk-SDK
 
 This app uses the Splunk-SDK module, which is licensed under the Apache Software License, Copyright
-(c) 2011-2019 Splunk, Inc.
+(c) 2011-2023 Splunk, Inc.
 
 ## State File Permissions
 
@@ -571,7 +571,7 @@ Post data to Splunk
 Type: **generic**  
 Read only: **False**
 
-This action creates an event on Splunk with the data included in the <b>data</b> parameter. If not specified the parameters will default to the following:<ul><li><b>host</b> - The IP of the Phantom instance running the action.</li><li><b>index</b> - The default index configured on the Splunk instance.</li><li><b>source</b> - &quot;Phantom&quot;.</li><li><b>source_type</b> - &quot;Automation/Orchestration Platform&quot;.</li></ul>
+This action creates an event on Splunk with the data included in the <b>data</b> parameter. If not specified the parameters will default to the following:<ul><li><b>host</b> - The IP of the Splunk Phantom instance running the action.</li><li><b>index</b> - The default index configured on the Splunk instance.</li><li><b>source</b> - &quot;Phantom&quot;.</li><li><b>source_type</b> - &quot;Automation/Orchestration Platform&quot;.</li></ul>
 
 #### Action Parameters
 PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
