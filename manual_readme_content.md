@@ -27,7 +27,7 @@
 ## Splunk-SDK
 
 This app uses the Splunk-SDK module, which is licensed under the Apache Software License, Copyright
-(c) 2011-2019 Splunk, Inc.
+(c) 2011-2023 Splunk, Inc.
 
 ## State File Permissions
 
