@@ -2,11 +2,11 @@
 # Splunk
 
 Publisher: Splunk  
-Connector Version: 2.15.0  
+Connector Version: 2.16.0  
 Product Vendor: Splunk Inc.  
 Product Name: Splunk Enterprise  
 Product Version Supported (regex): ".\*"  
-Minimum Product Version: 6.0.0  
+Minimum Product Version: 6.1.0  
 
 This app integrates with Splunk to update data on the device, in addition to investigate and ingestion actions
 
