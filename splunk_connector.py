@@ -944,6 +944,7 @@ class SplunkConnector(phantom.BaseConnector):
                         name_mappings[k.lower()] = k
                 for h in header_set:
                     cef_name = consts.CIM_CEF_MAP.get(h, h)
+                    cef_name = name_mappings.get(cef_name, cef_name)
                     cef_key_value = name_mappings.get(h, h)
                     cef[cef_name] = item.get(cef_key_value)
                     # Add original CIM fields if option is checked
