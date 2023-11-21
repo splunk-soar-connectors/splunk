@@ -51,6 +51,7 @@ from dateutil.parser import parse as dateutil_parse
 from past.utils import old_div  # noqa
 from phantom.base_connector import BaseConnector
 from phantom.vault import Vault
+from phantom_common import paths
 from pytz import timezone
 from splunklib.binding import HTTPError
 
@@ -1344,7 +1345,8 @@ class SplunkConnector(phantom.BaseConnector):
         if hasattr(Vault, 'get_vault_tmp_dir'):
             tmp = tempfile.NamedTemporaryFile(dir=Vault.get_vault_tmp_dir(), delete=False)
         else:
-            tmp = tempfile.NamedTemporaryFile(dir='/opt/phantom/vault/tmp/', delete=False)
+            vault_tmp = os.path.join(paths.PHANTOM_VAULT, "/tmp")
+            tmp = tempfile.NamedTemporaryFile(dir=vault_tmp, delete=False)
         vault_attach_dict = {}
 
         vault_attach_dict[phantom.APP_JSON_ACTION_NAME] = self.get_action_name()
