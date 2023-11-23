@@ -1345,7 +1345,7 @@ class SplunkConnector(phantom.BaseConnector):
         if hasattr(Vault, 'get_vault_tmp_dir'):
             tmp = tempfile.NamedTemporaryFile(dir=Vault.get_vault_tmp_dir(), delete=False)
         else:
-            vault_tmp = os.path.join(paths.PHANTOM_VAULT, "/tmp")
+            vault_tmp = os.path.join(paths.PHANTOM_VAULT, "tmp")
             tmp = tempfile.NamedTemporaryFile(dir=vault_tmp, delete=False)
         vault_attach_dict = {}
 
