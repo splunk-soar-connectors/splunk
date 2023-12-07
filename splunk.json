@@ -31,18 +31,18 @@
     ],
     "type": "siem",
     "main_module": "splunk_connector.py",
-    "app_version": "2.15.0",
-    "utctime_updated": "2022-09-08T08:47:45.000000Z",
+    "app_version": "2.15.1",
+    "utctime_updated": "2023-12-05T22:26:49.000000Z",
     "package_name": "phantom_splunk",
     "product_name": "Splunk Enterprise",
     "product_vendor": "Splunk Inc.",
     "product_version_regex": ".*",
-    "min_phantom_version": "6.0.0",
+    "min_phantom_version": "6.1.1",
     "fips_compliant": true,
     "python_version": "3",
     "latest_tested_versions": [
-        "On-premise, Splunk Enterprise Security v9.0.0, May 8 2023",
-        "Cloud, Splunk Cloud Platform v8.2.2112, May 8 2023"
+        "On-premise, Splunk Enterprise Security v9.0.0, Dec 5, 2023",
+        "Cloud, Splunk Cloud Platform v8.2.2112, Dec 5, 2023"
     ],
     "logo": "logo_splunk.svg",
     "logo_dark": "logo_splunk_dark.svg",
@@ -1234,7 +1234,7 @@
             },
             {
                 "module": "soupsieve",
-                "input_file": "wheels/py3/soupsieve-2.4.1-py3-none-any.whl"
+                "input_file": "wheels/py3/soupsieve-2.5-py3-none-any.whl"
             },
             {
                 "module": "splunk_sdk",
