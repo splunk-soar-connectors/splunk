@@ -1,6 +1,6 @@
 # File: splunk_connector.py
 #
-# Copyright (c) 2016-2023 Splunk Inc.
+# Copyright (c) 2016-2024 Splunk Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -906,7 +906,11 @@ class SplunkConnector(phantom.BaseConnector):
             search_params['max_count'] = self.max_container
             start_time = self._state.get('start_time')
             if start_time:
-                search_params['index_earliest'] = start_time
+                if self._validate_epoch_time(start_time):
+                    search_params['index_earliest'] = start_time
+                else:
+                    self.debug_print("The value of 'start_time' parameter {} is not a valid epoch time".format(start_time))
+                    self._state['start_time'] = None
 
         if int(search_params['max_count']) <= 0:
             self.debug_print("The value of 'container_count' parameter must be a positive integer. \
@@ -1012,6 +1016,14 @@ class SplunkConnector(phantom.BaseConnector):
             self._state['start_time'] = data[-1].get('_indextime')
 
         return action_result.set_status(phantom.APP_SUCCESS)
+
+    def _validate_epoch_time(self, epoch_time):
+        try:
+            epoch_time = float(epoch_time)
+            datetime.fromtimestamp(epoch_time)
+            return True
+        except Exception:
+            return False
 
     def _get_event_start(self, start_time):
         # use platform default start_time
