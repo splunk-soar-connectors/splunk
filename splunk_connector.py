@@ -1,6 +1,6 @@
 # File: splunk_connector.py
 #
-# Copyright (c) 2016-2023 Splunk Inc.
+# Copyright (c) 2016-2024 Splunk Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -1015,7 +1015,6 @@ class SplunkConnector(phantom.BaseConnector):
             self._state['start_time'] = data[-1].get('_indextime')
 
         return action_result.set_status(phantom.APP_SUCCESS)
-    
 
     def _validate_epoch_time(self, epoch_time):
         try:
