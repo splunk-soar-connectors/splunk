@@ -906,11 +906,7 @@ class SplunkConnector(phantom.BaseConnector):
             search_params['max_count'] = self.max_container
             start_time = self._state.get('start_time')
             if start_time:
-                if self._validate_epoch_time(start_time):
-                    search_params['index_earliest'] = start_time
-                else:
-                    self.debug_print("The value of 'start_time' parameter {} is not a valid epoch time".format(start_time))
-                    self._state['start_time'] = None
+                search_params['index_earliest'] = start_time
 
         if int(search_params['max_count']) <= 0:
             self.debug_print("The value of 'container_count' parameter must be a positive integer. \
@@ -920,8 +916,17 @@ class SplunkConnector(phantom.BaseConnector):
 
         ret_val = self._run_query(search_query, action_result, kwargs_create=search_params, parse_only=po)
         if phantom.is_fail(ret_val):
-            self.save_progress(action_result.get_message())
-            return action_result.set_status(phantom.APP_ERROR)
+            if "Invalid index_earliest" in action_result.get_message():
+                self.debug_print("The value of 'start_time' parameter {} is not a valid epoch time. Re-invoking api without start_time".format(search_params.get("index_earliest")))
+                self._state['start_time'] = None
+                search_params.pop("index_earliest")
+                ret_val = self._run_query(search_query, action_result, kwargs_create=search_params, parse_only=po)
+                if phantom.is_fail(ret_val):
+                    self.save_progress(action_result.get_message())
+                    return action_result.set_status(phantom.APP_ERROR)
+            else:
+                self.save_progress(action_result.get_message())
+                return action_result.set_status(phantom.APP_ERROR)
 
         display = config.get('on_poll_display')
         header_set = None
@@ -1016,14 +1021,6 @@ class SplunkConnector(phantom.BaseConnector):
             self._state['start_time'] = data[-1].get('_indextime')
 
         return action_result.set_status(phantom.APP_SUCCESS)
-
-    def _validate_epoch_time(self, epoch_time):
-        try:
-            epoch_time = float(epoch_time)
-            datetime.fromtimestamp(epoch_time)
-            return True
-        except Exception:
-            return False
 
     def _get_event_start(self, start_time):
         # use platform default start_time
