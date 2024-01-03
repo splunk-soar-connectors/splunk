@@ -917,7 +917,8 @@ class SplunkConnector(phantom.BaseConnector):
         ret_val = self._run_query(search_query, action_result, kwargs_create=search_params, parse_only=po)
         if phantom.is_fail(ret_val):
             if "Invalid index_earliest" in action_result.get_message():
-                self.debug_print("The value of 'start_time' parameter {} is not a valid epoch time. Re-invoking api without start_time".format(search_params.get("index_earliest")))
+                self.debug_print("The value of 'start_time' parameter {} is not a valid epoch time. Re-invoking api without start_time".format(
+                    search_params.get("index_earliest")))
                 self._state['start_time'] = None
                 search_params.pop("index_earliest")
                 ret_val = self._run_query(search_query, action_result, kwargs_create=search_params, parse_only=po)
