@@ -60,13 +60,14 @@ Please check the permissions for the state file as mentioned below.
 
 ## Required Permissions for Post Data Action
 
-For sending events to Splunk Platform, the User configured in the asset would require **edit_tcp** capability. Follow the below steps to configure:
-- Login to the Splunk Platform
-- Go to **Setting > Roles**
-- Click on role of the user configured in the asset(example: user) and go to **Capabilities**.
-- Search for '**edit_tcp**' in the capabilities enable it for the particular role.
-- To check if the capability is given to your user, go to **Settings > Users** and in the **Edit dropdown** and select **View Capabilities**.
-- Search for '**edit_tcp**' and if a tick besides it appears then the permission has been enabled for the user.
+For sending events to Splunk Platform, the User configured in the asset would require **edit_tcp** capability. Follow the below steps to configure
+
+-   Login to the Splunk Platform
+-   Go to **Setting > Roles**
+-   Click on role of the user configured in the asset(example: user) and go to **Capabilities**
+-   Search for '**edit_tcp**' in the capabilities enable it for the particular role
+-   To check if the capability is given to your user, go to **Settings > Users** and in the **Edit dropdown** and select **View Capabilities**
+-   Search for '**edit_tcp**' and if a tick besides it appears then the permission has been enabled for the user
 
 ## Asset Configuration Parameters
 
