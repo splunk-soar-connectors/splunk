@@ -63,7 +63,7 @@ class RetVal(tuple):
         return tuple.__new__(RetVal, (val1, val2))
 
 
-class SplunkConnector(phantom.BaseConnector):
+class SplunkConnector(BaseConnector):
 
     ACTION_ID_POST_DATA = "post_data"
     ACTION_ID_RUN_QUERY = "run_query"
@@ -1447,7 +1447,7 @@ if __name__ == '__main__':
         password = getpass.getpass("Password: ")
 
     if (username and password):
-        login_url = BaseConnector._get_phantom_base_url() + "login"
+        login_url = SplunkConnector._get_phantom_base_url() + "login"
         try:
             print("Accessing the Login page")
             r = requests.get(login_url, verify=verify, timeout=consts.SPLUNK_DEFAULT_REQUEST_TIMEOUT)
