@@ -59,6 +59,7 @@ Please check the permissions for the state file as mentioned below.
 -   File Owner: appropriate splunk phantom user
 
 ## Required Permissions for Post Data Action
+The endpoint used by the post data action is not supported on Splunk Cloud Platform. Hence, the following steps are not applicable for Splunk Cloud Platform.
 
 For sending events to Splunk Platform, the User configured in the asset would require **edit_tcp** capability. Follow the below steps to configure
 
