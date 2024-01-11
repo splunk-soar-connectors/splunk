@@ -919,11 +919,10 @@ class SplunkConnector(BaseConnector):
             if "Invalid index_earliest" in action_result.get_message():
                 self.debug_print("The value of 'start_time' parameter {} is not a valid epoch time. Re-invoking api without start_time".format(
                     search_params.get("index_earliest")))
-                self._state['start_time'] = None
-                return action_result.set_status(phantom.APP_ERROR)
+                del self._state['start_time']
             else:
                 self.save_progress(action_result.get_message())
-                return action_result.set_status(phantom.APP_ERROR)
+            return action_result.set_status(phantom.APP_ERROR)
 
         display = config.get('on_poll_display')
         header_set = None
