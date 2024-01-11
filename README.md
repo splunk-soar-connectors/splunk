@@ -39,7 +39,7 @@ This app integrates with Splunk to update data on the device, in addition to inv
 ## Splunk-SDK
 
 This app uses the Splunk-SDK module, which is licensed under the Apache Software License, Copyright
-(c) 2011-2023 Splunk, Inc.
+(c) 2011-2024 Splunk, Inc.
 
 ## State File Permissions
 
@@ -477,50 +477,50 @@ action_result.data.\*._bkt | string |  |
 action_result.data.\*._cd | string |  |  
 action_result.data.\*._indextime | string |  |  
 action_result.data.\*._key | string |  |   1659398400|_audit 
-action_result.data.\*._kv | string |  |  
+action_result.data.\*._kv | string |  |   1 
 action_result.data.\*._origtime | string |  |   1659398400 
 action_result.data.\*._raw | string |  |  
 action_result.data.\*._serial | string |  |  
 action_result.data.\*._si | string |  |  
 action_result.data.\*._sourcetype | string |  |  
-action_result.data.\*._subsecond | string |  |  
+action_result.data.\*._subsecond | string |  |   .427 
 action_result.data.\*._time | string |  |  
 action_result.data.\*._value | string |  |   184 
-action_result.data.\*.a | string |  |  
+action_result.data.\*.a | string |  |   abc 
 action_result.data.\*.content.app | string |  |   search 
-action_result.data.\*.content.host | string |  |  
-action_result.data.\*.content.info | string |  |  
-action_result.data.\*.content.search | string |  |  
-action_result.data.\*.content.search_type | string |  |  
-action_result.data.\*.content.sid | string |  |  
-action_result.data.\*.content.source | string |  |  
-action_result.data.\*.content.sourcetype | string |  |  
+action_result.data.\*.content.host | string |  |   test 
+action_result.data.\*.content.info | string |  |   granted 
+action_result.data.\*.content.search | string |  |   search [| makeresults | eval myfield = "test" | table search] `notable` | table event_id 
+action_result.data.\*.content.search_type | string |  |   adhoc 
+action_result.data.\*.content.sid | string |  |   1621953839.25275 
+action_result.data.\*.content.source | string |  |   source 
+action_result.data.\*.content.sourcetype | string |  |   source 
 action_result.data.\*.content.uri | string |  |   /en-US/app/search/search?q=search%20index%3Dmain%20%7C%20head%2010&sid=1651356328.532450&display.page.search.mode=smart&dispatch.sample_ratio=1&workload_pool=&earliest=-24h%40h&latest=now 
 action_result.data.\*.content.view | string |  |   search 
-action_result.data.\*.count | string |  |  
-action_result.data.\*.count(host) | string |  |  
+action_result.data.\*.count | string |  |   3058733 
+action_result.data.\*.count(host) | string |  |   28 
 action_result.data.\*.event | string |  |   {"data": {"count": 3, "size": 112, "transform": "access_app_tracker"}, "version": "1.0"} 
 action_result.data.\*.host | string |  `host name`  |   10.1.67.187:8088 
 action_result.data.\*.index | string |  |  
-action_result.data.\*.is_Acceleration_Jobs | string |  |  
-action_result.data.\*.is_Adhoc_Jobs | string |  |  
-action_result.data.\*.is_Failed_Jobs | string |  |  
-action_result.data.\*.is_Realtime_Jobs | string |  |  
-action_result.data.\*.is_Scheduled_Jobs | string |  |  
-action_result.data.\*.is_Subsearch_Jobs | string |  |  
-action_result.data.\*.is_not_Acceleration_Jobs | string |  |  
-action_result.data.\*.is_not_Adhoc_Jobs | string |  |  
-action_result.data.\*.is_not_Failed_Jobs | string |  |  
-action_result.data.\*.is_not_Realtime_Jobs | string |  |  
-action_result.data.\*.is_not_Scheduled_Jobs | string |  |  
-action_result.data.\*.is_not_Subsearch_Jobs | string |  |  
+action_result.data.\*.is_Acceleration_Jobs | string |  |   0 
+action_result.data.\*.is_Adhoc_Jobs | string |  |   1 
+action_result.data.\*.is_Failed_Jobs | string |  |   0 
+action_result.data.\*.is_Realtime_Jobs | string |  |   0 
+action_result.data.\*.is_Scheduled_Jobs | string |  |   0 
+action_result.data.\*.is_Subsearch_Jobs | string |  |   0 
+action_result.data.\*.is_not_Acceleration_Jobs | string |  |   1 
+action_result.data.\*.is_not_Adhoc_Jobs | string |  |   0 
+action_result.data.\*.is_not_Failed_Jobs | string |  |   1 
+action_result.data.\*.is_not_Realtime_Jobs | string |  |   1 
+action_result.data.\*.is_not_Scheduled_Jobs | string |  |   1 
+action_result.data.\*.is_not_Subsearch_Jobs | string |  |   1 
 action_result.data.\*.linecount | string |  |  
 action_result.data.\*.source | string |  |  
 action_result.data.\*.sourcetype | string |  |  
 action_result.data.\*.spent | string |  |   223 
 action_result.data.\*.splunk_server | string |  `host name`  |  
-action_result.data.\*.user | string |  |  
-action_result.data.\*.values(source) | string |  |  
+action_result.data.\*.user | string |  |   admin 
+action_result.data.\*.values(source) | string |  |   /opt/splunk/var/log/splunk/scheduler.log 
 action_result.summary.sid | string |  |   1612177958.977510 
 action_result.summary.total_events | numeric |  |   2 
 action_result.message | string |  |   Sid: 1612177958.977510, Total events: 2 
