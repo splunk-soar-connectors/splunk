@@ -29,11 +29,6 @@ License: Zope
 Copyright 1987-2006 implementation only works for dates between
 Copyright 2003-2019 Stuart Bishop <stuart@stuartbishop.net>
 
-Library: requests
-Version: 2.25.0
-License: Apache 2.0
-Kenneth Reitz
-
 Library: simplejson
 Version: 3.17.2
 License: Academic 2.1
