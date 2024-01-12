@@ -54,9 +54,9 @@ Please check the permissions for the state file as mentioned below.
 
 #### State File Permissions
 
--   File Rights: rw-rw-r-- (664) (The splunk phantom user should have read and write access for the state
+-   File Rights: rw-rw-r-- (664) (The splunk SOAR user should have read and write access for the state
     file)
--   File Owner: appropriate splunk phantom user
+-   File Owner: appropriate splunk SOAR user
 
 ## Required Permissions for Post Data Action
 The endpoint used by the post data action is not supported on Splunk Cloud Platform. Hence, the following steps are not applicable for Splunk Cloud Platform.
@@ -573,7 +573,7 @@ Post data to Splunk
 Type: **generic**  
 Read only: **False**
 
-This action creates an event on Splunk with the data included in the <b>data</b> parameter. If not specified the parameters will default to the following:<ul><li><b>host</b> - The IP of the Splunk Phantom instance running the action.</li><li><b>index</b> - The default index configured on the Splunk instance.</li><li><b>source</b> - &quot;Phantom&quot;.</li><li><b>source_type</b> - &quot;Automation/Orchestration Platform&quot;.</li></ul>
+This action creates an event on Splunk with the data included in the <b>data</b> parameter. If not specified the parameters will default to the following:<ul><li><b>host</b> - The IP of the Splunk SOAR instance running the action.</li><li><b>index</b> - The default index configured on the Splunk instance.</li><li><b>source</b> - &quot;Phantom&quot;.</li><li><b>source_type</b> - &quot;Automation/Orchestration Platform&quot;.</li></ul>
 
 #### Action Parameters
 PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
