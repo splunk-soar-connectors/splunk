@@ -490,7 +490,7 @@ action_result.data.\*.a | string |  |   abc
 action_result.data.\*.content.app | string |  |   search 
 action_result.data.\*.content.host | string |  |   test 
 action_result.data.\*.content.info | string |  |   granted 
-action_result.data.\*.content.search | string |  |   search [\\| makeresults \\| eval myfield = "test" \\| table search] `notable` \\| table event_id 
+action_result.data.\*.content.search | string |  |   search [| makeresults | eval myfield = "test" | table search] `notable` | table event_id 
 action_result.data.\*.content.search_type | string |  |   adhoc 
 action_result.data.\*.content.sid | string |  |   1621953839.25275 
 action_result.data.\*.content.source | string |  |   source 
