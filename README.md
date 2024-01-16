@@ -476,7 +476,7 @@ action_result.parameter.start_time | string |  |   -2d  2022-03-18T16:12:07.130+
 action_result.data.\*._bkt | string |  |  
 action_result.data.\*._cd | string |  |  
 action_result.data.\*._indextime | string |  |  
-action_result.data.\*._key | string |  |   1659398400|_audit 
+action_result.data.\*._key | string |  |   user 
 action_result.data.\*._kv | string |  |   1 
 action_result.data.\*._origtime | string |  |   1659398400 
 action_result.data.\*._raw | string |  |  
@@ -490,7 +490,7 @@ action_result.data.\*.a | string |  |   abc
 action_result.data.\*.content.app | string |  |   search 
 action_result.data.\*.content.host | string |  |   test 
 action_result.data.\*.content.info | string |  |   granted 
-action_result.data.\*.content.search | string |  |   search [| makeresults | eval myfield = "test" | table search] `notable` | table event_id 
+action_result.data.\*.content.search | string |  |   index = main 
 action_result.data.\*.content.search_type | string |  |   adhoc 
 action_result.data.\*.content.sid | string |  |   1621953839.25275 
 action_result.data.\*.content.source | string |  |   source 
