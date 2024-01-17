@@ -51,7 +51,6 @@ from dateutil.parser import parse as dateutil_parse
 from past.utils import old_div  # noqa
 from phantom.base_connector import BaseConnector
 from phantom.vault import Vault
-from phantom_common import paths
 from pytz import timezone
 from splunklib.binding import HTTPError
 
@@ -139,7 +138,7 @@ class SplunkConnector(BaseConnector):
             self._state = self.load_state()
             if self._state is None:
                 self.debug_print("Please check the owner, owner group, and the permissions of the state file")
-                self.debug_print("The splunk phantom user should have correct access rights and ownership for the \
+                self.debug_print("The Splunk SOAR user should have correct access rights and ownership for the \
                     corresponding state file (refer readme file for more information)")
                 return phantom.APP_ERROR
 
@@ -391,7 +390,7 @@ class SplunkConnector(BaseConnector):
             return self._process_json_response(r, action_result)
 
         # Process an HTML response, Do this no matter what the api talks.
-        # There is a high chance of a PROXY in between phantom and the rest of
+        # There is a high chance of a PROXY in between Splunk SOAR and the rest of
         # world, in case of errors, PROXY's return HTML, this function parses
         # the error and adds it to the action_result.
         if 'html' in r.headers.get('Content-Type', ''):
@@ -1024,7 +1023,7 @@ class SplunkConnector(BaseConnector):
             return None
 
         try:
-            # convert to Phantom timestamp format
+            # convert to Splunk SOAR timestamp format
             # '%Y-%m-%dT%H:%M:%S.%fZ
             datetime_obj = dateutil_parse(start_time)
             return datetime_obj.astimezone(pytz.utc).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
@@ -1347,18 +1346,14 @@ class SplunkConnector(BaseConnector):
 
     def add_json_result(self, action_result, data):
 
-        if hasattr(Vault, 'get_vault_tmp_dir'):
-            tmp = tempfile.NamedTemporaryFile(dir=Vault.get_vault_tmp_dir(), delete=False)
-        else:
-            vault_tmp = os.path.join(paths.PHANTOM_VAULT, "tmp")
-            tmp = tempfile.NamedTemporaryFile(dir=vault_tmp, delete=False)
+        fd, path = tempfile.mkstemp(dir=Vault.get_vault_tmp_dir(), text=True)
         vault_attach_dict = {}
 
         vault_attach_dict[phantom.APP_JSON_ACTION_NAME] = self.get_action_name()
         vault_attach_dict[phantom.APP_JSON_APP_RUN_ID] = self.get_app_run_id()
 
         try:
-            with open(tmp.name, 'w') as f:
+            with open(path, 'w') as f:
                 json.dump(data, f)
 
         except Exception as e:
@@ -1371,7 +1366,7 @@ class SplunkConnector(BaseConnector):
         container_id = self.get_container_id()
 
         try:
-            success, message, _ = soar_vault.vault_add(container_id, tmp.name, 'splunk_run_query_result.json', vault_attach_dict)
+            success, message, _ = soar_vault.vault_add(container_id, path, 'splunk_run_query_result.json', vault_attach_dict)
 
         except Exception as e:
             self._dump_error_log(e)
