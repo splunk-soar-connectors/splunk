@@ -54,9 +54,9 @@ Please check the permissions for the state file as mentioned below.
 
 #### State File Permissions
 
--   File Rights: rw-rw-r-- (664) (The splunk SOAR user should have read and write access for the state
+-   File Rights: rw-rw-r-- (664) (The Splunk SOAR user should have read and write access for the state
     file)
--   File Owner: appropriate splunk SOAR user
+-   File Owner: appropriate Splunk SOAR user
 
 ## Required Permissions for Post Data Action
 The endpoint used by the post data action is not supported on Splunk Cloud Platform. Hence, the following steps are not applicable for Splunk Cloud Platform.
@@ -476,7 +476,7 @@ action_result.parameter.start_time | string |  |   -2d  2022-03-18T16:12:07.130+
 action_result.data.\*._bkt | string |  |  
 action_result.data.\*._cd | string |  |  
 action_result.data.\*._indextime | string |  |  
-action_result.data.\*._key | string |  |   1659398400|_audit 
+action_result.data.\*._key | string |  |   user 
 action_result.data.\*._kv | string |  |   1 
 action_result.data.\*._origtime | string |  |   1659398400 
 action_result.data.\*._raw | string |  |  
