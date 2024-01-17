@@ -476,7 +476,7 @@ action_result.parameter.start_time | string |  |   -2d  2022-03-18T16:12:07.130+
 action_result.data.\*._bkt | string |  |  
 action_result.data.\*._cd | string |  |  
 action_result.data.\*._indextime | string |  |  
-action_result.data.\*._key | string |  |   user 
+action_result.data.\*._key | string |  |   1659398400|_audit 
 action_result.data.\*._kv | string |  |   1 
 action_result.data.\*._origtime | string |  |   1659398400 
 action_result.data.\*._raw | string |  |  
