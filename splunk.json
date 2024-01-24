@@ -31,8 +31,8 @@
     ],
     "type": "siem",
     "main_module": "splunk_connector.py",
-    "app_version": "2.15.1",
-    "utctime_updated": "2023-12-05T22:26:49.000000Z",
+    "app_version": "2.16.0",
+    "utctime_updated": "2022-09-08T08:47:45.000000Z",
     "package_name": "phantom_splunk",
     "product_name": "Splunk Enterprise",
     "product_vendor": "Splunk Inc.",
@@ -41,12 +41,12 @@
     "fips_compliant": true,
     "python_version": "3",
     "latest_tested_versions": [
-        "On-premise, Splunk Enterprise Security v9.0.0, Dec 5, 2023",
-        "Cloud, Splunk Cloud Platform v8.2.2112, Dec 5, 2023"
+        "On-premise, Splunk Enterprise Security v9.0.0, Jan 8 2024",
+        "Cloud, Splunk Cloud Platform v9.0.2303.202, Jan 8 2024"
     ],
     "logo": "logo_splunk.svg",
     "logo_dark": "logo_splunk_dark.svg",
-    "license": "Copyright (c) 2016-2023 Splunk Inc.",
+    "license": "Copyright (c) 2016-2024 Splunk Inc.",
     "pip_dependencies": {
         "wheel": [
             {
@@ -592,13 +592,15 @@
                     "data_path": "action_result.data.*._key",
                     "data_type": "string",
                     "example_values": [
-                        "1659398400|_audit"
+                        "user"
                     ]
                 },
                 {
                     "data_path": "action_result.data.*._kv",
                     "data_type": "string",
-                    "example_value": "1"
+                    "example_values": [
+                        "1"
+                    ]
                 },
                 {
                     "data_path": "action_result.data.*._origtime",
@@ -628,7 +630,9 @@
                 {
                     "data_path": "action_result.data.*._subsecond",
                     "data_type": "string",
-                    "example_value": ".427"
+                    "example_values": [
+                        ".427"
+                    ]
                 },
                 {
                     "data_path": "action_result.data.*._time",
@@ -646,7 +650,9 @@
                 {
                     "data_path": "action_result.data.*.a",
                     "data_type": "string",
-                    "example_value": "abc"
+                    "example_values": [
+                        "abc"
+                    ]
                 },
                 {
                     "data_path": "action_result.data.*.content.app",
@@ -658,37 +664,51 @@
                 {
                     "data_path": "action_result.data.*.content.host",
                     "data_type": "string",
-                    "example_value": "test"
+                    "example_values": [
+                        "test"
+                    ]
                 },
                 {
                     "data_path": "action_result.data.*.content.info",
                     "data_type": "string",
-                    "example_value": "granted"
+                    "example_values": [
+                        "granted"
+                    ]
                 },
                 {
                     "data_path": "action_result.data.*.content.search",
                     "data_type": "string",
-                    "example_value": "search [| makeresults | eval myfield = \"test\" | table search] `notable` | table event_id"
+                    "example_values": [
+                        "index = main"
+                    ]
                 },
                 {
                     "data_path": "action_result.data.*.content.search_type",
                     "data_type": "string",
-                    "example_value": "adhoc"
+                    "example_values": [
+                        "adhoc"
+                    ]
                 },
                 {
                     "data_path": "action_result.data.*.content.sid",
                     "data_type": "string",
-                    "example_value": "1621953839.25275"
+                    "example_values": [
+                        "1621953839.25275"
+                    ]
                 },
                 {
                     "data_path": "action_result.data.*.content.source",
                     "data_type": "string",
-                    "example_value": "source"
+                    "example_values": [
+                        "source"
+                    ]
                 },
                 {
                     "data_path": "action_result.data.*.content.sourcetype",
                     "data_type": "string",
-                    "example_value": "source"
+                    "example_values": [
+                        "source"
+                    ]
                 },
                 {
                     "data_path": "action_result.data.*.content.uri",
@@ -707,12 +727,16 @@
                 {
                     "data_path": "action_result.data.*.count",
                     "data_type": "string",
-                    "example_value": "3058733"
+                    "example_values": [
+                        "3058733"
+                    ]
                 },
                 {
                     "data_path": "action_result.data.*.count(host)",
                     "data_type": "string",
-                    "example_value": "28"
+                    "example_values": [
+                        "28"
+                    ]
                 },
                 {
                     "data_path": "action_result.data.*.event",
@@ -740,62 +764,86 @@
                 {
                     "data_path": "action_result.data.*.is_Acceleration_Jobs",
                     "data_type": "string",
-                    "example_value": "0"
+                    "example_values": [
+                        "0"
+                    ]
                 },
                 {
                     "data_path": "action_result.data.*.is_Adhoc_Jobs",
                     "data_type": "string",
-                    "example_value": "1"
+                    "example_values": [
+                        "1"
+                    ]
                 },
                 {
                     "data_path": "action_result.data.*.is_Failed_Jobs",
                     "data_type": "string",
-                    "example_value": "0"
+                    "example_values": [
+                        "0"
+                    ]
                 },
                 {
                     "data_path": "action_result.data.*.is_Realtime_Jobs",
                     "data_type": "string",
-                    "example_value": "0"
+                    "example_values": [
+                        "0"
+                    ]
                 },
                 {
                     "data_path": "action_result.data.*.is_Scheduled_Jobs",
                     "data_type": "string",
-                    "example_value": "0"
+                    "example_values": [
+                        "0"
+                    ]
                 },
                 {
                     "data_path": "action_result.data.*.is_Subsearch_Jobs",
                     "data_type": "string",
-                    "example_value": "0"
+                    "example_values": [
+                        "0"
+                    ]
                 },
                 {
                     "data_path": "action_result.data.*.is_not_Acceleration_Jobs",
                     "data_type": "string",
-                    "example_value": "1"
+                    "example_values": [
+                        "1"
+                    ]
                 },
                 {
                     "data_path": "action_result.data.*.is_not_Adhoc_Jobs",
                     "data_type": "string",
-                    "example_value": "0"
+                    "example_values": [
+                        "0"
+                    ]
                 },
                 {
                     "data_path": "action_result.data.*.is_not_Failed_Jobs",
                     "data_type": "string",
-                    "example_value": "1"
+                    "example_values": [
+                        "1"
+                    ]
                 },
                 {
                     "data_path": "action_result.data.*.is_not_Realtime_Jobs",
                     "data_type": "string",
-                    "example_value": "1"
+                    "example_values": [
+                        "1"
+                    ]
                 },
                 {
                     "data_path": "action_result.data.*.is_not_Scheduled_Jobs",
                     "data_type": "string",
-                    "example_value": "1"
+                    "example_values": [
+                        "1"
+                    ]
                 },
                 {
                     "data_path": "action_result.data.*.is_not_Subsearch_Jobs",
                     "data_type": "string",
-                    "example_value": "1"
+                    "example_values": [
+                        "1"
+                    ]
                 },
                 {
                     "data_path": "action_result.data.*.linecount",
@@ -826,12 +874,16 @@
                 {
                     "data_path": "action_result.data.*.user",
                     "data_type": "string",
-                    "example_value": "admin"
+                    "example_values": [
+                        "admin"
+                    ]
                 },
                 {
                     "data_path": "action_result.data.*.values(source)",
                     "data_type": "string",
-                    "example_value": "/opt/splunk/var/log/splunk/scheduler.log"
+                    "example_values": [
+                        "/opt/splunk/var/log/splunk/scheduler.log"
+                    ]
                 },
                 {
                     "data_path": "action_result.summary.sid",
@@ -1080,7 +1132,7 @@
         {
             "action": "post data",
             "description": "Post data to Splunk",
-            "verbose": "This action creates an event on Splunk with the data included in the <b>data</b> parameter. If not specified the parameters will default to the following:<ul><li><b>host</b> - The IP of the Phantom instance running the action.</li><li><b>index</b> - The default index configured on the Splunk instance.</li><li><b>source</b> - &quot;Phantom&quot;.</li><li><b>source_type</b> - &quot;Automation/Orchestration Platform&quot;.</li></ul>",
+            "verbose": "This action creates an event on Splunk with the data included in the <b>data</b> parameter. If not specified the parameters will default to the following:<ul><li><b>host</b> - The IP of the Splunk SOAR instance running the action.</li><li><b>index</b> - The default index configured on the Splunk instance.</li><li><b>source</b> - &quot;Phantom&quot;.</li><li><b>source_type</b> - &quot;Automation/Orchestration Platform&quot;.</li></ul>",
             "type": "generic",
             "identifier": "post_data",
             "read_only": false,
