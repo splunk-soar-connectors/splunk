@@ -2,7 +2,7 @@
 # Splunk
 
 Publisher: Splunk  
-Connector Version: 2.16.0  
+Connector Version: 2.16.1  
 Product Vendor: Splunk Inc.  
 Product Name: Splunk Enterprise  
 Product Version Supported (regex): ".\*"  
