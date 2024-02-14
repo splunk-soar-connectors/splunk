@@ -1321,15 +1321,12 @@ class SplunkConnector(BaseConnector):
                 error_text=self._get_error_message_from_exception(e))
             return action_result.set_status(phantom.APP_ERROR, error_text)
 
-        data = []
-
         for result in results:
 
             if not isinstance(result, dict):
                 continue
 
             action_result.add_data(result)
-            data.append(result)
 
             result_index += 1
 
@@ -1338,13 +1335,13 @@ class SplunkConnector(BaseConnector):
                 self.send_progress(status)
 
         if attach_result:
-            self.add_json_result(action_result, data)
+            self.add_json_result(action_result)
 
         summary[consts.SPLUNK_JSON_TOTAL_EVENTS] = result_index
         self.debug_print('Done run query')
         return action_result.set_status(phantom.APP_SUCCESS)
 
-    def add_json_result(self, action_result, data):
+    def add_json_result(self, action_result):
 
         fd, path = tempfile.mkstemp(dir=Vault.get_vault_tmp_dir(), text=True)
         vault_attach_dict = {}
@@ -1354,7 +1351,7 @@ class SplunkConnector(BaseConnector):
 
         try:
             with open(path, 'w') as f:
-                json.dump(data, f)
+                json.dump(action_result.get_data(), f)
 
         except Exception as e:
             self._dump_error_log(e, "Error occurred while adding file to Vault.")
