@@ -991,6 +991,19 @@
                     "data_type": "boolean",
                     "default": false,
                     "order": 6
+                },
+                "disposition": {
+                    "description": "New disposition field",
+                    "data_type": "string",
+                    "required": false,
+                    "primary": false,
+                    "contains": [],
+                    "value_list": [],
+                    "default": "",
+                    "order": 7,
+                    "name": "disposition",
+                    "id": 8,
+                    "param_name": "disposition"
                 }
             },
             "output": [
