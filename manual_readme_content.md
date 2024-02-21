@@ -188,7 +188,7 @@ For sending events to Splunk Platform, the User configured in the asset would re
         "Please provide a valid event ID".
 
 -   Use integer status field for custom status. Example: 1 For New, 2 for In progress, etc.
-
+-   The disposition field should be set in the format "disposition:1". 
 ## On Poll
 
 -   There are two approaches to polling as mentioned below.
