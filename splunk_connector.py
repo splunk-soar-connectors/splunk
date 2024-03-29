@@ -882,6 +882,7 @@ class SplunkConnector(phantom.BaseConnector):
         search_string = config.get('on_poll_query')
         po = config.get('on_poll_parse_only', False)
         include_cim_fields = config.get('include_cim_fields', False)
+        fetch_notables = config.get('fetch_notables', False)
 
         if not search_string:
             self.save_progress("Need to specify Query String to use polling")
@@ -902,10 +903,22 @@ class SplunkConnector(phantom.BaseConnector):
         if self.is_poll_now():
             search_params['max_count'] = param.get('container_count', 100)
         else:
-            search_params['max_count'] = self.max_container
             start_time = self._state.get('start_time')
-            if start_time:
-                search_params['index_earliest'] = start_time
+            search_params['max_count'] = self.max_container
+            if fetch_notables:
+                search_string = search_query
+                self.debug_print("Fetch notables selected")
+                search_string = search_string.strip()
+                if search_string[-1] != '|':
+                    search_string = '{} |'.format(search_string)
+                search_string = '{} eval sorted_review_time = mvsort(review_time), latest_review_time = mvindex(sorted_review_time, -1) | eval update_time = if(isnull(latest_review_time), _indextime, latest_review_time)'.format(search_string)
+                if start_time:
+                    search_string = '{0} | where update_time >= {1}'.format(search_string, start_time)
+                search_string = "{} | sort -update_time".format(search_string)
+                search_query = search_string
+            else:
+                if start_time:
+                    search_params['index_earliest'] = start_time
 
         if int(search_params['max_count']) <= 0:
             self.debug_print("The value of 'container_count' parameter must be a positive integer. \
@@ -926,6 +939,8 @@ class SplunkConnector(phantom.BaseConnector):
         # Set the most recent event to data[0]
         data = list(reversed(action_result.get_data()))
         self.save_progress("Finished search")
+
+        self.debug_print("Retrieved Data - {}".format(data))
 
         self.debug_print("Total {} event(s) fetched".format(len(data)))
 
@@ -999,15 +1014,26 @@ class SplunkConnector(phantom.BaseConnector):
                 continue
 
             if count == self.container_update_state and not self.is_poll_now():
-                self._state['start_time'] = item.get("_indextime")
-                self.save_state(self._state)
-                self.debug_print("Index time updated")
-                count = 0
+                if fetch_notables:
+                    self._state['start_time'] = item.get("update_time")
 
+                else:
+                    self._state['start_time'] = item.get("_indextime")
+                self.save_state(self._state)
+                self.debug_print("State time updated")
+                count = 0
+                
             count += 1
 
         if data and not self.is_poll_now():
-            self._state['start_time'] = data[-1].get('_indextime')
+            if fetch_notables:
+                self.debug_print("Checking last item :: {}".format(data[-1]))
+                self.debug_print("state value _update:: {}".format(item.get('update_time')))
+                self._state['start_time'] = data[-1].get('update_time')
+            else:
+                self.debug_print("Checking last item :: {}".format(data[-1]))
+                self.debug_print("state value _index :: {}".format(item.get('_indextime')))
+                self._state['start_time'] = data[-1].get('_indextime')
 
         return action_result.set_status(phantom.APP_SUCCESS)
 
@@ -1225,6 +1251,7 @@ class SplunkConnector(phantom.BaseConnector):
     def _run_query(self, search_query, action_result, attach_result=False, kwargs_create=dict(), parse_only=True):
         """Function that executes the query on splunk"""
         self.debug_print('Start run query')
+        self.debug_print('Final Search Query :: {}'.format(search_query))
         RETRY_LIMIT = self.retry_count
         summary = action_result.update_summary({})
         summary["sid"] = "Search ID not created"

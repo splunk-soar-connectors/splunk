@@ -31,7 +31,7 @@
     ],
     "type": "siem",
     "main_module": "splunk_connector.py",
-    "app_version": "2.15.1",
+    "app_version": "2.17.0",
     "utctime_updated": "2023-12-05T22:26:49.000000Z",
     "package_name": "phantom_splunk",
     "product_name": "Splunk Enterprise",
@@ -209,6 +209,13 @@
             "order": 20,
             "default": false,
             "name": "include_cim_fields"
+        },
+        "fetch_notables": {
+            "description": "Option to fetch splunk notable events rather than normal splunk events",
+            "data_type": "boolean",
+            "order": 21,
+            "default": false,
+            "name": "fetch_notables"
         }
     },
     "actions": [
