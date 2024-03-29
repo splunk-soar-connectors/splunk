@@ -1,5 +1,5 @@
 [comment]: # " File: README.md"
-[comment]: # "  Copyright (c) 2016-2023 Splunk Inc."
+[comment]: # "  Copyright (c) 2016-2024 Splunk Inc."
 [comment]: # ""
 [comment]: # "Licensed under the Apache License, Version 2.0 (the 'License');"
 [comment]: # "you may not use this file except in compliance with the License."
@@ -27,7 +27,7 @@
 ## Splunk-SDK
 
 This app uses the Splunk-SDK module, which is licensed under the Apache Software License, Copyright
-(c) 2011-2019 Splunk, Inc.
+(c) 2011-2024 Splunk, Inc.
 
 ## State File Permissions
 
@@ -42,9 +42,21 @@ Please check the permissions for the state file as mentioned below.
 
 #### State File Permissions
 
--   File Rights: rw-rw-r-- (664) (The phantom user should have read and write access for the state
+-   File Rights: rw-rw-r-- (664) (The Splunk SOAR user should have read and write access for the state
     file)
--   File Owner: appropriate phantom user
+-   File Owner: appropriate Splunk SOAR user
+
+## Required Permissions for Post Data Action
+The endpoint used by the post data action is not supported on Splunk Cloud Platform. Hence, the following steps are not applicable for Splunk Cloud Platform.
+
+For sending events to Splunk Platform, the User configured in the asset would require **edit_tcp** capability. Follow the below steps to configure
+
+-   Login to the Splunk Platform
+-   Go to **Setting > Roles**
+-   Click on role of the user configured in the asset(example: user) and go to **Capabilities**
+-   Search for '**edit_tcp**' in the capabilities enable it for the particular role
+-   To check if the capability is given to your user, go to **Settings > Users** and in the **Edit dropdown** and select **View Capabilities**
+-   Search for '**edit_tcp**' and if a tick besides it appears then the permission has been enabled for the user
 
 ## Asset Configuration Parameters
 

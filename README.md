@@ -11,7 +11,7 @@ Minimum Product Version: 6.1.1
 This app integrates with Splunk to update data on the device, in addition to investigate and ingestion actions
 
 [comment]: # " File: README.md"
-[comment]: # "  Copyright (c) 2016-2023 Splunk Inc."
+[comment]: # "  Copyright (c) 2016-2024 Splunk Inc."
 [comment]: # ""
 [comment]: # "Licensed under the Apache License, Version 2.0 (the 'License');"
 [comment]: # "you may not use this file except in compliance with the License."
@@ -39,7 +39,7 @@ This app integrates with Splunk to update data on the device, in addition to inv
 ## Splunk-SDK
 
 This app uses the Splunk-SDK module, which is licensed under the Apache Software License, Copyright
-(c) 2011-2019 Splunk, Inc.
+(c) 2011-2024 Splunk, Inc.
 
 ## State File Permissions
 
@@ -54,9 +54,21 @@ Please check the permissions for the state file as mentioned below.
 
 #### State File Permissions
 
--   File Rights: rw-rw-r-- (664) (The phantom user should have read and write access for the state
+-   File Rights: rw-rw-r-- (664) (The Splunk SOAR user should have read and write access for the state
     file)
--   File Owner: appropriate phantom user
+-   File Owner: appropriate Splunk SOAR user
+
+## Required Permissions for Post Data Action
+The endpoint used by the post data action is not supported on Splunk Cloud Platform. Hence, the following steps are not applicable for Splunk Cloud Platform.
+
+For sending events to Splunk Platform, the User configured in the asset would require **edit_tcp** capability. Follow the below steps to configure
+
+-   Login to the Splunk Platform
+-   Go to **Setting > Roles**
+-   Click on role of the user configured in the asset(example: user) and go to **Capabilities**
+-   Search for '**edit_tcp**' in the capabilities enable it for the particular role
+-   To check if the capability is given to your user, go to **Settings > Users** and in the **Edit dropdown** and select **View Capabilities**
+-   Search for '**edit_tcp**' and if a tick besides it appears then the permission has been enabled for the user
 
 ## Asset Configuration Parameters
 
@@ -465,51 +477,51 @@ action_result.parameter.start_time | string |  |   -2d  2022-03-18T16:12:07.130+
 action_result.data.\*._bkt | string |  |  
 action_result.data.\*._cd | string |  |  
 action_result.data.\*._indextime | string |  |  
-action_result.data.\*._key | string |  |   1659398400|_audit 
-action_result.data.\*._kv | string |  |  
+action_result.data.\*._key | string |  |   user 
+action_result.data.\*._kv | string |  |   1 
 action_result.data.\*._origtime | string |  |   1659398400 
 action_result.data.\*._raw | string |  |  
 action_result.data.\*._serial | string |  |  
 action_result.data.\*._si | string |  |  
 action_result.data.\*._sourcetype | string |  |  
-action_result.data.\*._subsecond | string |  |  
+action_result.data.\*._subsecond | string |  |   .427 
 action_result.data.\*._time | string |  |  
 action_result.data.\*._value | string |  |   184 
-action_result.data.\*.a | string |  |  
+action_result.data.\*.a | string |  |   abc 
 action_result.data.\*.content.app | string |  |   search 
-action_result.data.\*.content.host | string |  |  
-action_result.data.\*.content.info | string |  |  
-action_result.data.\*.content.search | string |  |  
-action_result.data.\*.content.search_type | string |  |  
-action_result.data.\*.content.sid | string |  |  
-action_result.data.\*.content.source | string |  |  
-action_result.data.\*.content.sourcetype | string |  |  
+action_result.data.\*.content.host | string |  |   test 
+action_result.data.\*.content.info | string |  |   granted 
+action_result.data.\*.content.search | string |  |   index = main 
+action_result.data.\*.content.search_type | string |  |   adhoc 
+action_result.data.\*.content.sid | string |  |   1621953839.25275 
+action_result.data.\*.content.source | string |  |   source 
+action_result.data.\*.content.sourcetype | string |  |   source 
 action_result.data.\*.content.uri | string |  |   /en-US/app/search/search?q=search%20index%3Dmain%20%7C%20head%2010&sid=1651356328.532450&display.page.search.mode=smart&dispatch.sample_ratio=1&workload_pool=&earliest=-24h%40h&latest=now 
 action_result.data.\*.content.view | string |  |   search 
-action_result.data.\*.count | string |  |  
-action_result.data.\*.count(host) | string |  |  
+action_result.data.\*.count | string |  |   3058733 
+action_result.data.\*.count(host) | string |  |   28 
 action_result.data.\*.event | string |  |   {"data": {"count": 3, "size": 112, "transform": "access_app_tracker"}, "version": "1.0"} 
 action_result.data.\*.host | string |  `host name`  |   10.1.67.187:8088 
 action_result.data.\*.index | string |  |  
-action_result.data.\*.is_Acceleration_Jobs | string |  |  
-action_result.data.\*.is_Adhoc_Jobs | string |  |  
-action_result.data.\*.is_Failed_Jobs | string |  |  
-action_result.data.\*.is_Realtime_Jobs | string |  |  
-action_result.data.\*.is_Scheduled_Jobs | string |  |  
-action_result.data.\*.is_Subsearch_Jobs | string |  |  
-action_result.data.\*.is_not_Acceleration_Jobs | string |  |  
-action_result.data.\*.is_not_Adhoc_Jobs | string |  |  
-action_result.data.\*.is_not_Failed_Jobs | string |  |  
-action_result.data.\*.is_not_Realtime_Jobs | string |  |  
-action_result.data.\*.is_not_Scheduled_Jobs | string |  |  
-action_result.data.\*.is_not_Subsearch_Jobs | string |  |  
+action_result.data.\*.is_Acceleration_Jobs | string |  |   0 
+action_result.data.\*.is_Adhoc_Jobs | string |  |   1 
+action_result.data.\*.is_Failed_Jobs | string |  |   0 
+action_result.data.\*.is_Realtime_Jobs | string |  |   0 
+action_result.data.\*.is_Scheduled_Jobs | string |  |   0 
+action_result.data.\*.is_Subsearch_Jobs | string |  |   0 
+action_result.data.\*.is_not_Acceleration_Jobs | string |  |   1 
+action_result.data.\*.is_not_Adhoc_Jobs | string |  |   0 
+action_result.data.\*.is_not_Failed_Jobs | string |  |   1 
+action_result.data.\*.is_not_Realtime_Jobs | string |  |   1 
+action_result.data.\*.is_not_Scheduled_Jobs | string |  |   1 
+action_result.data.\*.is_not_Subsearch_Jobs | string |  |   1 
 action_result.data.\*.linecount | string |  |  
 action_result.data.\*.source | string |  |  
 action_result.data.\*.sourcetype | string |  |  
 action_result.data.\*.spent | string |  |   223 
 action_result.data.\*.splunk_server | string |  `host name`  |  
-action_result.data.\*.user | string |  |  
-action_result.data.\*.values(source) | string |  |  
+action_result.data.\*.user | string |  |   admin 
+action_result.data.\*.values(source) | string |  |   /opt/splunk/var/log/splunk/scheduler.log 
 action_result.summary.sid | string |  |   1612177958.977510 
 action_result.summary.total_events | numeric |  |   2 
 action_result.message | string |  |   Sid: 1612177958.977510, Total events: 2 
@@ -562,7 +574,7 @@ Post data to Splunk
 Type: **generic**  
 Read only: **False**
 
-This action creates an event on Splunk with the data included in the <b>data</b> parameter. If not specified the parameters will default to the following:<ul><li><b>host</b> - The IP of the Phantom instance running the action.</li><li><b>index</b> - The default index configured on the Splunk instance.</li><li><b>source</b> - &quot;Phantom&quot;.</li><li><b>source_type</b> - &quot;Automation/Orchestration Platform&quot;.</li></ul>
+This action creates an event on Splunk with the data included in the <b>data</b> parameter. If not specified the parameters will default to the following:<ul><li><b>host</b> - The IP of the Splunk SOAR instance running the action.</li><li><b>index</b> - The default index configured on the Splunk instance.</li><li><b>source</b> - &quot;Phantom&quot;.</li><li><b>source_type</b> - &quot;Automation/Orchestration Platform&quot;.</li></ul>
 
 #### Action Parameters
 PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
