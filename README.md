@@ -2,7 +2,7 @@
 # Splunk
 
 Publisher: Splunk  
-Connector Version: 2.15.1  
+Connector Version: 2.17.0  
 Product Vendor: Splunk Inc.  
 Product Name: Splunk Enterprise  
 Product Version Supported (regex): ".\*"  
@@ -348,6 +348,7 @@ VARIABLE | REQUIRED | TYPE | DESCRIPTION
 **remove_empty_cef** |  optional  | boolean | Remove CEF fields having empty values from the artifact
 **sleeptime_in_requests** |  optional  | numeric | The time to wait for next REST call (max 120 seconds)
 **include_cim_fields** |  optional  | boolean | Option to keep original Splunk CIM together with SOAR CEF fields
+**fetch_notables** |  optional  | boolean | Option to fetch splunk notable events rather than normal splunk events
 
 ### Supported Actions  
 [test connectivity](#action-test-connectivity) - Validate the asset configuration for connectivity. This action logs into the device to check the connection and credentials  
