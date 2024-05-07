@@ -26,7 +26,7 @@ SPLUNK_ERR_UNABLE_TO_CREATE_JOB = "Failed to get a job id from splunk server"
 SPLUNK_ERR_GET_EVENTS = "Error getting events for alert '{ss_name}' having sid '{sid}'"
 SPLUNK_ERR_NOT_ES = "This instance does not seem to be Splunk ES. This action cannot be run"
 SPLUNK_ERR_INVALID_TIME_RANGE = "Invalid Time range specified, where the end time is less than start time"
-SPLUNK_ERR_NEED_PARAM = "One of comment, status, integer_status, urgency, or owner parameters needs to be supplied to run this \
+SPLUNK_ERR_NEED_PARAM = "One of comment, status, integer_status, disposition, integer_disposition, urgency, or owner parameters needs to be supplied to run this \
     action"
 SPLUNK_ERR_INVALID_INTEGER = "Please provide a valid integer value in the {param} parameter"
 SPLUNK_ERR_NON_NEGATIVE_INTEGER = "Please provide a valid non-negative integer value in the {param} parameter"
@@ -150,6 +150,7 @@ SPLUNK_INVALID_COMMAND = "Streaming/Transforming command operates on the events 
 
 # Validation keys
 SPLUNK_INT_STATUS_KEY = "'integer_status' action"
+SPLUNK_INT_DISPOSITION_KEY = "'integer_disposition' action"
 SPLUNK_RETRY_COUNT_KEY = "'retry_count' configuration"
 SPLUNK_PORT_KEY = "'port' configuration"
 SPLUNK_MAX_CONTAINER_KEY = "'max_container' configuration"
@@ -172,3 +173,4 @@ SPLUNK_DEFAULT_REQUEST_TIMEOUT = 60  # in seconds
 SPLUNK_SEARCH_MODE_SMART = "smart"
 SPLUNK_SEARCH_MODE_FAST = "fast"
 SPLUNK_SEARCH_MODE_VERBOSE = "verbose"
+SPLUNK_DISPOSITION_QUERY_FORMAT = "disposition:{}"

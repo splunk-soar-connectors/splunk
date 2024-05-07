@@ -37,7 +37,7 @@
     ],
     "type": "siem",
     "main_module": "splunk_connector.py",
-    "app_version": "2.16.1",
+    "app_version": "2.17.0",
     "utctime_updated": "2022-09-08T08:47:45.000000Z",
     "package_name": "phantom_splunk",
     "product_name": "Splunk Enterprise",
@@ -998,15 +998,20 @@
                 "disposition": {
                     "description": "New disposition field",
                     "data_type": "string",
-                    "required": false,
-                    "primary": false,
-                    "contains": [],
-                    "value_list": [],
-                    "default": "",
-                    "order": 7,
-                    "name": "disposition",
-                    "id": 8,
-                    "param_name": "disposition"
+                    "value_list": [
+                        "unassigned",
+                        "true positive - suspicious activity",
+                        "benign positive - suspicious but expected",
+                        "false positive - incorrect analytic logic",
+                        "false positive - inaccurate data",
+                        "undetermined"
+                ],
+                    "order": 7
+                },
+                "integer_disposition": {
+                    "description": "Integer representing custom disposition value",
+                    "data_type": "numeric",
+                    "order": 7
                 }
             },
             "output": [
