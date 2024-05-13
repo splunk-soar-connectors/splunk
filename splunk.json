@@ -993,7 +993,7 @@
                     "description": "Validate event_ids",
                     "data_type": "boolean",
                     "default": false,
-                    "order": 6
+                    "order": 8
                 },
                 "disposition": {
                     "description": "New disposition field",
@@ -1007,7 +1007,7 @@
                         "false positive - inaccurate data",
                         "undetermined"
                     ],
-                    "order": 7
+                    "order": 6
                 },
                 "integer_disposition": {
                     "description": "Integer representing custom disposition value",

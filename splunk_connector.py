@@ -762,7 +762,7 @@ class SplunkConnector(BaseConnector):
                 return action_result.set_status(phantom.APP_ERROR, "Unable to find underlying event_id from SID + RID combo")
             ids = event_id
 
-        if not comment and not status and not urgency and not owner and integer_status is None and not disposition and integer_disposition is None:
+        if not any([comment, status, urgency, owner, disposition]) and integer_status is None and integer_disposition is None:
             return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_NEED_PARAM)
 
         if status or integer_status is not None:
