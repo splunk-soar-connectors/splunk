@@ -743,7 +743,7 @@ class SplunkConnector(BaseConnector):
             consts.SPLUNK_INT_STATUS_KEY, allow_zero=True)
         if phantom.is_fail(ret_val):
             return action_result.get_status()
-        
+
         ret_val, integer_disposition = self._validate_integer(action_result, param.get("integer_disposition"),
             consts.SPLUNK_INT_DISPOSITION_KEY, allow_zero=True)
         if phantom.is_fail(ret_val):
@@ -804,8 +804,6 @@ class SplunkConnector(BaseConnector):
         # 3. Update the provided Events ID
         request_body = {"ruleUIDs": ids}
 
-        if owner:
-            request_body['newOwner'] = owner
         if integer_status is not None:
             if int(integer_status) not in list(self._splunk_status_dict.values()):
                 return action_result.set_status(phantom.APP_ERROR, "Please provide a valid value in 'integer_status' action\
@@ -828,14 +826,18 @@ class SplunkConnector(BaseConnector):
             if disposition not in self._splunk_disposition_dict:
                 if not disposition.isdigit():
                     return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_BAD_STATUS)
-                request_body['disposition'] =  consts.SPLUNK_DISPOSITION_QUERY_FORMAT.format(disposition)
+                request_body['disposition'] = consts.SPLUNK_DISPOSITION_QUERY_FORMAT.format(disposition)
             else:
                 request_body['disposition'] = consts.SPLUNK_DISPOSITION_QUERY_FORMAT.format(self._splunk_disposition_dict[disposition])
 
-        if urgency:
-            request_body['urgency'] = urgency
-        if comment:
-            request_body["comment"] = comment
+        param_mapping = {
+            'urgency': urgency,
+            'comment': comment,
+            'newOwner': owner
+        }
+
+        request_body.update({k: v for k, v in param_mapping.items() if v})
+
         self.debug_print("Updating the event")
 
         endpoint = 'notable_update'

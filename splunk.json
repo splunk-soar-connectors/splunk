@@ -999,13 +999,14 @@
                     "description": "New disposition field",
                     "data_type": "string",
                     "value_list": [
+                        "",
                         "unassigned",
                         "true positive - suspicious activity",
                         "benign positive - suspicious but expected",
                         "false positive - incorrect analytic logic",
                         "false positive - inaccurate data",
                         "undetermined"
-                ],
+                    ],
                     "order": 7
                 },
                 "integer_disposition": {
@@ -1033,6 +1034,13 @@
                     ]
                 },
                 {
+                    "data_path": "action_result.parameter.disposition",
+                    "data_type": "string",
+                    "example_values": [
+                        "unassigned"
+                    ]
+                },
+                {
                     "data_path": "action_result.parameter.event_ids",
                     "data_type": "string",
                     "contains": [
@@ -1040,6 +1048,13 @@
                     ],
                     "example_values": [
                         "1542751027.136723+0"
+                    ]
+                },
+                {
+                    "data_path": "action_result.parameter.integer_disposition",
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
                     ]
                 },
                 {
