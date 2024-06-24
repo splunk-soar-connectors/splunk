@@ -1000,12 +1000,12 @@
                     "data_type": "string",
                     "value_list": [
                         "",
-                        "unassigned",
-                        "true positive - suspicious activity",
-                        "benign positive - suspicious but expected",
-                        "false positive - incorrect analytic logic",
-                        "false positive - inaccurate data",
-                        "undetermined"
+                        "Unassigned",
+                        "True Positive - Suspicious Activity",
+                        "Benign Positive - Suspicious But Expected",
+                        "False Positive - Incorrect Analytic Logic",
+                        "False Positive - Inaccurate Data",
+                        "Undetermined"
                     ],
                     "order": 6
                 },

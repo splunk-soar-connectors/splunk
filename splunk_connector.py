@@ -724,7 +724,8 @@ class SplunkConnector(BaseConnector):
             is_enabled = str(data.get('content', {}).get('disabled')) == '0'
             is_allowed_type = data.get('content', {}).get('status_type') == type
             if object_id and object_id.isdigit() and object_name and is_enabled and is_allowed_type:
-                splunk_dict[object_name.lower()] = int(object_id)
+                if type == 'notable': object_name = object_name.lower()
+                splunk_dict[object_name] = int(object_id)
 
         return splunk_dict
 
