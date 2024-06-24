@@ -17,6 +17,7 @@
 # Success/Error status and messages
 SPLUNK_ERR_INVALID_QUERY = "Query invalid '{query}'"
 SPLUNK_ERR_BAD_STATUS = "The supplied status is invalid"
+SPLUNK_ERR_BAD_DISPOSITION = "The supplied disposition is invalid"
 SPLUNK_ERR_CONNECTIVITY_TEST = "Connectivity test failed"
 SPLUNK_SUCCESS_CONNECTIVITY_TEST = "Connectivity test passed"
 SPLUNK_ERR_NOT_JSON = "Splunk server response was not JSON"

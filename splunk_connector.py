@@ -827,7 +827,7 @@ class SplunkConnector(BaseConnector):
         elif disposition:
             if disposition not in self._splunk_disposition_dict:
                 if not disposition.isdigit():
-                    return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_BAD_STATUS)
+                    return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_BAD_DISPOSITION)
                 request_body['disposition'] = consts.SPLUNK_DISPOSITION_QUERY_FORMAT.format(disposition)
             else:
                 request_body['disposition'] = consts.SPLUNK_DISPOSITION_QUERY_FORMAT.format(self._splunk_disposition_dict[disposition])
