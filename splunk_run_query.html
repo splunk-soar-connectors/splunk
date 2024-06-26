@@ -160,7 +160,7 @@ and limitations under the License.
                         <tr>
                             {% for header in result.headers %}
                                 {% for k, v in item.items %}
-                                    {% ifequal header k %}
+                                    {% if header == k %}
                                     {% if k == 'splunk_server' or k == 'host' %}
                                     <td>
                                         <a href="javascript:;"
@@ -173,7 +173,7 @@ and limitations under the License.
                                     {% else %}
                                         <td>{{ v }}</td>
                                     {% endif %}
-                                    {% endifequal %}
+                                    {% endif %}
                                 {% endfor %}
                             {% endfor %}
                         </tr>
