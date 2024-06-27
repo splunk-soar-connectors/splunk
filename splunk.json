@@ -1005,7 +1005,8 @@
                         "Benign Positive - Suspicious But Expected",
                         "False Positive - Incorrect Analytic Logic",
                         "False Positive - Inaccurate Data",
-                        "Undetermined"
+                        "Undetermined",
+                        "Other"
                     ],
                     "order": 6
                 },
