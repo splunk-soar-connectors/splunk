@@ -392,7 +392,7 @@
         {
             "action": "on poll",
             "description": "Ingest logs from the Splunk instance",
-            "verbose": "The configured query is what will be used during ingestion. If you only wish to show certain fields, then you can specify these as a comma-separated list in the configuration. If left unspecified, all available fields will be added to each artifact. When limiting the number of events to ingest, it will ingest the most recent events.<br><br>",
+            "verbose": "The configured query is what will be used during ingestion. If you only wish to show certain fields, you can specify these as a comma-separated list in the configuration. If left unspecified, all available fields will be added to each artifact. When limiting the number of events to ingest, it will ingest the most recent events. To avoid duplication in polling, append | fields * to the query.<br><br>",
             "type": "ingest",
             "identifier": "on_poll",
             "read_only": true,
