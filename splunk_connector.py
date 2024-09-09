@@ -1284,6 +1284,9 @@ class SplunkConnector(BaseConnector):
         while True:
             for attempt_count in range(0, RETRY_LIMIT):
                 try:
+                    # TODO: One possible infinite loop - while could never
+                    #  end as the job could be stuck in permanent "QUEUED"
+                    #  or other state.
                     while not job.is_ready():
                         time.sleep(self.sleeptime_in_requests)
                         pass
