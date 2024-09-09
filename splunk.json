@@ -57,6 +57,18 @@
                 "input_file": "wheels/py3/beautifulsoup4-4.9.1-py3-none-any.whl"
             },
             {
+                "module": "deprecation",
+                "input_file": "wheels/shared/deprecation-2.1.0-py2.py3-none-any.whl"
+            },
+            {
+                "module": "packaging",
+                "input_file": "wheels/py3/packaging-21.3-py3-none-any.whl"
+            },
+            {
+                "module": "pyparsing",
+                "input_file": "wheels/py3/pyparsing-3.1.4-py3-none-any.whl"
+            },
+            {
                 "module": "python_dateutil",
                 "input_file": "wheels/shared/python_dateutil-2.8.1-py2.py3-none-any.whl"
             },
@@ -78,7 +90,7 @@
             },
             {
                 "module": "splunk_sdk",
-                "input_file": "wheels/py3/splunk_sdk-1.7.2-py3-none-any.whl"
+                "input_file": "wheels/py3/splunk_sdk-2.0.1-py3-none-any.whl"
             },
             {
                 "module": "xmltodict",
@@ -1272,6 +1284,14 @@
                 "input_file": "wheels/py3/beautifulsoup4-4.9.1-py3-none-any.whl"
             },
             {
+                "module": "deprecation",
+                "input_file": "wheels/shared/deprecation-2.1.0-py2.py3-none-any.whl"
+            },
+            {
+                "module": "packaging",
+                "input_file": "wheels/py3/packaging-24.1-py3-none-any.whl"
+            },
+            {
                 "module": "python_dateutil",
                 "input_file": "wheels/shared/python_dateutil-2.8.1-py2.py3-none-any.whl"
             },
@@ -1289,11 +1309,11 @@
             },
             {
                 "module": "soupsieve",
-                "input_file": "wheels/py3/soupsieve-2.5-py3-none-any.whl"
+                "input_file": "wheels/py3/soupsieve-2.6-py3-none-any.whl"
             },
             {
                 "module": "splunk_sdk",
-                "input_file": "wheels/py3/splunk_sdk-1.7.2-py3-none-any.whl"
+                "input_file": "wheels/py3/splunk_sdk-2.0.1-py3-none-any.whl"
             },
             {
                 "module": "xmltodict",
