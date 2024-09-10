@@ -150,6 +150,9 @@ For sending events to Splunk Platform, the User configured in the asset would re
     -   The time to wait for next REST call(max 120 seconds)
     -   It allows the user to add sleep time between the REST calls while performing the
         "run_query", "update_event", "get host events" and "on poll" action.
+-   splunk_job_timeout:
+    -   The duration in seconds to wait before a scheduled Splunk job times out
+    -   It allows the user to configure the duration after which the connector should consider the Splunk job as timed out.
 -   on_poll_display:
     -   Fields to save with On Poll
     -   Users can select the fields from the events which the user wants to ingest in the artifact
