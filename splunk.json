@@ -34,7 +34,7 @@
     ],
     "type": "siem",
     "main_module": "splunk_connector.py",
-    "app_version": "2.16.2",
+    "app_version": "2.17.0",
     "utctime_updated": "2022-09-08T08:47:45.000000Z",
     "package_name": "phantom_splunk",
     "product_name": "Splunk Enterprise",
@@ -224,6 +224,13 @@
             "order": 20,
             "default": false,
             "name": "include_cim_fields"
+        },
+        "splunk_job_timeout": {
+            "description": "The duration in seconds to wait before a scheduled Splunk job times out",
+            "data_type": "numeric",
+            "order": 21,
+            "default": 1200,
+            "name": "splunk_job_timeout"
         }
     },
     "actions": [

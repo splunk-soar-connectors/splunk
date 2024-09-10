@@ -187,6 +187,12 @@ class SplunkConnector(BaseConnector):
         if phantom.is_fail(ret_val):
             return self.get_status()
 
+        # Validate splunk_job_timeout
+        ret_val, self.splunk_job_timeout = self._validate_integer(self, config.get('splunk_job_timeout'),
+            consts.SPLUNK_JOB_TIMEOUT_KEY)
+        if phantom.is_fail(ret_val):
+            return self.get_status()
+
         # Validate sleeptime_in_requests
         ret_val, self.sleeptime_in_requests = self._validate_integer(self, config.get('sleeptime_in_requests', 1),
                                                                     consts.SPLUNK_SLEEPTIME_IN_REQUESTS_KEY)
@@ -615,7 +621,7 @@ class SplunkConnector(BaseConnector):
         for search_attempt_count in range(0, RETRY_LIMIT):
             for attempt_count in range(0, RETRY_LIMIT):
                 try:
-                    job = self._service.jobs.create(search_query, **kwargs_create)
+                    job: splunk_client.Job = self._service.jobs.create(search_query, **kwargs_create)
                     break
                 except Exception as e:
                     if attempt_count == RETRY_LIMIT - 1:
@@ -624,18 +630,9 @@ class SplunkConnector(BaseConnector):
                         return action_result.set_status(phantom.APP_ERROR, error_text)
 
             while True:
-                for attempt_count in range(0, RETRY_LIMIT):
-                    try:
-                        while not job.is_ready():
-                            time.sleep(self.sleeptime_in_requests)
-                            pass
-                        job.refresh()
-                        break
-                    except Exception as e:
-                        if attempt_count == RETRY_LIMIT - 1:
-                            error_text = consts.SPLUNK_EXCEPTION_ERR_MESSAGE.format(msg=consts.SPLUNK_ERR_CONNECTIVITY_FAILED,
-                                error_text=self._get_error_message_from_exception(e))
-                            return action_result.set_status(phantom.APP_ERROR, error_text)
+                is_job_successful: bool = self._wait_until_splunk_job_results_are_ready(action_result, job, RETRY_LIMIT)
+                if phantom.is_fail(is_job_successful):
+                    return phantom.APP_ERROR
 
                 stats = self._get_stats(job)
 
@@ -1270,7 +1267,7 @@ class SplunkConnector(BaseConnector):
         # Create the job
         for attempt_count in range(0, RETRY_LIMIT):
             try:
-                job = self._service.jobs.create(search_query, **kwargs_create)
+                job: splunk_client.Job = self._service.jobs.create(search_query, **kwargs_create)
                 break
             except Exception as e:
                 self._dump_error_log(e, 'Failed to create job.')
@@ -1280,23 +1277,12 @@ class SplunkConnector(BaseConnector):
                     return action_result.set_status(phantom.APP_ERROR, error_text)
 
         summary["sid"] = job.__dict__.get("sid")
+
         result_count = 0
         while True:
-            for attempt_count in range(0, RETRY_LIMIT):
-                try:
-                    # TODO: One possible infinite loop - while could never
-                    #  end as the job could be stuck in permanent "QUEUED"
-                    #  or other state.
-                    while not job.is_ready():
-                        time.sleep(self.sleeptime_in_requests)
-                        pass
-                    job.refresh()
-                    break
-                except Exception as e:
-                    if attempt_count == RETRY_LIMIT - 1:
-                        error_text = consts.SPLUNK_EXCEPTION_ERR_MESSAGE.format(msg=consts.SPLUNK_ERR_CONNECTIVITY_FAILED,
-                            error_text=self._get_error_message_from_exception(e))
-                        return action_result.set_status(phantom.APP_ERROR, error_text)
+            is_job_successful: bool = self._wait_until_splunk_job_results_are_ready(action_result, job, RETRY_LIMIT)
+            if phantom.is_fail(is_job_successful):
+                return phantom.APP_ERROR
 
             stats = self._get_stats(job)
 
@@ -1343,6 +1329,27 @@ class SplunkConnector(BaseConnector):
         summary[consts.SPLUNK_JSON_TOTAL_EVENTS] = result_index
         self.debug_print('Done run query')
         return action_result.set_status(phantom.APP_SUCCESS)
+
+    def _wait_until_splunk_job_results_are_ready(self, action_result: phantom.ActionResult, job: splunk_client.Job, retry_limit: int) -> bool:
+        for attempt_count in range(0, retry_limit):
+            try:
+                #  Timing out the splunk job is required, because the job
+                #  could be stuck in permanent "QUEUED" state after the Splunk
+                #  stack has crashed.
+                max_waiting_time: float = time.time() + self.splunk_job_timeout
+                while not job.is_ready():
+                    if time.time() > max_waiting_time:
+                        return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_SPLUNK_JOB_HAS_TIMED_OUT)
+                    time.sleep(self.sleeptime_in_requests)
+                    pass
+                job.refresh()
+                break
+            except Exception as e:
+                if attempt_count == retry_limit - 1:
+                    error_text = consts.SPLUNK_EXCEPTION_ERR_MESSAGE.format(msg=consts.SPLUNK_ERR_CONNECTIVITY_FAILED,
+                        error_text=self._get_error_message_from_exception(e))
+                    return action_result.set_status(phantom.APP_ERROR, error_text)
+        return True
 
     def add_json_result(self, action_result):
 
