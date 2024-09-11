@@ -1341,7 +1341,6 @@ class SplunkConnector(BaseConnector):
                     if time.time() > max_waiting_time:
                         return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_SPLUNK_JOB_HAS_TIMED_OUT)
                     time.sleep(self.sleeptime_in_requests)
-                    pass
                 job.refresh()
                 break
             except Exception as e:
