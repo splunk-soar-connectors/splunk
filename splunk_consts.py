@@ -27,8 +27,8 @@ SPLUNK_ERR_UNABLE_TO_CREATE_JOB = "Failed to get a job id from splunk server"
 SPLUNK_ERR_GET_EVENTS = "Error getting events for alert '{ss_name}' having sid '{sid}'"
 SPLUNK_ERR_NOT_ES = "This instance does not seem to be Splunk ES. This action cannot be run"
 SPLUNK_ERR_INVALID_TIME_RANGE = "Invalid Time range specified, where the end time is less than start time"
-SPLUNK_ERR_NEED_PARAM = "One of comment, status, integer_status, disposition, integer_disposition, urgency, or owner parameters needs to be supplied to run this \
-    action"
+SPLUNK_ERR_NEED_PARAM = "One of comment, status, integer_status, disposition, integer_disposition, urgency, or owner parameters needs \
+    to be supplied to run this action"
 SPLUNK_ERR_INVALID_INTEGER = "Please provide a valid integer value in the {param} parameter"
 SPLUNK_ERR_NON_NEGATIVE_INTEGER = "Please provide a valid non-negative integer value in the {param} parameter"
 SPLUNK_ERR_INVALID_PARAM = "Please provide non-zero positive integer in {param}"
@@ -92,13 +92,7 @@ SPLUNK_MILLISECONDS_IN_A_DAY = 86400000
 SPLUNK_NUMBER_OF_DAYS_BEFORE_ENDTIME = 10
 
 # Dictionaries
-SPLUNK_SEVERITY_MAP = {
-    'informational': 'low',
-    'low': 'low',
-    'medium': 'medium',
-    'high': 'high',
-    'critical': 'high'
-}
+SPLUNK_SEVERITY_MAP = {"informational": "low", "low": "low", "medium": "medium", "high": "high", "critical": "high"}
 
 # This will map certain splunk CIM fields to their CEF equivalent
 CIM_CEF_MAP = {
@@ -142,7 +136,7 @@ CIM_CEF_MAP = {
     "transport": "transportProtocol",
     "url": "requestURL",
     "user": "destinationUserName",
-    "user_id": "destinationUserId"
+    "user_id": "destinationUserId",
 }
 
 SPLUNK_INVALID_COMMAND = "Streaming/Transforming command operates on the events returned by some search.\
@@ -164,7 +158,7 @@ SPLUNK_RID_SID_NOTABLE_QUERY = r'search [| makeresults | eval myfield = "{}"'
 SPLUNK_RID_SID_NOTABLE_QUERY += r' | rex field=myfield "^(?<sid>.*)\+(?<rid>\d*(\.\d+)?)"'
 SPLUNK_RID_SID_NOTABLE_QUERY += r' | eval search = "( (sid::" . sid . " OR orig_sid::" . sid . ")'
 SPLUNK_RID_SID_NOTABLE_QUERY += r' (rid::" . rid . " OR orig_rid::" . rid . ") )"'
-SPLUNK_RID_SID_NOTABLE_QUERY += r' | table search] `notable` | table event_id'
+SPLUNK_RID_SID_NOTABLE_QUERY += r" | table search] `notable` | table event_id"
 SPLUNK_SEARCH_AUDIT_INDEX_QUERY = "search index=_audit action=alert_fired {0} | head {1} | \
             fields ss_name sid trigger_time severity"
 
