@@ -91,13 +91,7 @@ SPLUNK_MILLISECONDS_IN_A_DAY = 86400000
 SPLUNK_NUMBER_OF_DAYS_BEFORE_ENDTIME = 10
 
 # Dictionaries
-SPLUNK_SEVERITY_MAP = {
-    'informational': 'low',
-    'low': 'low',
-    'medium': 'medium',
-    'high': 'high',
-    'critical': 'high'
-}
+SPLUNK_SEVERITY_MAP = {"informational": "low", "low": "low", "medium": "medium", "high": "high", "critical": "high"}
 
 # This will map certain splunk CIM fields to their CEF equivalent
 CIM_CEF_MAP = {
@@ -141,7 +135,7 @@ CIM_CEF_MAP = {
     "transport": "transportProtocol",
     "url": "requestURL",
     "user": "destinationUserName",
-    "user_id": "destinationUserId"
+    "user_id": "destinationUserId",
 }
 
 SPLUNK_INVALID_COMMAND = "Streaming/Transforming command operates on the events returned by some search.\
@@ -162,7 +156,7 @@ SPLUNK_RID_SID_NOTABLE_QUERY = r'search [| makeresults | eval myfield = "{}"'
 SPLUNK_RID_SID_NOTABLE_QUERY += r' | rex field=myfield "^(?<sid>.*)\+(?<rid>\d*(\.\d+)?)"'
 SPLUNK_RID_SID_NOTABLE_QUERY += r' | eval search = "( (sid::" . sid . " OR orig_sid::" . sid . ")'
 SPLUNK_RID_SID_NOTABLE_QUERY += r' (rid::" . rid . " OR orig_rid::" . rid . ") )"'
-SPLUNK_RID_SID_NOTABLE_QUERY += r' | table search] `notable` | table event_id'
+SPLUNK_RID_SID_NOTABLE_QUERY += r" | table search] `notable` | table event_id"
 SPLUNK_SEARCH_AUDIT_INDEX_QUERY = "search index=_audit action=alert_fired {0} | head {1} | \
             fields ss_name sid trigger_time severity"
 

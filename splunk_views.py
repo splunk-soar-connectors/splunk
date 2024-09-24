@@ -22,22 +22,22 @@ def _get_ctx_result(result, provides):
     summary = result.get_summary()
     data = result.get_data()
 
-    ctx_result['param'] = param
+    ctx_result["param"] = param
     ctx_result["action_name"] = provides
     if summary:
-        ctx_result['summary'] = summary
+        ctx_result["summary"] = summary
 
     if not data:
-        ctx_result['data'] = {}
+        ctx_result["data"] = {}
         return ctx_result
 
     if param.get("display"):
-        headers = [x.strip() for x in param['display'].split(',')]
+        headers = [x.strip() for x in param["display"].split(",")]
         headers = list(filter(None, headers))
 
     else:
         for key in data[0].keys():
-            if key[0] != '_':
+            if key[0] != "_":
                 headers.append(key)
 
     for item in data:
@@ -46,16 +46,16 @@ def _get_ctx_result(result, provides):
             header_values[header] = item.get(header)
         processed_data.append(header_values)
 
-    ctx_result['data'] = data
-    ctx_result['processed_data'] = processed_data
-    ctx_result['headers'] = headers
+    ctx_result["data"] = data
+    ctx_result["processed_data"] = processed_data
+    ctx_result["headers"] = headers
 
     return ctx_result
 
 
 def display_view(provides, all_app_runs, context):
 
-    context['results'] = results = []
+    context["results"] = results = []
     for summary, action_results in all_app_runs:
         for result in action_results:
             ctx_result = _get_ctx_result(result, provides)
@@ -63,4 +63,4 @@ def display_view(provides, all_app_runs, context):
                 continue
             results.append(ctx_result)
 
-    return 'splunk_run_query.html'
+    return "splunk_run_query.html"
