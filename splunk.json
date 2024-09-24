@@ -1228,5 +1228,37 @@
                 "height": 5
             }
         }
-    ]
+    ],
+    "pip_dependencies": {
+        "wheel": [
+            {
+                "module": "pytz",
+                "input_file": "wheels/shared/pytz-2021.1-py2.py3-none-any.whl"
+            },
+            {
+                "module": "simplejson",
+                "input_file": "wheels/py36/simplejson-3.17.2-cp36-cp36m-manylinux1_x86_64.manylinux2010_x86_64.manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_5_x86_64.whl"
+            },
+            {
+                "module": "splunk_sdk",
+                "input_file": "wheels/py3/splunk_sdk-1.7.2-py3-none-any.whl"
+            }
+        ]
+    },
+    "pip39_dependencies": {
+        "wheel": [
+            {
+                "module": "pytz",
+                "input_file": "wheels/shared/pytz-2021.1-py2.py3-none-any.whl"
+            },
+            {
+                "module": "simplejson",
+                "input_file": "wheels/py39/simplejson-3.17.2-cp39-cp39-manylinux1_x86_64.manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_5_x86_64.whl"
+            },
+            {
+                "module": "splunk_sdk",
+                "input_file": "wheels/py3/splunk_sdk-1.7.2-py3-none-any.whl"
+            }
+        ]
+    }
 }
