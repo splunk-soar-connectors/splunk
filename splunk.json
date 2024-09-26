@@ -927,10 +927,10 @@
                     "order": 0,
                     "primary": true
                 },
-                "comment": {
-                    "description": "New comment for the event",
+                "owner": {
+                    "description": "New owner for the event",
                     "data_type": "string",
-                    "order": 5
+                    "order": 1
                 },
                 "status": {
                     "description": "New status for the event",
@@ -964,16 +964,10 @@
                     ],
                     "order": 4
                 },
-                "owner": {
-                    "description": "New owner for the event",
+                "comment": {
+                    "description": "New comment for the event",
                     "data_type": "string",
-                    "order": 1
-                },
-                "wait_for_confirmation": {
-                    "description": "Validate event_ids",
-                    "data_type": "boolean",
-                    "default": false,
-                    "order": 8
+                    "order": 5
                 },
                 "disposition": {
                     "description": "New disposition field",
@@ -994,6 +988,12 @@
                     "description": "Integer representing custom disposition value",
                     "data_type": "numeric",
                     "order": 7
+                },
+                "wait_for_confirmation": {
+                    "description": "Validate event_ids",
+                    "data_type": "boolean",
+                    "default": false,
+                    "order": 8
                 }
             },
             "output": [

@@ -838,12 +838,13 @@ class SplunkConnector(BaseConnector):
                 request_body["status"] = self._splunk_status_dict[status]
 
         if integer_disposition is not None:
-            if int(integer_disposition) not in list(self._splunk_disposition_dict.values()):
+            if int(integer_disposition) not in self._splunk_disposition_dict.values():
+                self.debug_print(f"int disposition: {self._splunk_disposition_dict}")
                 return action_result.set_status(
                     phantom.APP_ERROR,
                     "Please provide a valid value in 'integer_disposition' action\
                      parameter. Valid values: {}".format(
-                        (", ".join(map(str, list(self._splunk_disposition_dict.values()))))
+                        (", ".join(map(str, self._splunk_disposition_dict.values())))
                     ),
                 )
             request_body["disposition"] = consts.SPLUNK_DISPOSITION_QUERY_FORMAT.format(integer_disposition)
