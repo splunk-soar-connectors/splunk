@@ -748,7 +748,7 @@ class SplunkConnector(BaseConnector):
         ret_val, integer_status = self._validate_integer(
             action_result, param.get("integer_status"), consts.SPLUNK_INT_STATUS_KEY, allow_zero=True
         )
-        
+
         if phantom.is_fail(ret_val):
             return action_result.get_status()
 
@@ -814,7 +814,7 @@ class SplunkConnector(BaseConnector):
 
         if owner:
             request_body["newOwner"] = owner
-      
+
         if integer_status is not None:
             if int(integer_status) not in list(self._splunk_status_dict.values()):
                 return action_result.set_status(

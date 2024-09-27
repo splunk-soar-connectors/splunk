@@ -1307,7 +1307,7 @@
                 "module": "deprecation",
                 "input_file": "wheels/shared/deprecation-2.1.0-py2.py3-none-any.whl"
             },
-            {. 
+            {
                 "module": "packaging",
                 "input_file": "wheels/py3/packaging-24.1-py3-none-any.whl"
             },
