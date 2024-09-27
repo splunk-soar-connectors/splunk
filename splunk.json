@@ -53,22 +53,6 @@
     "logo": "logo_splunk.svg",
     "logo_dark": "logo_splunk_dark.svg",
     "license": "Copyright (c) 2016-2024 Splunk Inc.",
-    "pip_dependencies": {
-        "wheel": [
-            {
-                "module": "pytz",
-                "input_file": "wheels/shared/pytz-2021.1-py2.py3-none-any.whl"
-            },
-            {
-                "module": "simplejson",
-                "input_file": "wheels/py36/simplejson-3.17.2-cp36-cp36m-manylinux2010_x86_64.manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
-            },
-            {
-                "module": "splunk_sdk",
-                "input_file": "wheels/py3/splunk_sdk-1.7.2-py3-none-any.whl"
-            }
-        ]
-    },
     "configuration": {
         "device": {
             "description": "Device IP/Hostname",
@@ -195,6 +179,13 @@
             "order": 20,
             "default": false,
             "name": "include_cim_fields"
+        },
+        "splunk_job_timeout": {
+            "description": "The duration in seconds to wait before a scheduled Splunk job times out",
+            "data_type": "numeric",
+            "order": 21,
+            "default": 1200,
+            "name": "splunk_job_timeout"
         }
     },
     "actions": [
@@ -1282,8 +1273,44 @@
             }
         }
     ],
+    "pip_dependencies": {
+        "wheel": [
+            {
+                "module": "deprecation",
+                "input_file": "wheels/shared/deprecation-2.1.0-py2.py3-none-any.whl"
+            },
+            {
+                "module": "packaging",
+                "input_file": "wheels/py3/packaging-21.3-py3-none-any.whl"
+            },
+            {
+                "module": "pyparsing",
+                "input_file": "wheels/py3/pyparsing-3.1.4-py3-none-any.whl"
+            },
+            {
+                "module": "pytz",
+                "input_file": "wheels/shared/pytz-2021.1-py2.py3-none-any.whl"
+            },
+            {
+                "module": "simplejson",
+                "input_file": "wheels/py36/simplejson-3.17.2-cp36-cp36m-manylinux2010_x86_64.manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
+            },
+            {
+                "module": "splunk_sdk",
+                "input_file": "wheels/py3/splunk_sdk-2.0.1-py3-none-any.whl"
+            }
+        ]
+    },
     "pip39_dependencies": {
         "wheel": [
+            {
+                "module": "deprecation",
+                "input_file": "wheels/shared/deprecation-2.1.0-py2.py3-none-any.whl"
+            },
+            {. 
+                "module": "packaging",
+                "input_file": "wheels/py3/packaging-24.1-py3-none-any.whl"
+            },
             {
                 "module": "pytz",
                 "input_file": "wheels/shared/pytz-2021.1-py2.py3-none-any.whl"
@@ -1294,7 +1321,7 @@
             },
             {
                 "module": "splunk_sdk",
-                "input_file": "wheels/py3/splunk_sdk-1.7.2-py3-none-any.whl"
+                "input_file": "wheels/py3/splunk_sdk-2.0.1-py3-none-any.whl"
             }
         ]
     }

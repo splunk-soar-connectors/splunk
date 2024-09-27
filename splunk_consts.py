@@ -45,6 +45,7 @@ SPLUNK_STATE_FILE_CORRUPT_ERR = (
 SPLUNK_ERR_UNABLE_TO_PARSE_JSON_RESPONSE = "Unable to parse response as JSON. {error}"
 SPLUNK_ERR_UNABLE_TO_PARSE_HTML_RESPONSE = "Unable to parse HTML response. {error}"
 SPLUNK_ERR_EMPTY_RESPONSE = "Status Code {code}. Empty response and no information in the header."
+SPLUNK_ERR_SPLUNK_JOB_HAS_TIMED_OUT = "Failed to retrieve splunk job results. The splunk job has timed out."
 
 # Progress messages
 SPLUNK_PROG_GOT_JOB_ID = "Got job id '{job_id}'"
@@ -152,6 +153,7 @@ SPLUNK_MAX_CONTAINER_KEY = "'max_container' configuration"
 SPLUNK_CONTAINER_UPDATE_STATE_KEY = "'Container count to update the state file' configuration"
 SPLUNK_LAST_N_DAYS_KEY = "'last_n_days' action"
 SPLUNK_SLEEPTIME_IN_REQUESTS_KEY = "'The time to wait for next REST call (max 120 seconds)' configuration"
+SPLUNK_JOB_TIMEOUT_KEY = "'The duration in seconds to wait before a scheduled Splunk job times out' configuration"
 
 # Queries
 SPLUNK_RID_SID_NOTABLE_QUERY = r'search [| makeresults | eval myfield = "{}"'

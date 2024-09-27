@@ -2,7 +2,7 @@
 # Splunk
 
 Publisher: Splunk  
-Connector Version: 2.16.2  
+Connector Version: 2.17.0  
 Product Vendor: Splunk Inc.  
 Product Name: Splunk Enterprise  
 Product Version Supported (regex): ".\*"  
@@ -150,6 +150,9 @@ For sending events to Splunk Platform, the User configured in the asset would re
     -   The time to wait for next REST call(max 120 seconds)
     -   It allows the user to add sleep time between the REST calls while performing the
         "run_query", "update_event", "get host events" and "on poll" action.
+-   splunk_job_timeout:
+    -   The duration in seconds to wait before a scheduled Splunk job times out
+    -   It allows the user to configure the duration after which the connector should consider the Splunk job as timed out.
 -   on_poll_display:
     -   Fields to save with On Poll
     -   Users can select the fields from the events which the user wants to ingest in the artifact
@@ -360,6 +363,7 @@ VARIABLE | REQUIRED | TYPE | DESCRIPTION
 **remove_empty_cef** |  optional  | boolean | Remove CEF fields having empty values from the artifact
 **sleeptime_in_requests** |  optional  | numeric | The time to wait for next REST call (max 120 seconds)
 **include_cim_fields** |  optional  | boolean | Option to keep original Splunk CIM together with SOAR CEF fields
+**splunk_job_timeout** |  optional  | numeric | The duration in seconds to wait before a scheduled Splunk job times out
 
 ### Supported Actions  
 [test connectivity](#action-test-connectivity) - Validate the asset configuration for connectivity. This action logs into the device to check the connection and credentials  

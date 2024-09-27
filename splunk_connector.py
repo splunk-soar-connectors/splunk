@@ -27,6 +27,7 @@ from builtins import range  # noqa
 from builtins import str  # noqa
 from datetime import datetime
 from io import BytesIO
+from typing import Optional
 from urllib.error import HTTPError as UrllibHTTPError  # noqa
 from urllib.error import URLError  # noqa
 from urllib.parse import urlencode, urlparse  # noqa
@@ -187,6 +188,13 @@ class SplunkConnector(BaseConnector):
         ret_val, self.container_update_state = self._validate_integer(
             self, config.get("container_update_state", 100), consts.SPLUNK_CONTAINER_UPDATE_STATE_KEY
         )
+
+        if phantom.is_fail(ret_val):
+            return self.get_status()
+
+        # Validate splunk_job_timeout
+        ret_val, self.splunk_job_timeout = self._validate_integer(self, config.get("splunk_job_timeout"), consts.SPLUNK_JOB_TIMEOUT_KEY)
+
         if phantom.is_fail(ret_val):
             return self.get_status()
 
@@ -610,33 +618,18 @@ class SplunkConnector(BaseConnector):
         self.debug_print("kwargs_create", kwargs_create)
 
         # Create the job
-
         for search_attempt_count in range(0, RETRY_LIMIT):
-            for attempt_count in range(0, RETRY_LIMIT):
-                try:
-                    job = self._service.jobs.create(search_query, **kwargs_create)
-                    break
-                except Exception as e:
-                    if attempt_count == RETRY_LIMIT - 1:
-                        error_text = consts.SPLUNK_EXCEPTION_ERR_MESSAGE.format(
-                            msg=consts.SPLUNK_ERR_UNABLE_TO_CREATE_JOB, error_text=self._get_error_message_from_exception(e)
-                        )
-                        return action_result.set_status(phantom.APP_ERROR, error_text)
+            # Create the job
+            is_created_successfully, job = self._create_splunk_job(
+                action_result=action_result, retry_limit=RETRY_LIMIT, search_query=search_query, kwargs_create=kwargs_create
+            )
+            if phantom.is_fail(is_created_successfully):
+                return phantom.APP_ERROR
 
             while True:
-                for attempt_count in range(0, RETRY_LIMIT):
-                    try:
-                        while not job.is_ready():
-                            time.sleep(self.sleeptime_in_requests)
-                            pass
-                        job.refresh()
-                        break
-                    except Exception as e:
-                        if attempt_count == RETRY_LIMIT - 1:
-                            error_text = consts.SPLUNK_EXCEPTION_ERR_MESSAGE.format(
-                                msg=consts.SPLUNK_ERR_CONNECTIVITY_FAILED, error_text=self._get_error_message_from_exception(e)
-                            )
-                            return action_result.set_status(phantom.APP_ERROR, error_text)
+                is_job_successful: bool = self._wait_until_splunk_job_results_are_ready(action_result, job, RETRY_LIMIT)
+                if phantom.is_fail(is_job_successful):
+                    return phantom.APP_ERROR
 
                 stats = self._get_stats(job)
 
@@ -729,14 +722,15 @@ class SplunkConnector(BaseConnector):
             return splunk_dict
 
         for data in entry:
-            object_id = data.get("name").split(":")[-1]
-            object_name = data.get("content", {}).get("label")
+            status_id = data.get("name")
+            status_name = data.get("content", {}).get("label")
             is_enabled = str(data.get("content", {}).get("disabled")) == "0"
-            is_allowed_type = data.get("content", {}).get("status_type") == type
-            if object_id and object_id.isdigit() and object_name and is_enabled and is_allowed_type:
-                if type == "notable":
-                    object_name = object_name.lower()
-                splunk_dict[object_name] = int(object_id)
+            is_notable_status_type = data.get("content", {}).get("status_type") == "notable"
+            if status_id and status_id.isdigit() and status_name and is_enabled and is_notable_status_type:
+                self._splunk_status_dict[status_name.lower()] = int(status_id)
+
+        if not self._splunk_status_dict:
+            return False
 
         return splunk_dict
 
@@ -754,14 +748,13 @@ class SplunkConnector(BaseConnector):
         ret_val, integer_status = self._validate_integer(
             action_result, param.get("integer_status"), consts.SPLUNK_INT_STATUS_KEY, allow_zero=True
         )
+        
         if phantom.is_fail(ret_val):
             return action_result.get_status()
 
         ret_val, integer_disposition = self._validate_integer(
             action_result, param.get("integer_disposition"), consts.SPLUNK_INT_DISPOSITION_KEY, allow_zero=True
         )
-        if phantom.is_fail(ret_val):
-            return action_result.get_status()
 
         comment = param.get(consts.SPLUNK_JSON_COMMENT)
         urgency = param.get(consts.SPLUNK_JSON_URGENCY)
@@ -819,6 +812,9 @@ class SplunkConnector(BaseConnector):
         # 3. Update the provided Events ID
         request_body = {"ruleUIDs": ids}
 
+        if owner:
+            request_body["newOwner"] = owner
+      
         if integer_status is not None:
             if int(integer_status) not in list(self._splunk_status_dict.values()):
                 return action_result.set_status(
@@ -1333,34 +1329,19 @@ class SplunkConnector(BaseConnector):
         self.debug_print("kwargs_create", kwargs_create)
 
         # Create the job
-        for attempt_count in range(0, RETRY_LIMIT):
-            try:
-                job = self._service.jobs.create(search_query, **kwargs_create)
-                break
-            except Exception as e:
-                self._dump_error_log(e, "Failed to create job.")
-                if attempt_count == RETRY_LIMIT - 1:
-                    error_text = consts.SPLUNK_EXCEPTION_ERR_MESSAGE.format(
-                        msg=consts.SPLUNK_ERR_UNABLE_TO_CREATE_JOB, error_text=self._get_error_message_from_exception(e)
-                    )
-                    return action_result.set_status(phantom.APP_ERROR, error_text)
+        is_created_successfully, job = self._create_splunk_job(
+            action_result=action_result, retry_limit=RETRY_LIMIT, search_query=search_query, kwargs_create=kwargs_create
+        )
+        if phantom.is_fail(is_created_successfully):
+            return phantom.APP_ERROR
 
         summary["sid"] = job.__dict__.get("sid")
+
         result_count = 0
         while True:
-            for attempt_count in range(0, RETRY_LIMIT):
-                try:
-                    while not job.is_ready():
-                        time.sleep(self.sleeptime_in_requests)
-                        pass
-                    job.refresh()
-                    break
-                except Exception as e:
-                    if attempt_count == RETRY_LIMIT - 1:
-                        error_text = consts.SPLUNK_EXCEPTION_ERR_MESSAGE.format(
-                            msg=consts.SPLUNK_ERR_CONNECTIVITY_FAILED, error_text=self._get_error_message_from_exception(e)
-                        )
-                        return action_result.set_status(phantom.APP_ERROR, error_text)
+            is_job_successful: bool = self._wait_until_splunk_job_results_are_ready(action_result, job, RETRY_LIMIT)
+            if phantom.is_fail(is_job_successful):
+                return phantom.APP_ERROR
 
             stats = self._get_stats(job)
 
@@ -1410,6 +1391,45 @@ class SplunkConnector(BaseConnector):
         summary[consts.SPLUNK_JSON_TOTAL_EVENTS] = result_index
         self.debug_print("Done run query")
         return action_result.set_status(phantom.APP_SUCCESS)
+
+    def _wait_until_splunk_job_results_are_ready(self, action_result: phantom.ActionResult, job: splunk_client.Job, retry_limit: int) -> bool:
+        for attempt_count in range(1, retry_limit + 1):
+            max_waiting_time: float = time.time() + self.splunk_job_timeout
+            try:
+                #  Timing out the splunk job is required, because the job
+                #  could be stuck in permanent "QUEUED" state after the Splunk
+                #  stack has crashed.
+                while not job.is_ready():
+                    if time.time() > max_waiting_time:
+                        return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_SPLUNK_JOB_HAS_TIMED_OUT)
+                    time.sleep(self.sleeptime_in_requests)
+                job.refresh()
+                break
+            except Exception as e:
+                self.debug_print(f"Attempt {attempt_count} out of {retry_limit} to connect to splunk server failed with error: {e}.")
+                if attempt_count == retry_limit:
+                    error_text = consts.SPLUNK_EXCEPTION_ERR_MESSAGE.format(
+                        msg=consts.SPLUNK_ERR_CONNECTIVITY_FAILED, error_text=self._get_error_message_from_exception(e)
+                    )
+                    return action_result.set_status(phantom.APP_ERROR, error_text)
+        return True
+
+    def _create_splunk_job(
+        self, action_result: phantom.ActionResult, retry_limit: int, search_query: str, kwargs_create: dict
+    ) -> tuple[bool, Optional[splunk_client.Job]]:
+        for attempt_count in range(1, retry_limit + 1):
+            try:
+                job: splunk_client.Job = self._service.jobs.create(search_query, **kwargs_create)
+                break
+            except Exception as e:
+                self.debug_print(f"Attempt {attempt_count} out of {retry_limit} to create splunk job failed with error: {e}.")
+                self._dump_error_log(e, "Failed to create job.")
+                if attempt_count == retry_limit:
+                    error_text = consts.SPLUNK_EXCEPTION_ERR_MESSAGE.format(
+                        msg=consts.SPLUNK_ERR_UNABLE_TO_CREATE_JOB, error_text=self._get_error_message_from_exception(e)
+                    )
+                    return action_result.set_status(phantom.APP_ERROR, error_text), None
+        return True, job
 
     def add_json_result(self, action_result):
 
