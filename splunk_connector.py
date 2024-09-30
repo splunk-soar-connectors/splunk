@@ -722,15 +722,14 @@ class SplunkConnector(BaseConnector):
             return splunk_dict
 
         for data in entry:
-            status_id = data.get("name")
-            status_name = data.get("content", {}).get("label")
+            object_id = data.get("name").split(":")[-1]
+            object_name = data.get("content", {}).get("label")
             is_enabled = str(data.get("content", {}).get("disabled")) == "0"
-            is_notable_status_type = data.get("content", {}).get("status_type") == "notable"
-            if status_id and status_id.isdigit() and status_name and is_enabled and is_notable_status_type:
-                self._splunk_status_dict[status_name.lower()] = int(status_id)
-
-        if not self._splunk_status_dict:
-            return False
+            is_allowed_type = data.get("content", {}).get("status_type") == type
+            if object_id and object_id.isdigit() and object_name and is_enabled and is_allowed_type:
+                if type == "notable":
+                    object_name = object_name.lower()
+                splunk_dict[object_name] = int(object_id)
 
         return splunk_dict
 
@@ -755,6 +754,9 @@ class SplunkConnector(BaseConnector):
         ret_val, integer_disposition = self._validate_integer(
             action_result, param.get("integer_disposition"), consts.SPLUNK_INT_DISPOSITION_KEY, allow_zero=True
         )
+
+        if phantom.is_fail(ret_val):
+            return action_result.get_status()
 
         comment = param.get(consts.SPLUNK_JSON_COMMENT)
         urgency = param.get(consts.SPLUNK_JSON_URGENCY)
