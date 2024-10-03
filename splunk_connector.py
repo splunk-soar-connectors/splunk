@@ -814,9 +814,6 @@ class SplunkConnector(BaseConnector):
         # 3. Update the provided Events ID
         request_body = {"ruleUIDs": ids}
 
-        if owner:
-            request_body["newOwner"] = owner
-
         if integer_status is not None:
             if int(integer_status) not in list(self._splunk_status_dict.values()):
                 return action_result.set_status(
