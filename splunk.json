@@ -190,10 +190,10 @@
         "use_event_id_sdi": {
             "description": "Option to use the event_id field value as the source data identifier instead of the full event hash",
             "data_type": "boolean",
-            "order": 21,
+            "order": 22,
             "default": "False",
             "name": "use_event_id_sdi",
-            "id": 21
+            "id": 22
         }
     },
     "actions": [
