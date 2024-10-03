@@ -986,7 +986,8 @@ class SplunkConnector(BaseConnector):
                 sdi = item['event_id']
             else:
                 if use_event_id_sdi and 'event_id' not in item:
-                    self.save_progress('Use event_id as SLI is activated in the asset but event_id is missing from this event. Defaulting to event hash') 
+                    self.save_progress('Use event_id as SLI is activated in the asset but event_id is missing from this event.')
+                    self.save_progress('Defaulting to event hash')
                 input_str = json.dumps(item)
                 input_str = UnicodeDammit(input_str).unicode_markup.encode("utf-8")
                 fips_enabled = self._get_fips_enabled()
