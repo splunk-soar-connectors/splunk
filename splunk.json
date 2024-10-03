@@ -30,12 +30,15 @@
         },
         {
             "name": "Tony Cihak"
+        },
+        {
+            "name": "Mhike"
         }
     ],
     "type": "siem",
     "main_module": "splunk_connector.py",
-    "app_version": "2.17.0",
-    "utctime_updated": "2022-09-08T08:47:45.000000Z",
+    "app_version": "2.17.1",
+    "utctime_updated": "2024-10-03T00:00:00.000000Z",
     "package_name": "phantom_splunk",
     "product_name": "Splunk Enterprise",
     "product_vendor": "Splunk Inc.",
@@ -183,6 +186,14 @@
             "order": 21,
             "default": 1200,
             "name": "splunk_job_timeout"
+        },
+        "use_event_id_sdi": {
+            "description": "Option to use the event_id field value as the source data identifier instead of the full event hash",
+            "data_type": "boolean",
+            "order": 21,
+            "default": "False",
+            "name": "use_event_id_sdi",
+            "id": 21
         }
     },
     "actions": [
