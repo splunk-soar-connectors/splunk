@@ -894,7 +894,7 @@ class SplunkConnector(BaseConnector):
         search_string = config.get("on_poll_query")
         po = config.get("on_poll_parse_only", False)
         include_cim_fields = config.get("include_cim_fields", False)
-        use_event_id_sdi = config.get('use_event_id_sdi', False)
+        use_event_id_sdi = config.get("use_event_id_sdi", False)
 
         if not search_string:
             self.save_progress("Need to specify Query String to use polling")
@@ -982,12 +982,12 @@ class SplunkConnector(BaseConnector):
 
             # If the boolean in the asset is checked, attempt to use event_id as the source data identifier
             # If event_id is missing from event, print warning and use hash SDI
-            if use_event_id_sdi and 'event_id' in item:
-                sdi = item['event_id']
+            if use_event_id_sdi and "event_id" in item:
+                sdi = item["event_id"]
             else:
-                if use_event_id_sdi and 'event_id' not in item:
-                    self.save_progress('Use event_id as SLI is activated in the asset but event_id is missing from this event.')
-                    self.save_progress('Defaulting to event hash')
+                if use_event_id_sdi and "event_id" not in item:
+                    self.save_progress("Use event_id as SLI is activated in the asset but event_id is missing from this event.")
+                    self.save_progress("Defaulting to event hash")
                 input_str = json.dumps(item)
                 input_str = UnicodeDammit(input_str).unicode_markup.encode("utf-8")
                 fips_enabled = self._get_fips_enabled()
