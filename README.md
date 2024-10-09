@@ -2,7 +2,7 @@
 # Splunk
 
 Publisher: Splunk  
-Connector Version: 2.17.0  
+Connector Version: 2.18.0  
 Product Vendor: Splunk Inc.  
 Product Name: Splunk Enterprise  
 Product Version Supported (regex): ".\*"  
@@ -202,7 +202,7 @@ For sending events to Splunk Platform, the User configured in the asset would re
     -   If this search command does not return any results then, the action fails with the message
         "Please provide a valid event ID".
 
--   Use integer status field for custom status. Example: 1 For New, 2 for In progress, etc.
+-   Use the integer status field to set custom status values (e.g., 1 for 'New', 2 for 'In Progress', etc.). Similarly, use the integer disposition field for custom disposition values (e.g., 0 for 'Undetermined').
 
 ## On Poll
 
@@ -431,7 +431,7 @@ Ingest logs from the Splunk instance
 Type: **ingest**  
 Read only: **True**
 
-The configured query is what will be used during ingestion. If you only wish to show certain fields, then you can specify these as a comma-separated list in the configuration. If left unspecified, all available fields will be added to each artifact. When limiting the number of events to ingest, it will ingest the most recent events.<br><br>
+The configured query is what will be used during ingestion. If you only wish to show certain fields, you can specify these as a comma-separated list in the configuration. If left unspecified, all available fields will be added to each artifact. When limiting the number of events to ingest, it will ingest the most recent events. To avoid duplication in polling, append '| fields \*' to the query.<br><br>
 
 #### Action Parameters
 PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
@@ -543,11 +543,13 @@ The <b>event_ids</b> parameter takes a single event_id (which has the format: 68
 PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 --------- | -------- | ----------- | ---- | --------
 **event_ids** |  required  | Event ID to update | string |  `splunk notable event id` 
-**comment** |  optional  | New comment for the event | string | 
+**owner** |  optional  | New owner for the event | string | 
 **status** |  optional  | New status for the event | string | 
 **integer_status** |  optional  | Integer representing custom status value | numeric | 
 **urgency** |  optional  | New urgency for the event | string | 
-**owner** |  optional  | New owner for the event | string | 
+**comment** |  optional  | New comment for the event | string | 
+**disposition** |  optional  | New disposition field | string | 
+**integer_disposition** |  optional  | Integer representing custom disposition value | numeric | 
 **wait_for_confirmation** |  optional  | Validate event_ids | boolean | 
 
 #### Action Output
@@ -555,7 +557,9 @@ DATA PATH | TYPE | CONTAINS | EXAMPLE VALUES
 --------- | ---- | -------- | --------------
 action_result.status | string |  |   success  failed 
 action_result.parameter.comment | string |  |   test comment 
+action_result.parameter.disposition | string |  |   unassigned 
 action_result.parameter.event_ids | string |  `splunk notable event id`  |   1542751027.136723+0 
+action_result.parameter.integer_disposition | numeric |  |   1 
 action_result.parameter.integer_status | numeric |  |   1 
 action_result.parameter.owner | string |  |   test 
 action_result.parameter.status | string |  |   new 
