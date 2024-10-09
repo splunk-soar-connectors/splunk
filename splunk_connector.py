@@ -81,6 +81,7 @@ class SplunkConnector(BaseConnector):
         self.port = None
         self.max_container = None
         self._splunk_status_dict = None
+        self._splunk_disposition_dict = None
         self.container_update_state = None
         self.remove_empty_cef = None
         self.sleeptime_in_requests = None
@@ -187,11 +188,13 @@ class SplunkConnector(BaseConnector):
         ret_val, self.container_update_state = self._validate_integer(
             self, config.get("container_update_state", 100), consts.SPLUNK_CONTAINER_UPDATE_STATE_KEY
         )
+
         if phantom.is_fail(ret_val):
             return self.get_status()
 
         # Validate splunk_job_timeout
         ret_val, self.splunk_job_timeout = self._validate_integer(self, config.get("splunk_job_timeout"), consts.SPLUNK_JOB_TIMEOUT_KEY)
+
         if phantom.is_fail(ret_val):
             return self.get_status()
 
@@ -703,32 +706,32 @@ class SplunkConnector(BaseConnector):
 
         return stats
 
-    def _set_splunk_status_dict(self, action_result):
+    def _set_splunk_status_dict(self, action_result, type):
+
+        splunk_dict = {}
 
         endpoint = "alerts/reviewstatuses?count=-1&output_mode=json"
         ret_val, resp_data = self._make_rest_call_retry(action_result, endpoint, {}, method=requests.get)
 
         if phantom.is_fail(ret_val) or not resp_data:
-            return False
+            return splunk_dict
 
-        self._splunk_status_dict = {}
         entry = resp_data.get("entry")
 
         if not entry:
-            return False
+            return splunk_dict
 
         for data in entry:
-            status_id = data.get("name")
-            status_name = data.get("content", {}).get("label")
+            object_id = data.get("name").split(":")[-1]
+            object_name = data.get("content", {}).get("label")
             is_enabled = str(data.get("content", {}).get("disabled")) == "0"
-            is_notable_status_type = data.get("content", {}).get("status_type") == "notable"
-            if status_id and status_id.isdigit() and status_name and is_enabled and is_notable_status_type:
-                self._splunk_status_dict[status_name.lower()] = int(status_id)
+            is_allowed_type = data.get("content", {}).get("status_type") == type
+            if object_id and object_id.isdigit() and object_name and is_enabled and is_allowed_type:
+                if type == "notable":
+                    object_name = object_name.lower()
+                splunk_dict[object_name] = int(object_id)
 
-        if not self._splunk_status_dict:
-            return False
-
-        return True
+        return splunk_dict
 
     def _update_event(self, param):
 
@@ -744,13 +747,21 @@ class SplunkConnector(BaseConnector):
         ret_val, integer_status = self._validate_integer(
             action_result, param.get("integer_status"), consts.SPLUNK_INT_STATUS_KEY, allow_zero=True
         )
+
+        if phantom.is_fail(ret_val):
+            return action_result.get_status()
+
+        ret_val, integer_disposition = self._validate_integer(
+            action_result, param.get("integer_disposition"), consts.SPLUNK_INT_DISPOSITION_KEY, allow_zero=True
+        )
+
         if phantom.is_fail(ret_val):
             return action_result.get_status()
 
         comment = param.get(consts.SPLUNK_JSON_COMMENT)
         urgency = param.get(consts.SPLUNK_JSON_URGENCY)
         wait_for_confirmation = param.get("wait_for_confirmation", False)
-
+        disposition = param.get("disposition", "")
         regexp = re.compile(r"\+\d*(\.\d+)?[\"$]")
         if regexp.search(json.dumps(ids)):
             self.send_progress("Interpreting the event ID as an SID + RID combo; querying for the actual event_id...")
@@ -760,12 +771,18 @@ class SplunkConnector(BaseConnector):
                 return action_result.set_status(phantom.APP_ERROR, "Unable to find underlying event_id from SID + RID combo")
             ids = event_id
 
-        if not comment and not status and not urgency and not owner and integer_status is None:
+        if not any([comment, status, urgency, owner, disposition]) and integer_status is None and integer_disposition is None:
             return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_NEED_PARAM)
 
         if status or integer_status is not None:
-            if not self._set_splunk_status_dict(action_result):
+            self._splunk_status_dict = self._set_splunk_status_dict(action_result, "notable")
+            if not self._splunk_status_dict:
                 return action_result.set_status(phantom.APP_ERROR, "Error occurred while fetching Splunk event status")
+
+        if disposition or integer_disposition is not None:
+            self._splunk_disposition_dict = self._set_splunk_status_dict(action_result, "disposition")
+            if not self._splunk_disposition_dict:
+                return action_result.set_status(phantom.APP_ERROR, "Error occurred while fetching Splunk event disposition")
 
         self.debug_print("Attempting to create a connection")
 
@@ -797,8 +814,6 @@ class SplunkConnector(BaseConnector):
         # 3. Update the provided Events ID
         request_body = {"ruleUIDs": ids}
 
-        if owner:
-            request_body["newOwner"] = owner
         if integer_status is not None:
             if int(integer_status) not in list(self._splunk_status_dict.values()):
                 return action_result.set_status(
@@ -816,10 +831,29 @@ class SplunkConnector(BaseConnector):
                 request_body["status"] = status
             else:
                 request_body["status"] = self._splunk_status_dict[status]
-        if urgency:
-            request_body["urgency"] = urgency
-        if comment:
-            request_body["comment"] = comment
+
+        if integer_disposition is not None:
+            if int(integer_disposition) not in self._splunk_disposition_dict.values():
+                self.debug_print(f"int disposition: {self._splunk_disposition_dict}")
+                return action_result.set_status(
+                    phantom.APP_ERROR,
+                    "Please provide a valid value in 'integer_disposition' action\
+                     parameter. Valid values: {}".format(
+                        (", ".join(map(str, self._splunk_disposition_dict.values())))
+                    ),
+                )
+            request_body["disposition"] = consts.SPLUNK_DISPOSITION_QUERY_FORMAT.format(integer_disposition)
+        elif disposition:
+            if disposition not in self._splunk_disposition_dict:
+                if not disposition.isdigit():
+                    return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_BAD_DISPOSITION)
+                request_body["disposition"] = consts.SPLUNK_DISPOSITION_QUERY_FORMAT.format(disposition)
+            else:
+                request_body["disposition"] = consts.SPLUNK_DISPOSITION_QUERY_FORMAT.format(self._splunk_disposition_dict[disposition])
+
+        param_mapping = {"urgency": urgency, "comment": comment, "newOwner": owner}
+
+        request_body.update({k: v for k, v in param_mapping.items() if v})
 
         self.debug_print("Updating the event")
 

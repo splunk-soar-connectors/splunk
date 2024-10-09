@@ -190,7 +190,7 @@ For sending events to Splunk Platform, the User configured in the asset would re
     -   If this search command does not return any results then, the action fails with the message
         "Please provide a valid event ID".
 
--   Use integer status field for custom status. Example: 1 For New, 2 for In progress, etc.
+-   Use the integer status field to set custom status values (e.g., 1 for 'New', 2 for 'In Progress', etc.). Similarly, use the integer disposition field for custom disposition values (e.g., 0 for 'Undetermined').
 
 ## On Poll
 
