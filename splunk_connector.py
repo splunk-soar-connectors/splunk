@@ -188,13 +188,11 @@ class SplunkConnector(BaseConnector):
         ret_val, self.container_update_state = self._validate_integer(
             self, config.get("container_update_state", 100), consts.SPLUNK_CONTAINER_UPDATE_STATE_KEY
         )
-
         if phantom.is_fail(ret_val):
             return self.get_status()
 
         # Validate splunk_job_timeout
         ret_val, self.splunk_job_timeout = self._validate_integer(self, config.get("splunk_job_timeout"), consts.SPLUNK_JOB_TIMEOUT_KEY)
-
         if phantom.is_fail(ret_val):
             return self.get_status()
 
