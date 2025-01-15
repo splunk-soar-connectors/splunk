@@ -15,6 +15,7 @@
 #
 
 import hashlib
+import json
 import os
 import re
 import ssl
@@ -22,37 +23,27 @@ import sys
 import tempfile
 import time
 import traceback
-from builtins import map  # noqa
-from builtins import range  # noqa
-from builtins import str  # noqa
-from datetime import datetime
+from datetime import datetime, timezone
 from io import BytesIO
 from typing import Optional
-from urllib.error import HTTPError as UrllibHTTPError  # noqa
-from urllib.error import URLError  # noqa
-from urllib.parse import urlencode, urlparse  # noqa
-from urllib.request import ProxyHandler  # noqa
-from urllib.request import Request  # noqa
-from urllib.request import build_opener  # noqa
-from urllib.request import install_opener  # noqa
-from urllib.request import urlopen  # noqa
+from urllib.error import HTTPError as UrllibHTTPError
+from urllib.error import URLError
+from urllib.request import ProxyHandler, Request, build_opener, install_opener, urlopen
+from zoneinfo import ZoneInfo
 
 import phantom.app as phantom
 import phantom.rules as soar_vault
-import pytz
 import requests
-import simplejson as json
 import splunklib.binding as splunk_binding
 import splunklib.client as splunk_client
 import splunklib.results as splunk_results
 import xmltodict
-from bs4 import BeautifulSoup, UnicodeDammit
+from bs4 import BeautifulSoup
+from bs4.dammit import UnicodeDammit
 from dateutil.parser import ParserError
 from dateutil.parser import parse as dateutil_parse
-from past.utils import old_div  # noqa
 from phantom.base_connector import BaseConnector
 from phantom.vault import Vault
-from pytz import timezone
 from splunklib.binding import HTTPError
 
 import splunk_consts as consts
@@ -1079,7 +1070,7 @@ class SplunkConnector(BaseConnector):
             # convert to Splunk SOAR timestamp format
             # '%Y-%m-%dT%H:%M:%S.%fZ
             datetime_obj = dateutil_parse(start_time)
-            return datetime_obj.astimezone(pytz.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+            return datetime_obj.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
         except ParserError as parse_err:
             self._dump_error_log(parse_err, "ParserError while parsing _time.")
             error_text = consts.SPLUNK_EXCEPTION_ERR_MESSAGE.format(
@@ -1184,8 +1175,9 @@ class SplunkConnector(BaseConnector):
             return action_result.set_status(phantom.APP_ERROR, "Error occurred while parsing the search query")
 
         self.debug_print("search_query: {0}".format(search_query))
-        return self._run_query(search_query, action_result, attach_result=attach_result,
-            kwargs_create=kwargs, parse_only=po, add_raw_field=add_raw)
+        return self._run_query(
+            search_query, action_result, attach_result=attach_result, kwargs_create=kwargs, parse_only=po, add_raw_field=add_raw
+        )
 
     def _get_tz_str_from_epoch(self, time_format_str, epoch_milli):
 
@@ -1193,10 +1185,10 @@ class SplunkConnector(BaseConnector):
         config = self.get_config()
         device_tz_sting = config[consts.SPLUNK_JSON_TIMEZONE]
 
-        to_tz = timezone(device_tz_sting)
+        to_tz = ZoneInfo(device_tz_sting)
 
-        utc_dt = datetime.utcfromtimestamp(old_div(epoch_milli / 1000)).replace(tzinfo=pytz.utc)
-        to_dt = to_tz.normalize(utc_dt.astimezone(to_tz))
+        utc_dt = datetime.fromtimestamp(epoch_milli // 1000, tz=timezone.utc)
+        to_dt = utc_dt.astimezone(to_tz)
 
         # return utc_dt.strftime('%Y-%m-%d %H:%M:%S')
         return to_dt.strftime(time_format_str)
