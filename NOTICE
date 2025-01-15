@@ -1,14 +1,7 @@
 Splunk SOAR Splunk
-Copyright (c) 2016-2024 Splunk Inc.
+Copyright (c) 2016-2025 Splunk Inc.
 
 Third-party Software Attributions:
-
-Library: beautifulsoup4
-Version: 4.9.1
-License: MIT
-Copyright 2004-2017 Leonard Richardson
-Copyright 2004-2019 Leonard Richardson
-Copyright 2018 Isaac Muse
 
 Library: python-dateutil
 Version: 2.8.1

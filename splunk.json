@@ -33,17 +33,20 @@
         },
         {
             "name": "Mhike"
+        },
+        {
+            "name": "Brendan Shea"
         }
     ],
     "type": "siem",
     "main_module": "splunk_connector.py",
-    "app_version": "2.17.1",
-    "utctime_updated": "2024-10-03T00:00:00.000000Z",
+    "app_version": "2.20.0",
+    "utctime_updated": "2025-01-15T00:00:00.000000Z",
     "package_name": "phantom_splunk",
     "product_name": "Splunk Enterprise",
     "product_vendor": "Splunk Inc.",
     "product_version_regex": ".*",
-    "min_phantom_version": "6.2.1",
+    "min_phantom_version": "6.3.0",
     "fips_compliant": true,
     "python_version": "3",
     "latest_tested_versions": [
@@ -52,7 +55,7 @@
     ],
     "logo": "logo_splunk.svg",
     "logo_dark": "logo_splunk_dark.svg",
-    "license": "Copyright (c) 2016-2024 Splunk Inc.",
+    "license": "Copyright (c) 2016-2025 Splunk Inc.",
     "configuration": {
         "device": {
             "description": "Device IP/Hostname",
@@ -371,7 +374,7 @@
         {
             "action": "on poll",
             "description": "Ingest logs from the Splunk instance",
-            "verbose": "The configured query is what will be used during ingestion. If you only wish to show certain fields, then you can specify these as a comma-separated list in the configuration. If left unspecified, all available fields will be added to each artifact. When limiting the number of events to ingest, it will ingest the most recent events.<br><br>",
+            "verbose": "The configured query is what will be used during ingestion. If you only wish to show certain fields, you can specify these as a comma-separated list in the configuration. If left unspecified, all available fields will be added to each artifact. When limiting the number of events to ingest, it will ingest the most recent events. To avoid duplication in polling, append '| fields *' to the query.<br><br>",
             "type": "ingest",
             "identifier": "on_poll",
             "read_only": true,
@@ -449,15 +452,17 @@
                     "order": 3,
                     "default": false
                 },
+                "add_raw_field": {
+                    "description": "Ingest _raw field data",
+                    "data_type": "boolean",
+                    "order": 4,
+                    "default": true
+                },
                 "attach_result": {
                     "description": "Attach result to the vault",
                     "data_type": "boolean",
-                    "order": 4,
+                    "order": 5,
                     "default": false
-                },
-                "ph": {
-                    "data_type": "ph",
-                    "order": 5
                 },
                 "start_time": {
                     "description": "Earliest time modifier",
@@ -926,10 +931,10 @@
                     "order": 0,
                     "primary": true
                 },
-                "comment": {
-                    "description": "New comment for the event",
+                "owner": {
+                    "description": "New owner for the event",
                     "data_type": "string",
-                    "order": 5
+                    "order": 1
                 },
                 "status": {
                     "description": "New status for the event",
@@ -963,16 +968,36 @@
                     ],
                     "order": 4
                 },
-                "owner": {
-                    "description": "New owner for the event",
+                "comment": {
+                    "description": "New comment for the event",
                     "data_type": "string",
-                    "order": 1
+                    "order": 5
+                },
+                "disposition": {
+                    "description": "New disposition field",
+                    "data_type": "string",
+                    "value_list": [
+                        "",
+                        "Unassigned",
+                        "True Positive - Suspicious Activity",
+                        "Benign Positive - Suspicious But Expected",
+                        "False Positive - Incorrect Analytic Logic",
+                        "False Positive - Inaccurate Data",
+                        "Undetermined",
+                        "Other"
+                    ],
+                    "order": 6
+                },
+                "integer_disposition": {
+                    "description": "Integer representing custom disposition value",
+                    "data_type": "numeric",
+                    "order": 7
                 },
                 "wait_for_confirmation": {
                     "description": "Validate event_ids",
                     "data_type": "boolean",
                     "default": false,
-                    "order": 6
+                    "order": 8
                 }
             },
             "output": [
@@ -994,6 +1019,13 @@
                     ]
                 },
                 {
+                    "data_path": "action_result.parameter.disposition",
+                    "data_type": "string",
+                    "example_values": [
+                        "unassigned"
+                    ]
+                },
+                {
                     "data_path": "action_result.parameter.event_ids",
                     "data_type": "string",
                     "contains": [
@@ -1001,6 +1033,13 @@
                     ],
                     "example_values": [
                         "1542751027.136723+0"
+                    ]
+                },
+                {
+                    "data_path": "action_result.parameter.integer_disposition",
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
                     ]
                 },
                 {
@@ -1262,16 +1301,8 @@
                 "input_file": "wheels/py3/pyparsing-3.1.4-py3-none-any.whl"
             },
             {
-                "module": "pytz",
-                "input_file": "wheels/shared/pytz-2021.1-py2.py3-none-any.whl"
-            },
-            {
-                "module": "simplejson",
-                "input_file": "wheels/py36/simplejson-3.17.2-cp36-cp36m-manylinux2010_x86_64.manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
-            },
-            {
                 "module": "splunk_sdk",
-                "input_file": "wheels/py3/splunk_sdk-2.0.1-py3-none-any.whl"
+                "input_file": "wheels/py3/splunk_sdk-2.1.0-py3-none-any.whl"
             }
         ]
     },
@@ -1283,19 +1314,11 @@
             },
             {
                 "module": "packaging",
-                "input_file": "wheels/py3/packaging-24.1-py3-none-any.whl"
-            },
-            {
-                "module": "pytz",
-                "input_file": "wheels/shared/pytz-2021.1-py2.py3-none-any.whl"
-            },
-            {
-                "module": "simplejson",
-                "input_file": "wheels/py39/simplejson-3.17.2-cp39-cp39-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
+                "input_file": "wheels/py3/packaging-24.2-py3-none-any.whl"
             },
             {
                 "module": "splunk_sdk",
-                "input_file": "wheels/py3/splunk_sdk-2.0.1-py3-none-any.whl"
+                "input_file": "wheels/py3/splunk_sdk-2.1.0-py3-none-any.whl"
             }
         ]
     }

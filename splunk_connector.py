@@ -1,6 +1,6 @@
 # File: splunk_connector.py
 #
-# Copyright (c) 2016-2024 Splunk Inc.
+# Copyright (c) 2016-2025 Splunk Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
 #
 
 import hashlib
+import json
 import os
 import re
 import ssl
@@ -22,37 +23,27 @@ import sys
 import tempfile
 import time
 import traceback
-from builtins import map  # noqa
-from builtins import range  # noqa
-from builtins import str  # noqa
-from datetime import datetime
+from datetime import datetime, timezone
 from io import BytesIO
 from typing import Optional
-from urllib.error import HTTPError as UrllibHTTPError  # noqa
-from urllib.error import URLError  # noqa
-from urllib.parse import urlencode, urlparse  # noqa
-from urllib.request import ProxyHandler  # noqa
-from urllib.request import Request  # noqa
-from urllib.request import build_opener  # noqa
-from urllib.request import install_opener  # noqa
-from urllib.request import urlopen  # noqa
+from urllib.error import HTTPError as UrllibHTTPError
+from urllib.error import URLError
+from urllib.request import ProxyHandler, Request, build_opener, install_opener, urlopen
+from zoneinfo import ZoneInfo
 
 import phantom.app as phantom
 import phantom.rules as soar_vault
-import pytz
 import requests
-import simplejson as json
 import splunklib.binding as splunk_binding
 import splunklib.client as splunk_client
 import splunklib.results as splunk_results
 import xmltodict
-from bs4 import BeautifulSoup, UnicodeDammit
+from bs4 import BeautifulSoup
+from bs4.dammit import UnicodeDammit
 from dateutil.parser import ParserError
 from dateutil.parser import parse as dateutil_parse
-from past.utils import old_div  # noqa
 from phantom.base_connector import BaseConnector
 from phantom.vault import Vault
-from pytz import timezone
 from splunklib.binding import HTTPError
 
 import splunk_consts as consts
@@ -81,6 +72,7 @@ class SplunkConnector(BaseConnector):
         self.port = None
         self.max_container = None
         self._splunk_status_dict = None
+        self._splunk_disposition_dict = None
         self.container_update_state = None
         self.remove_empty_cef = None
         self.sleeptime_in_requests = None
@@ -703,32 +695,32 @@ class SplunkConnector(BaseConnector):
 
         return stats
 
-    def _set_splunk_status_dict(self, action_result):
+    def _set_splunk_status_dict(self, action_result, type):
+
+        splunk_dict = {}
 
         endpoint = "alerts/reviewstatuses?count=-1&output_mode=json"
         ret_val, resp_data = self._make_rest_call_retry(action_result, endpoint, {}, method=requests.get)
 
         if phantom.is_fail(ret_val) or not resp_data:
-            return False
+            return splunk_dict
 
-        self._splunk_status_dict = {}
         entry = resp_data.get("entry")
 
         if not entry:
-            return False
+            return splunk_dict
 
         for data in entry:
-            status_id = data.get("name")
-            status_name = data.get("content", {}).get("label")
+            object_id = data.get("name").split(":")[-1]
+            object_name = data.get("content", {}).get("label")
             is_enabled = str(data.get("content", {}).get("disabled")) == "0"
-            is_notable_status_type = data.get("content", {}).get("status_type") == "notable"
-            if status_id and status_id.isdigit() and status_name and is_enabled and is_notable_status_type:
-                self._splunk_status_dict[status_name.lower()] = int(status_id)
+            is_allowed_type = data.get("content", {}).get("status_type") == type
+            if object_id and object_id.isdigit() and object_name and is_enabled and is_allowed_type:
+                if type == "notable":
+                    object_name = object_name.lower()
+                splunk_dict[object_name] = int(object_id)
 
-        if not self._splunk_status_dict:
-            return False
-
-        return True
+        return splunk_dict
 
     def _update_event(self, param):
 
@@ -744,13 +736,21 @@ class SplunkConnector(BaseConnector):
         ret_val, integer_status = self._validate_integer(
             action_result, param.get("integer_status"), consts.SPLUNK_INT_STATUS_KEY, allow_zero=True
         )
+
+        if phantom.is_fail(ret_val):
+            return action_result.get_status()
+
+        ret_val, integer_disposition = self._validate_integer(
+            action_result, param.get("integer_disposition"), consts.SPLUNK_INT_DISPOSITION_KEY, allow_zero=True
+        )
+
         if phantom.is_fail(ret_val):
             return action_result.get_status()
 
         comment = param.get(consts.SPLUNK_JSON_COMMENT)
         urgency = param.get(consts.SPLUNK_JSON_URGENCY)
         wait_for_confirmation = param.get("wait_for_confirmation", False)
-
+        disposition = param.get("disposition", "")
         regexp = re.compile(r"\+\d*(\.\d+)?[\"$]")
         if regexp.search(json.dumps(ids)):
             self.send_progress("Interpreting the event ID as an SID + RID combo; querying for the actual event_id...")
@@ -760,12 +760,18 @@ class SplunkConnector(BaseConnector):
                 return action_result.set_status(phantom.APP_ERROR, "Unable to find underlying event_id from SID + RID combo")
             ids = event_id
 
-        if not comment and not status and not urgency and not owner and integer_status is None:
+        if not any([comment, status, urgency, owner, disposition]) and integer_status is None and integer_disposition is None:
             return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_NEED_PARAM)
 
         if status or integer_status is not None:
-            if not self._set_splunk_status_dict(action_result):
+            self._splunk_status_dict = self._set_splunk_status_dict(action_result, "notable")
+            if not self._splunk_status_dict:
                 return action_result.set_status(phantom.APP_ERROR, "Error occurred while fetching Splunk event status")
+
+        if disposition or integer_disposition is not None:
+            self._splunk_disposition_dict = self._set_splunk_status_dict(action_result, "disposition")
+            if not self._splunk_disposition_dict:
+                return action_result.set_status(phantom.APP_ERROR, "Error occurred while fetching Splunk event disposition")
 
         self.debug_print("Attempting to create a connection")
 
@@ -797,8 +803,6 @@ class SplunkConnector(BaseConnector):
         # 3. Update the provided Events ID
         request_body = {"ruleUIDs": ids}
 
-        if owner:
-            request_body["newOwner"] = owner
         if integer_status is not None:
             if int(integer_status) not in list(self._splunk_status_dict.values()):
                 return action_result.set_status(
@@ -816,10 +820,29 @@ class SplunkConnector(BaseConnector):
                 request_body["status"] = status
             else:
                 request_body["status"] = self._splunk_status_dict[status]
-        if urgency:
-            request_body["urgency"] = urgency
-        if comment:
-            request_body["comment"] = comment
+
+        if integer_disposition is not None:
+            if int(integer_disposition) not in self._splunk_disposition_dict.values():
+                self.debug_print(f"int disposition: {self._splunk_disposition_dict}")
+                return action_result.set_status(
+                    phantom.APP_ERROR,
+                    "Please provide a valid value in 'integer_disposition' action\
+                     parameter. Valid values: {}".format(
+                        (", ".join(map(str, self._splunk_disposition_dict.values())))
+                    ),
+                )
+            request_body["disposition"] = consts.SPLUNK_DISPOSITION_QUERY_FORMAT.format(integer_disposition)
+        elif disposition:
+            if disposition not in self._splunk_disposition_dict:
+                if not disposition.isdigit():
+                    return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_BAD_DISPOSITION)
+                request_body["disposition"] = consts.SPLUNK_DISPOSITION_QUERY_FORMAT.format(disposition)
+            else:
+                request_body["disposition"] = consts.SPLUNK_DISPOSITION_QUERY_FORMAT.format(self._splunk_disposition_dict[disposition])
+
+        param_mapping = {"urgency": urgency, "comment": comment, "newOwner": owner}
+
+        request_body.update({k: v for k, v in param_mapping.items() if v})
 
         self.debug_print("Updating the event")
 
@@ -1055,7 +1078,7 @@ class SplunkConnector(BaseConnector):
             # convert to Splunk SOAR timestamp format
             # '%Y-%m-%dT%H:%M:%S.%fZ
             datetime_obj = dateutil_parse(start_time)
-            return datetime_obj.astimezone(pytz.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+            return datetime_obj.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
         except ParserError as parse_err:
             self._dump_error_log(parse_err, "ParserError while parsing _time.")
             error_text = consts.SPLUNK_EXCEPTION_ERR_MESSAGE.format(
@@ -1134,6 +1157,7 @@ class SplunkConnector(BaseConnector):
         po = param.get(consts.SPLUNK_JSON_PARSE_ONLY, False)
         attach_result = param.get(consts.SPLUNK_JSON_ATTACH_RESULT, False)
         search_mode = param.get(consts.SPLUNK_JSON_SEARCH_MODE, consts.SPLUNK_SEARCH_MODE_SMART)
+        add_raw = param.get(consts.SPLUNK_JSON_ADD_RAW_DATA)
 
         # More info on valid time modifier at https://docs.splunk.com/Documentation/Splunk/8.2.5/SearchReference/SearchTimeModifiers # noqa
         start_time = phantom.get_value(param, consts.SPLUNK_JSON_START_TIME)
@@ -1159,7 +1183,9 @@ class SplunkConnector(BaseConnector):
             return action_result.set_status(phantom.APP_ERROR, "Error occurred while parsing the search query")
 
         self.debug_print("search_query: {0}".format(search_query))
-        return self._run_query(search_query, action_result, attach_result=attach_result, kwargs_create=kwargs, parse_only=po)
+        return self._run_query(
+            search_query, action_result, attach_result=attach_result, kwargs_create=kwargs, parse_only=po, add_raw_field=add_raw
+        )
 
     def _get_tz_str_from_epoch(self, time_format_str, epoch_milli):
 
@@ -1167,10 +1193,10 @@ class SplunkConnector(BaseConnector):
         config = self.get_config()
         device_tz_sting = config[consts.SPLUNK_JSON_TIMEZONE]
 
-        to_tz = timezone(device_tz_sting)
+        to_tz = ZoneInfo(device_tz_sting)
 
-        utc_dt = datetime.utcfromtimestamp(old_div(epoch_milli / 1000)).replace(tzinfo=pytz.utc)
-        to_dt = to_tz.normalize(utc_dt.astimezone(to_tz))
+        utc_dt = datetime.fromtimestamp(epoch_milli // 1000, tz=timezone.utc)
+        to_dt = utc_dt.astimezone(to_tz)
 
         # return utc_dt.strftime('%Y-%m-%d %H:%M:%S')
         return to_dt.strftime(time_format_str)
@@ -1260,7 +1286,7 @@ class SplunkConnector(BaseConnector):
         self.save_progress(consts.SPLUNK_SUCCESS_CONNECTIVITY_TEST)
         return action_result.set_status(phantom.APP_SUCCESS, consts.SPLUNK_SUCCESS_CONNECTIVITY_TEST)
 
-    def _run_query(self, search_query, action_result, attach_result=False, kwargs_create=dict(), parse_only=True):
+    def _run_query(self, search_query, action_result, attach_result=False, kwargs_create=dict(), parse_only=True, add_raw_field=True):
         """Function that executes the query on splunk"""
         self.debug_print("Start run query")
         RETRY_LIMIT = self.retry_count
@@ -1349,6 +1375,9 @@ class SplunkConnector(BaseConnector):
 
             if not isinstance(result, dict):
                 continue
+
+            if not add_raw_field:
+                result.pop("_raw", None)
 
             action_result.add_data(result)
 
