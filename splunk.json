@@ -43,7 +43,7 @@
     "product_name": "Splunk Enterprise",
     "product_vendor": "Splunk Inc.",
     "product_version_regex": ".*",
-    "min_phantom_version": "6.2.1",
+    "min_phantom_version": "6.3.0",
     "fips_compliant": true,
     "python_version": "3",
     "latest_tested_versions": [
@@ -52,7 +52,7 @@
     ],
     "logo": "logo_splunk.svg",
     "logo_dark": "logo_splunk_dark.svg",
-    "license": "Copyright (c) 2016-2024 Splunk Inc.",
+    "license": "Copyright (c) 2016-2025 Splunk Inc.",
     "configuration": {
         "device": {
             "description": "Device IP/Hostname",
