@@ -917,6 +917,7 @@ class SplunkConnector(BaseConnector):
         search_string = config.get("on_poll_query")
         po = config.get("on_poll_parse_only", False)
         include_cim_fields = config.get("include_cim_fields", False)
+        use_event_id_sdi = config.get("use_event_id_sdi", False)
 
         if not search_string:
             self.save_progress("Need to specify Query String to use polling")
@@ -1002,16 +1003,23 @@ class SplunkConnector(BaseConnector):
                     # Add original CIM fields if option is checked
                     cef.update({k: v} if include_cim_fields else {})
 
-            input_str = json.dumps(item)
-            input_str = UnicodeDammit(input_str).unicode_markup.encode("utf-8")
-
-            fips_enabled = self._get_fips_enabled()
-            # if fips is not enabled, we should continue with our existing md5 usage for generating SDIs
-            # to not impact existing customers
-            if not fips_enabled:
-                sdi = hashlib.md5(input_str).hexdigest()  # nosemgrep
+            # If the boolean in the asset is checked, attempt to use event_id as the source data identifier
+            # If event_id is missing from event, print warning and use hash SDI
+            if use_event_id_sdi and "event_id" in item:
+                sdi = item["event_id"]
             else:
-                sdi = hashlib.sha256(input_str).hexdigest()
+                if use_event_id_sdi and "event_id" not in item:
+                    self.save_progress("Use event_id as SDI is activated in the asset but event_id is missing from this event.")
+                    self.save_progress("Defaulting to event hash")
+                input_str = json.dumps(item)
+                input_str = UnicodeDammit(input_str).unicode_markup.encode("utf-8")
+                fips_enabled = self._get_fips_enabled()
+                # if fips is not enabled, we should continue with our existing md5 usage for generating SDIs
+                # to not impact existing customers
+                if not fips_enabled:
+                    sdi = hashlib.md5(input_str).hexdigest()  # nosemgrep
+                else:
+                    sdi = hashlib.sha256(input_str).hexdigest()
 
             severity = self._get_splunk_severity(item)
             spl_event_start = self._get_event_start(item.get("_time"))

@@ -159,6 +159,10 @@ For sending events to Splunk Platform, the User configured in the asset would re
     -   If the on_poll_display parameter is not provided, then all the fields that are extracted
         from the events will be ingested in the respective artifacts
     -   Users can provide comma-separated field names. Example: field1, field2, field3
+-   use_event_id_sdi:
+    -   Use the event_id as the source data identifier instead of the full event hash
+    -   If checked, the event_id as SDI will cause updated versions of the event to be ingested into the original container instead of a new one
+    -   If checked but event_id is missing, the event hash will be used as a default
 -   If the on_poll_query(query to use with On Poll) parameter is not provided, then an error message
     will be returned
 -   If the on_poll_command(command for the query to use with On Poll) parameter is not provided and
