@@ -1368,8 +1368,8 @@ class SplunkConnector(BaseConnector):
             if not isinstance(result, dict):
                 continue
 
-            if not add_raw_field and result.get("_raw"):
-                del result["_raw"]
+            if not add_raw_field:
+                result.pop("_raw", None)
 
             action_result.add_data(result)
 
