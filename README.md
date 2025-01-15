@@ -2,7 +2,7 @@
 # Splunk
 
 Publisher: Splunk  
-Connector Version: 2.19.0  
+Connector Version: 2.20.0  
 Product Vendor: Splunk Inc.  
 Product Name: Splunk Enterprise  
 Product Version Supported (regex): ".\*"  
@@ -159,10 +159,6 @@ For sending events to Splunk Platform, the User configured in the asset would re
     -   If the on_poll_display parameter is not provided, then all the fields that are extracted
         from the events will be ingested in the respective artifacts
     -   Users can provide comma-separated field names. Example: field1, field2, field3
--   use_event_id_sdi:
-    -   Use the event_id as the source data identifier instead of the full event hash
-    -   If checked, the event_id as SDI will cause updated versions of the event to be ingested into the original container instead of a new one
-    -   If checked but event_id is missing, the event hash will be used as a default
 -   If the on_poll_query(query to use with On Poll) parameter is not provided, then an error message
     will be returned
 -   If the on_poll_command(command for the query to use with On Poll) parameter is not provided and
@@ -368,6 +364,7 @@ VARIABLE | REQUIRED | TYPE | DESCRIPTION
 **sleeptime_in_requests** |  optional  | numeric | The time to wait for next REST call (max 120 seconds)
 **include_cim_fields** |  optional  | boolean | Option to keep original Splunk CIM together with SOAR CEF fields
 **splunk_job_timeout** |  optional  | numeric | The duration in seconds to wait before a scheduled Splunk job times out
+**use_event_id_sdi** |  optional  | boolean | Option to use the event_id field value as the source data identifier instead of the full event hash
 
 ### Supported Actions  
 [test connectivity](#action-test-connectivity) - Validate the asset configuration for connectivity. This action logs into the device to check the connection and credentials  
