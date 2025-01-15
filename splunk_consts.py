@@ -1,6 +1,6 @@
 # File: splunk_consts.py
 #
-# Copyright (c) 2016-2024 Splunk Inc.
+# Copyright (c) 2016-2025 Splunk Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -59,6 +59,7 @@ SPLUNK_PROG_JOB_ID_DONE_RETRIEVING_RESULTS = "Retrieving results for job id '{jo
 # Json keys
 SPLUNK_JSON_COMMAND = "command"
 SPLUNK_JSON_PARSE_ONLY = "parse_only"
+SPLUNK_JSON_ADD_RAW_DATA = "add_raw_field"
 SPLUNK_JSON_HOST = "host"
 SPLUNK_JSON_DATA = "data"
 SPLUNK_JSON_INDEX = "index"
