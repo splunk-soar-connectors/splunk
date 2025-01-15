@@ -442,7 +442,7 @@
                     "default": false
                 },
                 "add_raw_field": {
-                    "description": "Indest _raw field data",
+                    "description": "Ingest _raw field data",
                     "data_type": "boolean",
                     "order": 4,
                     "default": true
