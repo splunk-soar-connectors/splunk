@@ -460,7 +460,7 @@ PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 **query** |  required  | Query to run (in Splunk Processing Language) | string |  `splunk query` 
 **display** |  optional  | Display fields (comma-separated) | string | 
 **parse_only** |  optional  | Parse only | boolean | 
-**add_raw_field** |  optional  | Indest _raw field data | boolean | 
+**add_raw_field** |  optional  | Ingest _raw field data | boolean | 
 **attach_result** |  optional  | Attach result to the vault | boolean | 
 **start_time** |  optional  | Earliest time modifier | string | 
 **end_time** |  optional  | Latest time modifier | string | 
