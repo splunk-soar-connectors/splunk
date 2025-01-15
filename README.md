@@ -1,12 +1,12 @@
 [comment]: # "Auto-generated SOAR connector documentation"
 # Splunk
 
-Publisher: Splunk
-Connector Version: 2.19.0
-Product Vendor: Splunk Inc.
-Product Name: Splunk Enterprise
-Product Version Supported (regex): ".\*"
-Minimum Product Version: 6.2.1
+Publisher: Splunk  
+Connector Version: 2.19.0  
+Product Vendor: Splunk Inc.  
+Product Name: Splunk Enterprise  
+Product Version Supported (regex): ".\*"  
+Minimum Product Version: 6.3.0  
 
 This app integrates with Splunk to update data on the device, in addition to investigate and ingestion actions
 
@@ -365,30 +365,30 @@ VARIABLE | REQUIRED | TYPE | DESCRIPTION
 **include_cim_fields** |  optional  | boolean | Option to keep original Splunk CIM together with SOAR CEF fields
 **splunk_job_timeout** |  optional  | numeric | The duration in seconds to wait before a scheduled Splunk job times out
 
-### Supported Actions
-[test connectivity](#action-test-connectivity) - Validate the asset configuration for connectivity. This action logs into the device to check the connection and credentials
-[get host events](#action-get-host-events) - Get events pertaining to a host that have occurred in the last 'N' days
-[on poll](#action-on-poll) - Ingest logs from the Splunk instance
-[run query](#action-run-query) - Run a search query on the Splunk device. Please escape any quotes that are part of the query string
-[update event](#action-update-event) - Update a notable event
-[post data](#action-post-data) - Post data to Splunk
+### Supported Actions  
+[test connectivity](#action-test-connectivity) - Validate the asset configuration for connectivity. This action logs into the device to check the connection and credentials  
+[get host events](#action-get-host-events) - Get events pertaining to a host that have occurred in the last 'N' days  
+[on poll](#action-on-poll) - Ingest logs from the Splunk instance  
+[run query](#action-run-query) - Run a search query on the Splunk device. Please escape any quotes that are part of the query string  
+[update event](#action-update-event) - Update a notable event  
+[post data](#action-post-data) - Post data to Splunk  
 
 ## action: 'test connectivity'
 Validate the asset configuration for connectivity. This action logs into the device to check the connection and credentials
 
-Type: **test**
+Type: **test**  
 Read only: **True**
 
 #### Action Parameters
 No parameters are required for this action
 
 #### Action Output
-No Output
+No Output  
 
 ## action: 'get host events'
 Get events pertaining to a host that have occurred in the last 'N' days
 
-Type: **investigate**
+Type: **investigate**  
 Read only: **True**
 
 <ul><li>The <b>last_n_days</b> parameter must be greater than 0.</li><li>The action will search for the events of the hostname (provided in the 'ip_hostname' parameter) in the default index configured on the Splunk instance.</li></ul>
@@ -396,39 +396,39 @@ Read only: **True**
 #### Action Parameters
 PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 --------- | -------- | ----------- | ---- | --------
-**ip_hostname** |  required  | Hostname/IP to search the events of | string |  `ip`  `host name`
-**last_n_days** |  optional  | Number of days ago | numeric |
+**ip_hostname** |  required  | Hostname/IP to search the events of | string |  `ip`  `host name` 
+**last_n_days** |  optional  | Number of days ago | numeric | 
 
 #### Action Output
 DATA PATH | TYPE | CONTAINS | EXAMPLE VALUES
 --------- | ---- | -------- | --------------
-action_result.status | string |  |   success  failed
-action_result.parameter.ip_hostname | string |  `ip`  `host name`  |   test_host
-action_result.parameter.last_n_days | numeric |  |   2
-action_result.data.\*._bkt | string |  |
-action_result.data.\*._cd | string |  |
-action_result.data.\*._indextime | string |  |
-action_result.data.\*._raw | string |  |
-action_result.data.\*._serial | string |  |
-action_result.data.\*._si | string |  |
-action_result.data.\*._sourcetype | string |  |
-action_result.data.\*._time | string |  |
-action_result.data.\*.host | string |  `host name`  |
-action_result.data.\*.index | string |  |
-action_result.data.\*.linecount | string |  |
-action_result.data.\*.source | string |  |
-action_result.data.\*.sourcetype | string |  |
-action_result.data.\*.splunk_server | string |  `host name`  |
-action_result.summary.sid | string |  |   1612177958.977510
-action_result.summary.total_events | numeric |  |
-action_result.message | string |  |   Sid: 1621953772.25264, Total events: 1
-summary.total_objects | numeric |  |   1
-summary.total_objects_successful | numeric |  |   1
+action_result.status | string |  |   success  failed 
+action_result.parameter.ip_hostname | string |  `ip`  `host name`  |   test_host 
+action_result.parameter.last_n_days | numeric |  |   2 
+action_result.data.\*._bkt | string |  |  
+action_result.data.\*._cd | string |  |  
+action_result.data.\*._indextime | string |  |  
+action_result.data.\*._raw | string |  |  
+action_result.data.\*._serial | string |  |  
+action_result.data.\*._si | string |  |  
+action_result.data.\*._sourcetype | string |  |  
+action_result.data.\*._time | string |  |  
+action_result.data.\*.host | string |  `host name`  |  
+action_result.data.\*.index | string |  |  
+action_result.data.\*.linecount | string |  |  
+action_result.data.\*.source | string |  |  
+action_result.data.\*.sourcetype | string |  |  
+action_result.data.\*.splunk_server | string |  `host name`  |  
+action_result.summary.sid | string |  |   1612177958.977510 
+action_result.summary.total_events | numeric |  |  
+action_result.message | string |  |   Sid: 1621953772.25264, Total events: 1 
+summary.total_objects | numeric |  |   1 
+summary.total_objects_successful | numeric |  |   1   
 
 ## action: 'on poll'
 Ingest logs from the Splunk instance
 
-Type: **ingest**
+Type: **ingest**  
 Read only: **True**
 
 The configured query is what will be used during ingestion. If you only wish to show certain fields, you can specify these as a comma-separated list in the configuration. If left unspecified, all available fields will be added to each artifact. When limiting the number of events to ingest, it will ingest the most recent events. To avoid duplication in polling, append '| fields \*' to the query.<br><br>
@@ -436,19 +436,19 @@ The configured query is what will be used during ingestion. If you only wish to 
 #### Action Parameters
 PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 --------- | -------- | ----------- | ---- | --------
-**container_id** |  optional  | Parameter ignored in this app | numeric |
-**start_time** |  optional  | Parameter ignored in this app | numeric |
-**end_time** |  optional  | Parameter ignored in this app | numeric |
-**container_count** |  optional  | Maximum number of events to query for | numeric |
-**artifact_count** |  optional  | Parameter ignored in this app | numeric |
+**container_id** |  optional  | Parameter ignored in this app | numeric | 
+**start_time** |  optional  | Parameter ignored in this app | numeric | 
+**end_time** |  optional  | Parameter ignored in this app | numeric | 
+**container_count** |  optional  | Maximum number of events to query for | numeric | 
+**artifact_count** |  optional  | Parameter ignored in this app | numeric | 
 
 #### Action Output
-No Output
+No Output  
 
 ## action: 'run query'
 Run a search query on the Splunk device. Please escape any quotes that are part of the query string
 
-Type: **investigate**
+Type: **investigate**  
 Read only: **True**
 
 By default, the widget for the &quot;run query&quot; action will show the host, time, and raw fields. If you would like to see specific fields parsed out, they can be listed in a comma-separated format in the &quot;display&quot; parameter.<br><br>Please keep in mind that Splunk does not always return all possible fields. Splunk may not return fields that are calculated or not present in the event.<br><br>To work around this you can force Splunk to return specific fields by using the &quot;fields&quot;. By appending &quot;| fields + \*&quot; to your query, Splunk will return every field. You can replace the asterisk with a comma-separated list of fields to only return specific fields.<br><br>Finally, some searches (such as those based on data models) can contain name-spaced fields. If a data model called &quot;my_model&quot; with a search &quot;my_search&quot; has a field &quot;hash&quot; then the field will be named &quot;my_search.hash&quot; and that is what must be used in the Splunk fields command and the display parameter. If using a non-global lookup file that is only accessible by a specific Splunk App, make sure to note the specific Splunk App in your asset configuration. The <b>parse_only</b> parameter, if <b>True</b>, it disables the expansion of search due to evaluation of sub-searches, time term expansion, lookups, tags, eventtypes, and sourcetype alias. This parameter is used for the validation of the Splunk query before fetching the results.<br><br>Learn more below:<ul><li><a href='https://docs.splunk.com/Documentation/Splunk/8.2.5/SearchReference/SearchTimeModifiers' target='_blank'>Time modifiers</a></li><li><a href='https://docs.splunk.com/Documentation/Splunk/latest/RESTREF/RESTsearch#search.2Fjobs' target='_blank'>Splunk REST APIs</a></li><li><a href='https://dev.splunk.com/enterprise/docs/devtools/python/sdk-python/howtousesplunkpython/howtorunsearchespython/' target='_blank'>Splunk SDK</a></li></ul>
@@ -456,86 +456,86 @@ By default, the widget for the &quot;run query&quot; action will show the host, 
 #### Action Parameters
 PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 --------- | -------- | ----------- | ---- | --------
-**command** |  optional  | Beginning command (in Splunk Processing Language) | string |
-**query** |  required  | Query to run (in Splunk Processing Language) | string |  `splunk query`
-**display** |  optional  | Display fields (comma-separated) | string |
-**parse_only** |  optional  | Parse only | boolean |
-**add_raw_field** |  optional  | Indest _raw field data | boolean |
-**attach_result** |  optional  | Attach result to the vault | boolean |
-**start_time** |  optional  | Earliest time modifier | string |
-**end_time** |  optional  | Latest time modifier | string |
-**search_mode** |  optional  | Search mode | string |
+**command** |  optional  | Beginning command (in Splunk Processing Language) | string | 
+**query** |  required  | Query to run (in Splunk Processing Language) | string |  `splunk query` 
+**display** |  optional  | Display fields (comma-separated) | string | 
+**parse_only** |  optional  | Parse only | boolean | 
+**add_raw_field** |  optional  | Indest _raw field data | boolean | 
+**attach_result** |  optional  | Attach result to the vault | boolean | 
+**start_time** |  optional  | Earliest time modifier | string | 
+**end_time** |  optional  | Latest time modifier | string | 
+**search_mode** |  optional  | Search mode | string | 
 
 #### Action Output
 DATA PATH | TYPE | CONTAINS | EXAMPLE VALUES
 --------- | ---- | -------- | --------------
-action_result.status | string |  |   success  failed
-action_result.parameter.attach_result | boolean |  |   True  False
-action_result.parameter.command | string |  |   savedsearch
-action_result.parameter.display | string |  |   _time  index
-action_result.parameter.end_time | string |  |   -2d  2022-03-18T16:12:09.130+00:00
-action_result.parameter.parse_only | boolean |  |   True  False
-action_result.parameter.query | string |  `splunk query`  |   "Send to test"
-action_result.parameter.search_mode | string |  |   smart
-action_result.parameter.start_time | string |  |   -2d  2022-03-18T16:12:07.130+00:00
-action_result.data.\*._bkt | string |  |
-action_result.data.\*._cd | string |  |
-action_result.data.\*._indextime | string |  |
-action_result.data.\*._key | string |  |   user
-action_result.data.\*._kv | string |  |   1
-action_result.data.\*._origtime | string |  |   1659398400
-action_result.data.\*._raw | string |  |
-action_result.data.\*._serial | string |  |
-action_result.data.\*._si | string |  |
-action_result.data.\*._sourcetype | string |  |
-action_result.data.\*._subsecond | string |  |   .427
-action_result.data.\*._time | string |  |
-action_result.data.\*._value | string |  |   184
-action_result.data.\*.a | string |  |   abc
-action_result.data.\*.content.app | string |  |   search
-action_result.data.\*.content.host | string |  |   test
-action_result.data.\*.content.info | string |  |   granted
-action_result.data.\*.content.search | string |  |   index = main
-action_result.data.\*.content.search_type | string |  |   adhoc
-action_result.data.\*.content.sid | string |  |   1621953839.25275
-action_result.data.\*.content.source | string |  |   source
-action_result.data.\*.content.sourcetype | string |  |   source
-action_result.data.\*.content.uri | string |  |   /en-US/app/search/search?q=search%20index%3Dmain%20%7C%20head%2010&sid=1651356328.532450&display.page.search.mode=smart&dispatch.sample_ratio=1&workload_pool=&earliest=-24h%40h&latest=now
-action_result.data.\*.content.view | string |  |   search
-action_result.data.\*.count | string |  |   3058733
-action_result.data.\*.count(host) | string |  |   28
-action_result.data.\*.event | string |  |   {"data": {"count": 3, "size": 112, "transform": "access_app_tracker"}, "version": "1.0"}
-action_result.data.\*.host | string |  `host name`  |   10.1.67.187:8088
-action_result.data.\*.index | string |  |
-action_result.data.\*.is_Acceleration_Jobs | string |  |   0
-action_result.data.\*.is_Adhoc_Jobs | string |  |   1
-action_result.data.\*.is_Failed_Jobs | string |  |   0
-action_result.data.\*.is_Realtime_Jobs | string |  |   0
-action_result.data.\*.is_Scheduled_Jobs | string |  |   0
-action_result.data.\*.is_Subsearch_Jobs | string |  |   0
-action_result.data.\*.is_not_Acceleration_Jobs | string |  |   1
-action_result.data.\*.is_not_Adhoc_Jobs | string |  |   0
-action_result.data.\*.is_not_Failed_Jobs | string |  |   1
-action_result.data.\*.is_not_Realtime_Jobs | string |  |   1
-action_result.data.\*.is_not_Scheduled_Jobs | string |  |   1
-action_result.data.\*.is_not_Subsearch_Jobs | string |  |   1
-action_result.data.\*.linecount | string |  |
-action_result.data.\*.source | string |  |
-action_result.data.\*.sourcetype | string |  |
-action_result.data.\*.spent | string |  |   223
-action_result.data.\*.splunk_server | string |  `host name`  |
-action_result.data.\*.user | string |  |   admin
-action_result.data.\*.values(source) | string |  |   /opt/splunk/var/log/splunk/scheduler.log
-action_result.summary.sid | string |  |   1612177958.977510
-action_result.summary.total_events | numeric |  |   2
-action_result.message | string |  |   Sid: 1612177958.977510, Total events: 2
-summary.total_objects | numeric |  |   1
-summary.total_objects_successful | numeric |  |   1
+action_result.status | string |  |   success  failed 
+action_result.parameter.attach_result | boolean |  |   True  False 
+action_result.parameter.command | string |  |   savedsearch 
+action_result.parameter.display | string |  |   _time  index 
+action_result.parameter.end_time | string |  |   -2d  2022-03-18T16:12:09.130+00:00 
+action_result.parameter.parse_only | boolean |  |   True  False 
+action_result.parameter.query | string |  `splunk query`  |   "Send to test" 
+action_result.parameter.search_mode | string |  |   smart 
+action_result.parameter.start_time | string |  |   -2d  2022-03-18T16:12:07.130+00:00 
+action_result.data.\*._bkt | string |  |  
+action_result.data.\*._cd | string |  |  
+action_result.data.\*._indextime | string |  |  
+action_result.data.\*._key | string |  |   user 
+action_result.data.\*._kv | string |  |   1 
+action_result.data.\*._origtime | string |  |   1659398400 
+action_result.data.\*._raw | string |  |  
+action_result.data.\*._serial | string |  |  
+action_result.data.\*._si | string |  |  
+action_result.data.\*._sourcetype | string |  |  
+action_result.data.\*._subsecond | string |  |   .427 
+action_result.data.\*._time | string |  |  
+action_result.data.\*._value | string |  |   184 
+action_result.data.\*.a | string |  |   abc 
+action_result.data.\*.content.app | string |  |   search 
+action_result.data.\*.content.host | string |  |   test 
+action_result.data.\*.content.info | string |  |   granted 
+action_result.data.\*.content.search | string |  |   index = main 
+action_result.data.\*.content.search_type | string |  |   adhoc 
+action_result.data.\*.content.sid | string |  |   1621953839.25275 
+action_result.data.\*.content.source | string |  |   source 
+action_result.data.\*.content.sourcetype | string |  |   source 
+action_result.data.\*.content.uri | string |  |   /en-US/app/search/search?q=search%20index%3Dmain%20%7C%20head%2010&sid=1651356328.532450&display.page.search.mode=smart&dispatch.sample_ratio=1&workload_pool=&earliest=-24h%40h&latest=now 
+action_result.data.\*.content.view | string |  |   search 
+action_result.data.\*.count | string |  |   3058733 
+action_result.data.\*.count(host) | string |  |   28 
+action_result.data.\*.event | string |  |   {"data": {"count": 3, "size": 112, "transform": "access_app_tracker"}, "version": "1.0"} 
+action_result.data.\*.host | string |  `host name`  |   10.1.67.187:8088 
+action_result.data.\*.index | string |  |  
+action_result.data.\*.is_Acceleration_Jobs | string |  |   0 
+action_result.data.\*.is_Adhoc_Jobs | string |  |   1 
+action_result.data.\*.is_Failed_Jobs | string |  |   0 
+action_result.data.\*.is_Realtime_Jobs | string |  |   0 
+action_result.data.\*.is_Scheduled_Jobs | string |  |   0 
+action_result.data.\*.is_Subsearch_Jobs | string |  |   0 
+action_result.data.\*.is_not_Acceleration_Jobs | string |  |   1 
+action_result.data.\*.is_not_Adhoc_Jobs | string |  |   0 
+action_result.data.\*.is_not_Failed_Jobs | string |  |   1 
+action_result.data.\*.is_not_Realtime_Jobs | string |  |   1 
+action_result.data.\*.is_not_Scheduled_Jobs | string |  |   1 
+action_result.data.\*.is_not_Subsearch_Jobs | string |  |   1 
+action_result.data.\*.linecount | string |  |  
+action_result.data.\*.source | string |  |  
+action_result.data.\*.sourcetype | string |  |  
+action_result.data.\*.spent | string |  |   223 
+action_result.data.\*.splunk_server | string |  `host name`  |  
+action_result.data.\*.user | string |  |   admin 
+action_result.data.\*.values(source) | string |  |   /opt/splunk/var/log/splunk/scheduler.log 
+action_result.summary.sid | string |  |   1612177958.977510 
+action_result.summary.total_events | numeric |  |   2 
+action_result.message | string |  |   Sid: 1612177958.977510, Total events: 2 
+summary.total_objects | numeric |  |   1 
+summary.total_objects_successful | numeric |  |   1   
 
 ## action: 'update event'
 Update a notable event
 
-Type: **generic**
+Type: **generic**  
 Read only: **False**
 
 The <b>event_ids</b> parameter takes a single event_id (which has the format: 68E08B8B-A853-3A20-9768-231C97B7EE76@@notable@@a4bd78810ae8e03e285e552fac0ddb23) or an adaptive response SID + RID combo (which has the format: scheduler__admin__SplunkEnterpriseSecuritySuite__RMD515d4671130158e57_at_1532441220_4982+0).<br><br>NOTE: This action only works with a notable event from Splunk ES.<br><br>Second Note: The <b>status</b> parameter takes a string value, but custom status values are unique to installation and not available at app creation. The <b>integer_status</b> parameter takes a positive integer denoting the custom value desired. This integer must be determined by the customer on-site. If set it will override <b>status</b>.
@@ -543,43 +543,43 @@ The <b>event_ids</b> parameter takes a single event_id (which has the format: 68
 #### Action Parameters
 PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 --------- | -------- | ----------- | ---- | --------
-**event_ids** |  required  | Event ID to update | string |  `splunk notable event id`
-**owner** |  optional  | New owner for the event | string |
-**status** |  optional  | New status for the event | string |
-**integer_status** |  optional  | Integer representing custom status value | numeric |
-**urgency** |  optional  | New urgency for the event | string |
-**comment** |  optional  | New comment for the event | string |
-**disposition** |  optional  | New disposition field | string |
-**integer_disposition** |  optional  | Integer representing custom disposition value | numeric |
-**wait_for_confirmation** |  optional  | Validate event_ids | boolean |
+**event_ids** |  required  | Event ID to update | string |  `splunk notable event id` 
+**owner** |  optional  | New owner for the event | string | 
+**status** |  optional  | New status for the event | string | 
+**integer_status** |  optional  | Integer representing custom status value | numeric | 
+**urgency** |  optional  | New urgency for the event | string | 
+**comment** |  optional  | New comment for the event | string | 
+**disposition** |  optional  | New disposition field | string | 
+**integer_disposition** |  optional  | Integer representing custom disposition value | numeric | 
+**wait_for_confirmation** |  optional  | Validate event_ids | boolean | 
 
 #### Action Output
 DATA PATH | TYPE | CONTAINS | EXAMPLE VALUES
 --------- | ---- | -------- | --------------
-action_result.status | string |  |   success  failed
-action_result.parameter.comment | string |  |   test comment
-action_result.parameter.disposition | string |  |   unassigned
-action_result.parameter.event_ids | string |  `splunk notable event id`  |   1542751027.136723+0
-action_result.parameter.integer_disposition | numeric |  |   1
-action_result.parameter.integer_status | numeric |  |   1
-action_result.parameter.owner | string |  |   test
-action_result.parameter.status | string |  |   new
-action_result.parameter.urgency | string |  |   low
-action_result.parameter.wait_for_confirmation | boolean |  |   False  True
-action_result.data.\*.failure_count | numeric |  |   0
-action_result.data.\*.message | string |  |   1 event updated successfully
-action_result.data.\*.success | boolean |  |   False  True
-action_result.data.\*.success_count | numeric |  |   1
-action_result.summary.sid | string |  |   1612177958.977510
-action_result.summary.updated_event_id | string |  |   2CF264EE-6016-4F6A-BCC3-4B7251E113F7@@notable@@035142b19c09ab645c6bbfb847e866f4
-action_result.message | string |  |   Updated event id: 2CF264EE-6016-4F6A-BCC3-4B7251E113F7@@notable@@035142b19c09ab645c6bbfb847e866f4
-summary.total_objects | numeric |  |   1
-summary.total_objects_successful | numeric |  |   1
+action_result.status | string |  |   success  failed 
+action_result.parameter.comment | string |  |   test comment 
+action_result.parameter.disposition | string |  |   unassigned 
+action_result.parameter.event_ids | string |  `splunk notable event id`  |   1542751027.136723+0 
+action_result.parameter.integer_disposition | numeric |  |   1 
+action_result.parameter.integer_status | numeric |  |   1 
+action_result.parameter.owner | string |  |   test 
+action_result.parameter.status | string |  |   new 
+action_result.parameter.urgency | string |  |   low 
+action_result.parameter.wait_for_confirmation | boolean |  |   False  True 
+action_result.data.\*.failure_count | numeric |  |   0 
+action_result.data.\*.message | string |  |   1 event updated successfully 
+action_result.data.\*.success | boolean |  |   False  True 
+action_result.data.\*.success_count | numeric |  |   1 
+action_result.summary.sid | string |  |   1612177958.977510 
+action_result.summary.updated_event_id | string |  |   2CF264EE-6016-4F6A-BCC3-4B7251E113F7@@notable@@035142b19c09ab645c6bbfb847e866f4 
+action_result.message | string |  |   Updated event id: 2CF264EE-6016-4F6A-BCC3-4B7251E113F7@@notable@@035142b19c09ab645c6bbfb847e866f4 
+summary.total_objects | numeric |  |   1 
+summary.total_objects_successful | numeric |  |   1   
 
 ## action: 'post data'
 Post data to Splunk
 
-Type: **generic**
+Type: **generic**  
 Read only: **False**
 
 This action creates an event on Splunk with the data included in the <b>data</b> parameter. If not specified the parameters will default to the following:<ul><li><b>host</b> - The IP of the Splunk SOAR instance running the action.</li><li><b>index</b> - The default index configured on the Splunk instance.</li><li><b>source</b> - &quot;Phantom&quot;.</li><li><b>source_type</b> - &quot;Automation/Orchestration Platform&quot;.</li></ul>
@@ -587,23 +587,23 @@ This action creates an event on Splunk with the data included in the <b>data</b>
 #### Action Parameters
 PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 --------- | -------- | ----------- | ---- | --------
-**data** |  required  | Data to post | string |
-**host** |  optional  | Host for event | string |  `ip`  `host name`
-**index** |  optional  | Index to send event to | string |
-**source** |  optional  | Source for event | string |
-**source_type** |  optional  | Type of source for event | string |
+**data** |  required  | Data to post | string | 
+**host** |  optional  | Host for event | string |  `ip`  `host name` 
+**index** |  optional  | Index to send event to | string | 
+**source** |  optional  | Source for event | string | 
+**source_type** |  optional  | Type of source for event | string | 
 
 #### Action Output
 DATA PATH | TYPE | CONTAINS | EXAMPLE VALUES
 --------- | ---- | -------- | --------------
-action_result.status | string |  |   success  failed
-action_result.parameter.data | string |  |   test_data
-action_result.parameter.host | string |  `ip`  `host name`  |   test_host
-action_result.parameter.index | string |  |   main
-action_result.parameter.source | string |  |   test
-action_result.parameter.source_type | string |  |   pb
-action_result.data | string |  |
-action_result.summary | string |  |
-action_result.message | string |  |   Successfully posted the data
-summary.total_objects | numeric |  |   1
-summary.total_objects_successful | numeric |  |   1
+action_result.status | string |  |   success  failed 
+action_result.parameter.data | string |  |   test_data 
+action_result.parameter.host | string |  `ip`  `host name`  |   test_host 
+action_result.parameter.index | string |  |   main 
+action_result.parameter.source | string |  |   test 
+action_result.parameter.source_type | string |  |   pb 
+action_result.data | string |  |  
+action_result.summary | string |  |  
+action_result.message | string |  |   Successfully posted the data 
+summary.total_objects | numeric |  |   1 
+summary.total_objects_successful | numeric |  |   1 
