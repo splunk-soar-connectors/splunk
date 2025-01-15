@@ -337,8 +337,8 @@ ports used by Splunk SOAR.
 8089 is the default port used by Splunk Server.
 
 
-### Configuration Variables
-The below configuration variables are required for this Connector to operate.  These variables are specified when configuring a Splunk Enterprise asset in SOAR.
+### Configuration variables
+This table lists the configuration variables required to operate Splunk. These variables are specified when configuring a Splunk Enterprise asset in Splunk SOAR.
 
 VARIABLE | REQUIRED | TYPE | DESCRIPTION
 -------- | -------- | ---- | -----------
@@ -460,6 +460,7 @@ PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 **query** |  required  | Query to run (in Splunk Processing Language) | string |  `splunk query` 
 **display** |  optional  | Display fields (comma-separated) | string | 
 **parse_only** |  optional  | Parse only | boolean | 
+**add_raw_field** |  optional  | Indest _raw field data | boolean | 
 **attach_result** |  optional  | Attach result to the vault | boolean | 
 **start_time** |  optional  | Earliest time modifier | string | 
 **end_time** |  optional  | Latest time modifier | string | 
