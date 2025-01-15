@@ -1,1 +1,3 @@
 **Unreleased**
+* Added 'use_event_id_sdi' parameter to asset config to allow updated event ingestion into the original container
+* Added parameter in run query action to optionally remove the "_raw" field [PAPP-26864]
