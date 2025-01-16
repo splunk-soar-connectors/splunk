@@ -1,6 +1,6 @@
 # File: splunk_connector.py
 #
-# Copyright (c) 2016-2024 Splunk Inc.
+# Copyright (c) 2016-2025 Splunk Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
 #
 
 import hashlib
+import json
 import os
 import re
 import ssl
@@ -22,37 +23,27 @@ import sys
 import tempfile
 import time
 import traceback
-from builtins import map  # noqa
-from builtins import range  # noqa
-from builtins import str  # noqa
-from datetime import datetime
+from datetime import datetime, timezone
 from io import BytesIO
 from typing import Optional
-from urllib.error import HTTPError as UrllibHTTPError  # noqa
-from urllib.error import URLError  # noqa
-from urllib.parse import urlencode, urlparse  # noqa
-from urllib.request import ProxyHandler  # noqa
-from urllib.request import Request  # noqa
-from urllib.request import build_opener  # noqa
-from urllib.request import install_opener  # noqa
-from urllib.request import urlopen  # noqa
+from urllib.error import HTTPError as UrllibHTTPError
+from urllib.error import URLError
+from urllib.request import ProxyHandler, Request, build_opener, install_opener, urlopen
+from zoneinfo import ZoneInfo
 
 import phantom.app as phantom
 import phantom.rules as soar_vault
-import pytz
 import requests
-import simplejson as json
 import splunklib.binding as splunk_binding
 import splunklib.client as splunk_client
 import splunklib.results as splunk_results
 import xmltodict
-from bs4 import BeautifulSoup, UnicodeDammit
+from bs4 import BeautifulSoup
+from bs4.dammit import UnicodeDammit
 from dateutil.parser import ParserError
 from dateutil.parser import parse as dateutil_parse
-from past.utils import old_div  # noqa
 from phantom.base_connector import BaseConnector
 from phantom.vault import Vault
-from pytz import timezone
 from splunklib.binding import HTTPError
 
 import splunk_consts as consts
@@ -926,6 +917,7 @@ class SplunkConnector(BaseConnector):
         search_string = config.get("on_poll_query")
         po = config.get("on_poll_parse_only", False)
         include_cim_fields = config.get("include_cim_fields", False)
+        use_event_id_sdi = config.get("use_event_id_sdi", False)
 
         if not search_string:
             self.save_progress("Need to specify Query String to use polling")
@@ -1011,16 +1003,23 @@ class SplunkConnector(BaseConnector):
                     # Add original CIM fields if option is checked
                     cef.update({k: v} if include_cim_fields else {})
 
-            input_str = json.dumps(item)
-            input_str = UnicodeDammit(input_str).unicode_markup.encode("utf-8")
-
-            fips_enabled = self._get_fips_enabled()
-            # if fips is not enabled, we should continue with our existing md5 usage for generating SDIs
-            # to not impact existing customers
-            if not fips_enabled:
-                sdi = hashlib.md5(input_str).hexdigest()  # nosemgrep
+            # If the boolean in the asset is checked, attempt to use event_id as the source data identifier
+            # If event_id is missing from event, print warning and use hash SDI
+            if use_event_id_sdi and "event_id" in item:
+                sdi = item["event_id"]
             else:
-                sdi = hashlib.sha256(input_str).hexdigest()
+                if use_event_id_sdi and "event_id" not in item:
+                    self.save_progress("Use event_id as SDI is activated in the asset but event_id is missing from this event.")
+                    self.save_progress("Defaulting to event hash")
+                input_str = json.dumps(item)
+                input_str = UnicodeDammit(input_str).unicode_markup.encode("utf-8")
+                fips_enabled = self._get_fips_enabled()
+                # if fips is not enabled, we should continue with our existing md5 usage for generating SDIs
+                # to not impact existing customers
+                if not fips_enabled:
+                    sdi = hashlib.md5(input_str).hexdigest()  # nosemgrep
+                else:
+                    sdi = hashlib.sha256(input_str).hexdigest()
 
             severity = self._get_splunk_severity(item)
             spl_event_start = self._get_event_start(item.get("_time"))
@@ -1079,7 +1078,7 @@ class SplunkConnector(BaseConnector):
             # convert to Splunk SOAR timestamp format
             # '%Y-%m-%dT%H:%M:%S.%fZ
             datetime_obj = dateutil_parse(start_time)
-            return datetime_obj.astimezone(pytz.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+            return datetime_obj.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
         except ParserError as parse_err:
             self._dump_error_log(parse_err, "ParserError while parsing _time.")
             error_text = consts.SPLUNK_EXCEPTION_ERR_MESSAGE.format(
@@ -1158,6 +1157,7 @@ class SplunkConnector(BaseConnector):
         po = param.get(consts.SPLUNK_JSON_PARSE_ONLY, False)
         attach_result = param.get(consts.SPLUNK_JSON_ATTACH_RESULT, False)
         search_mode = param.get(consts.SPLUNK_JSON_SEARCH_MODE, consts.SPLUNK_SEARCH_MODE_SMART)
+        add_raw = param.get(consts.SPLUNK_JSON_ADD_RAW_DATA)
 
         # More info on valid time modifier at https://docs.splunk.com/Documentation/Splunk/8.2.5/SearchReference/SearchTimeModifiers # noqa
         start_time = phantom.get_value(param, consts.SPLUNK_JSON_START_TIME)
@@ -1183,7 +1183,9 @@ class SplunkConnector(BaseConnector):
             return action_result.set_status(phantom.APP_ERROR, "Error occurred while parsing the search query")
 
         self.debug_print("search_query: {0}".format(search_query))
-        return self._run_query(search_query, action_result, attach_result=attach_result, kwargs_create=kwargs, parse_only=po)
+        return self._run_query(
+            search_query, action_result, attach_result=attach_result, kwargs_create=kwargs, parse_only=po, add_raw_field=add_raw
+        )
 
     def _get_tz_str_from_epoch(self, time_format_str, epoch_milli):
 
@@ -1191,10 +1193,10 @@ class SplunkConnector(BaseConnector):
         config = self.get_config()
         device_tz_sting = config[consts.SPLUNK_JSON_TIMEZONE]
 
-        to_tz = timezone(device_tz_sting)
+        to_tz = ZoneInfo(device_tz_sting)
 
-        utc_dt = datetime.utcfromtimestamp(old_div(epoch_milli / 1000)).replace(tzinfo=pytz.utc)
-        to_dt = to_tz.normalize(utc_dt.astimezone(to_tz))
+        utc_dt = datetime.fromtimestamp(epoch_milli // 1000, tz=timezone.utc)
+        to_dt = utc_dt.astimezone(to_tz)
 
         # return utc_dt.strftime('%Y-%m-%d %H:%M:%S')
         return to_dt.strftime(time_format_str)
@@ -1284,7 +1286,7 @@ class SplunkConnector(BaseConnector):
         self.save_progress(consts.SPLUNK_SUCCESS_CONNECTIVITY_TEST)
         return action_result.set_status(phantom.APP_SUCCESS, consts.SPLUNK_SUCCESS_CONNECTIVITY_TEST)
 
-    def _run_query(self, search_query, action_result, attach_result=False, kwargs_create=dict(), parse_only=True):
+    def _run_query(self, search_query, action_result, attach_result=False, kwargs_create=dict(), parse_only=True, add_raw_field=True):
         """Function that executes the query on splunk"""
         self.debug_print("Start run query")
         RETRY_LIMIT = self.retry_count
@@ -1373,6 +1375,9 @@ class SplunkConnector(BaseConnector):
 
             if not isinstance(result, dict):
                 continue
+
+            if not add_raw_field:
+                result.pop("_raw", None)
 
             action_result.add_data(result)
 

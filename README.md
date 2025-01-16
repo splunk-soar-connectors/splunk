@@ -2,16 +2,16 @@
 # Splunk
 
 Publisher: Splunk  
-Connector Version: 2.18.0  
+Connector Version: 2.20.0  
 Product Vendor: Splunk Inc.  
 Product Name: Splunk Enterprise  
 Product Version Supported (regex): ".\*"  
-Minimum Product Version: 6.2.1  
+Minimum Product Version: 6.3.0  
 
 This app integrates with Splunk to update data on the device, in addition to investigate and ingestion actions
 
 [comment]: # " File: README.md"
-[comment]: # "  Copyright (c) 2016-2024 Splunk Inc."
+[comment]: # "  Copyright (c) 2016-2025 Splunk Inc."
 [comment]: # ""
 [comment]: # "Licensed under the Apache License, Version 2.0 (the 'License');"
 [comment]: # "you may not use this file except in compliance with the License."
@@ -32,7 +32,7 @@ This app integrates with Splunk to update data on the device, in addition to inv
     [documentation](https://docs.splunk.com/Documentation/Splunk/9.0.0/Security/CreateAuthTokens) to
     generate an API token.
 
-      
+
     **NOTE -** If the username/password and API token are both provided then the API token will be
     given preference and a token-based authentication workflow will be used.
 
@@ -77,7 +77,7 @@ For sending events to Splunk Platform, the User configured in the asset would re
 
     -   User can select a field name from the events data
 
-          
+
 
         -   If the provided field exists, then container_name_prefix will be the value against the
             provided field from the events data
@@ -86,7 +86,7 @@ For sending events to Splunk Platform, the User configured in the asset would re
 
     -   If the container_name_prefix parameter is not provided:
 
-          
+
 
         -   If the event data contains '\_time' field, then container_name_prefix will be 'Splunk
             Log Entry on \<value of the \_time field>'
@@ -101,7 +101,7 @@ For sending events to Splunk Platform, the User configured in the asset would re
 
     -   If the container_name_values parameter is provided:
 
-          
+
 
         -   If the provided field exists, then container_name_values will be the value against the
             provided CIM field or its CIM field mapping from the events data
@@ -110,7 +110,7 @@ For sending events to Splunk Platform, the User configured in the asset would re
 
     -   If the container_name_values parameter is not provided:
 
-          
+
 
         -   If 'container_name_prefix' parameter is not provided, then container_name_values will be
             'source'
@@ -160,26 +160,26 @@ For sending events to Splunk Platform, the User configured in the asset would re
         from the events will be ingested in the respective artifacts
     -   Users can provide comma-separated field names. Example: field1, field2, field3
 -   If the on_poll_query(query to use with On Poll) parameter is not provided, then an error message
-    will be returned  
+    will be returned
 -   If the on_poll_command(command for the query to use with On Poll) parameter is not provided and
     the on_poll_query does not start with "|" or "search", then the "search" keyword is added at
-    the beginning of the on_poll_query  
+    the beginning of the on_poll_query
     Example:
-    -   on_poll_command: None  
-        on_poll_query: index = "main"  
+    -   on_poll_command: None
+        on_poll_query: index = "main"
         Final query generated internally: search index = "main"
 -   If the on_poll_command parameter is not provided and the on_poll_query starts with "|" or
     "search", then the final query would be the same as the query provided in the on_poll_query
-    parameter  
+    parameter
     Example:
-    -   on_poll_command: None  
-        on_poll_query: search index = "main"  
+    -   on_poll_command: None
+        on_poll_query: search index = "main"
         Final query generated internally: search index = "main"
 -   If on_poll_command parameter is provided, then query is formed as: {on_poll_command}
-    {on_poll_query}  
+    {on_poll_query}
     Example:
-    -   on_poll_command: search  
-        on_poll_query: index = "main"  
+    -   on_poll_command: search
+        on_poll_query: index = "main"
         Final query generated internally: search index = "main"
 
 ## Update Event
@@ -196,7 +196,7 @@ For sending events to Splunk Platform, the User configured in the asset would re
     parameter is True, the action validates the "event_id" provided by the user using the search
     command: 'search \`notable\` | search event_id="\<event_id>"'.
 
-      
+
 
     -   If this search command returns more than 0 results, the action updates the event.
     -   If this search command does not return any results then, the action fails with the message
@@ -208,18 +208,18 @@ For sending events to Splunk Platform, the User configured in the asset would re
 
 -   There are two approaches to polling as mentioned below.
 
-      
+
 
     -   POLL NOW (Manual polling)
 
-          
+
 
         -   It will fetch the data every time as per the corresponding asset configuration
             parameters. It doesn’t store the last run context of the fetched data.
 
     -   Scheduled/Interval Polling
 
-          
+
 
         -   The ingestion action will be triggered after each specified time interval. It stores the
             last run context of the fetched data and starts fetching new data based on the
@@ -228,7 +228,7 @@ For sending events to Splunk Platform, the User configured in the asset would re
 
 -   Notes
 
-      
+
 
     -   In case "on poll" returns any 4XX except 403, validate your search Query on Splunk
     -   Sample "Query" to use with On Poll: index="\_internal" | stats count by host, source,
@@ -244,59 +244,59 @@ For sending events to Splunk Platform, the User configured in the asset would re
         then the "urgency" of the incident will be considered. If the "urgency" is also not present,
         then the ingested container "severity" will be taken as "medium" by default.
 
-      
+
 
 -   Helpful examples to run on poll
 
-      
+
 
     1.  The query will fetch top 10 events from the result of index = "main" search.
-        -   on_poll_command: "search"  
-        -   on_poll_query: index = "main" | head 10  
-        -   Final query generated internally: search index = "main" | head 10  
+        -   on_poll_command: "search"
+        -   on_poll_query: index = "main" | head 10
+        -   Final query generated internally: search index = "main" | head 10
     2.  The query will execute the query saved in the savedsearch named "Dashboard Views - Action
         History".
-        -   on_poll_command: "savedsearch"  
-        -   on_poll_query: "Dashboard Views - Action History"  
-        -   Final query generated internally: savedsearch "Dashboard Views - Action History"  
+        -   on_poll_command: "savedsearch"
+        -   on_poll_query: "Dashboard Views - Action History"
+        -   Final query generated internally: savedsearch "Dashboard Views - Action History"
     3.  The query will perform statistics for datamodel and will give total count of events fetched
         for datamodel = authentication.
-        -   on_poll_command: "tstats"  
-        -   on_poll_query: "count from datamodel=Authentication"  
-        -   Final query generated internally: "tstats count from datamodel=Authentication"  
+        -   on_poll_command: "tstats"
+        -   on_poll_query: "count from datamodel=Authentication"
+        -   Final query generated internally: "tstats count from datamodel=Authentication"
     4.  The query will display field "a" in table format for the results fetched from 'search index
         = "\_internal"' search.
-        -   on_poll_command: None  
-        -   on_poll_query: index = "\_internal" | table a  
-        -   Final query generated internally: search index = "\_internal" | table a  
+        -   on_poll_command: None
+        -   on_poll_query: index = "\_internal" | table a
+        -   Final query generated internally: search index = "\_internal" | table a
     5.  This query will fetch all the events with sourcetype = "modular_alerts:notable",
         app="phantom", and user="admin".
-        -   on_poll_command: None  
-        -   on_poll_query: index=\* sourcetype="modular_alerts:notable" app="phantom" user="admin"  
+        -   on_poll_command: None
+        -   on_poll_query: index=\* sourcetype="modular_alerts:notable" app="phantom" user="admin"
         -   Final query generated internally: search index=\* sourcetype="modular_alerts:notable"
-            app="phantom" user="admin"  
+            app="phantom" user="admin"
     6.  This query will get the count of the events that are indexed in index named "main".
-        -   on_poll_command: None  
-        -   on_poll_query: index="main" | stats count  
-        -   Final query generated internally: search index="main" | stats count  
+        -   on_poll_command: None
+        -   on_poll_query: index="main" | stats count
+        -   Final query generated internally: search index="main" | stats count
     7.  This query will add a field with name = "a" and value = "abc" in all the events that are
         indexed in index named "main".
-        -   on_poll_command: None  
-        -   on_poll_query: index="main" | eval a = "abc"  
-        -   Final query generated internally: search index="main" | eval a = "abc"  
+        -   on_poll_command: None
+        -   on_poll_query: index="main" | eval a = "abc"
+        -   Final query generated internally: search index="main" | eval a = "abc"
     8.  This query will fetch only the sourcetype of all the events that are indexed in index named
         "main".
-        -   on_poll_command: None  
-        -   on_poll_query: index="main" | fields sourcetype  
-        -   Final query generated internally: search index="main" | fields sourcetype  
+        -   on_poll_command: None
+        -   on_poll_query: index="main" | fields sourcetype
+        -   Final query generated internally: search index="main" | fields sourcetype
     9.  This query will fetch all the events having tag = error and index = main.
-        -   on_poll_command: None  
-        -   on_poll_query: index="\_internal" tag=error  
-        -   Final query generated internally: search index="\_internal" tag="error"  
+        -   on_poll_command: None
+        -   on_poll_query: index="\_internal" tag=error
+        -   Final query generated internally: search index="\_internal" tag="error"
     10. This query will show the data of "ppf_action_history_searches" lookup.
-        -   on_poll_command: None  
-        -   on_poll_query: |inputlookup ppf_action_history_searches  
-        -   Final query generated internally: |inputlookup ppf_action_history_searches  
+        -   on_poll_command: None
+        -   on_poll_query: |inputlookup ppf_action_history_searches
+        -   Final query generated internally: |inputlookup ppf_action_history_searches
 
 ## Naming Ingested Containers
 
@@ -337,8 +337,8 @@ ports used by Splunk SOAR.
 8089 is the default port used by Splunk Server.
 
 
-### Configuration Variables
-The below configuration variables are required for this Connector to operate.  These variables are specified when configuring a Splunk Enterprise asset in SOAR.
+### Configuration variables
+This table lists the configuration variables required to operate Splunk. These variables are specified when configuring a Splunk Enterprise asset in Splunk SOAR.
 
 VARIABLE | REQUIRED | TYPE | DESCRIPTION
 -------- | -------- | ---- | -----------
@@ -364,6 +364,7 @@ VARIABLE | REQUIRED | TYPE | DESCRIPTION
 **sleeptime_in_requests** |  optional  | numeric | The time to wait for next REST call (max 120 seconds)
 **include_cim_fields** |  optional  | boolean | Option to keep original Splunk CIM together with SOAR CEF fields
 **splunk_job_timeout** |  optional  | numeric | The duration in seconds to wait before a scheduled Splunk job times out
+**use_event_id_sdi** |  optional  | boolean | Option to use the event_id field value as the source data identifier instead of the full event hash
 
 ### Supported Actions  
 [test connectivity](#action-test-connectivity) - Validate the asset configuration for connectivity. This action logs into the device to check the connection and credentials  
@@ -460,6 +461,7 @@ PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 **query** |  required  | Query to run (in Splunk Processing Language) | string |  `splunk query` 
 **display** |  optional  | Display fields (comma-separated) | string | 
 **parse_only** |  optional  | Parse only | boolean | 
+**add_raw_field** |  optional  | Ingest _raw field data | boolean | 
 **attach_result** |  optional  | Attach result to the vault | boolean | 
 **start_time** |  optional  | Earliest time modifier | string | 
 **end_time** |  optional  | Latest time modifier | string | 
