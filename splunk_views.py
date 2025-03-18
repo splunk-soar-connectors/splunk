@@ -13,7 +13,6 @@
 # either express or implied. See the License for the specific language governing permissions
 # and limitations under the License.
 def _get_ctx_result(result, provides):
-
     ctx_result = {}
     headers = []
     processed_data = []
@@ -54,7 +53,6 @@ def _get_ctx_result(result, provides):
 
 
 def display_view(provides, all_app_runs, context):
-
     context["results"] = results = []
     for summary, action_results in all_app_runs:
         for result in action_results:
