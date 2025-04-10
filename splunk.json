@@ -1290,26 +1290,6 @@
             }
         }
     ],
-    "pip_dependencies": {
-        "wheel": [
-            {
-                "module": "deprecation",
-                "input_file": "wheels/shared/deprecation-2.1.0-py2.py3-none-any.whl"
-            },
-            {
-                "module": "packaging",
-                "input_file": "wheels/py3/packaging-21.3-py3-none-any.whl"
-            },
-            {
-                "module": "pyparsing",
-                "input_file": "wheels/py3/pyparsing-3.1.4-py3-none-any.whl"
-            },
-            {
-                "module": "splunk_sdk",
-                "input_file": "wheels/py3/splunk_sdk-2.1.0-py3-none-any.whl"
-            }
-        ]
-    },
     "pip39_dependencies": {
         "wheel": [
             {
