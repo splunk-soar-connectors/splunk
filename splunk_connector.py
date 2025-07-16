@@ -215,15 +215,15 @@ class SplunkConnector(BaseConnector):
         try:
             response = urlopen(req)
             self.debug_print(response)
+        except UrllibHTTPError:
+            self.save_progress("Check the proxy settings")
+            pass  # Propagate HTTP errors via the returned response message
         except URLError:
             # If running Python 2.7.9+, disable SSL certificate validation and try again
             if sys.version_info >= (2, 7, 9) and not config[phantom.APP_JSON_VERIFY]:
                 response = urlopen(req, context=ssl._create_unverified_context())  # nosemgrep
             else:
                 raise
-        except UrllibHTTPError:
-            self.save_progress("Check the proxy settings")
-            pass  # Propagate HTTP errors via the returned response message
         return {"status": response.code, "reason": response.msg, "headers": response.getheaders(), "body": BytesIO(response.read())}
 
     def handler(self, proxy):
@@ -834,7 +834,7 @@ class SplunkConnector(BaseConnector):
         if not ret_val:
             return ret_val
 
-        if "success" in resp_data and not resp_data.get("success"):
+        if resp_data and "success" in resp_data and not resp_data.get("success"):
             msg = resp_data.get("message")
             return action_result.set_status(phantom.APP_ERROR, msg if msg else "Unable to update the notable event")
 
@@ -1450,6 +1450,7 @@ class SplunkConnector(BaseConnector):
         # Get the action that we are supposed to carry out, set it in the connection result object
         action = self.get_action_identifier()
         self.send_progress(f"executing action: {action}")
+        result = None
         if action == self.ACTION_ID_RUN_QUERY:
             result = self._handle_run_query(param)
         elif action == self.ACTION_ID_POST_DATA:
