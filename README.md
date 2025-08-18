@@ -1,9 +1,9 @@
 # Splunk
 
-Publisher: Splunk \
-Connector Version: 2.20.1 \
-Product Vendor: Splunk Inc. \
-Product Name: Splunk Enterprise \
+Publisher: Splunk <br>
+Connector Version: 2.20.1 <br>
+Product Vendor: Splunk Inc. <br>
+Product Name: Splunk Enterprise <br>
 Minimum Product Version: 6.3.0
 
 This app integrates with Splunk to update data on the device, in addition to investigate and ingestion actions
@@ -330,18 +330,18 @@ VARIABLE | REQUIRED | TYPE | DESCRIPTION
 
 ### Supported Actions
 
-[test connectivity](#action-test-connectivity) - Validate the asset configuration for connectivity. This action logs into the device to check the connection and credentials \
-[get host events](#action-get-host-events) - Get events pertaining to a host that have occurred in the last 'N' days \
-[on poll](#action-on-poll) - Ingest logs from the Splunk instance \
-[run query](#action-run-query) - Run a search query on the Splunk device. Please escape any quotes that are part of the query string \
-[update event](#action-update-event) - Update a notable event \
+[test connectivity](#action-test-connectivity) - Validate the asset configuration for connectivity. This action logs into the device to check the connection and credentials <br>
+[get host events](#action-get-host-events) - Get events pertaining to a host that have occurred in the last 'N' days <br>
+[on poll](#action-on-poll) - Ingest logs from the Splunk instance <br>
+[run query](#action-run-query) - Run a search query on the Splunk device. Please escape any quotes that are part of the query string <br>
+[update event](#action-update-event) - Update a notable event <br>
 [post data](#action-post-data) - Post data to Splunk
 
 ## action: 'test connectivity'
 
 Validate the asset configuration for connectivity. This action logs into the device to check the connection and credentials
 
-Type: **test** \
+Type: **test** <br>
 Read only: **True**
 
 #### Action Parameters
@@ -356,7 +356,7 @@ No Output
 
 Get events pertaining to a host that have occurred in the last 'N' days
 
-Type: **investigate** \
+Type: **investigate** <br>
 Read only: **True**
 
 <ul><li>The <b>last_n_days</b> parameter must be greater than 0.</li><li>The action will search for the events of the hostname (provided in the 'ip_hostname' parameter) in the default index configured on the Splunk instance.</li></ul>
@@ -399,7 +399,7 @@ summary.total_objects_successful | numeric | | 1 |
 
 Ingest logs from the Splunk instance
 
-Type: **ingest** \
+Type: **ingest** <br>
 Read only: **True**
 
 The configured query is what will be used during ingestion. If you only wish to show certain fields, you can specify these as a comma-separated list in the configuration. If left unspecified, all available fields will be added to each artifact. When limiting the number of events to ingest, it will ingest the most recent events. To avoid duplication in polling, append '| fields \*' to the query.<br><br>
@@ -422,7 +422,7 @@ No Output
 
 Run a search query on the Splunk device. Please escape any quotes that are part of the query string
 
-Type: **investigate** \
+Type: **investigate** <br>
 Read only: **True**
 
 By default, the widget for the "run query" action will show the host, time, and raw fields. If you would like to see specific fields parsed out, they can be listed in a comma-separated format in the "display" parameter.<br><br>Please keep in mind that Splunk does not always return all possible fields. Splunk may not return fields that are calculated or not present in the event.<br><br>To work around this you can force Splunk to return specific fields by using the "fields". By appending "| fields + \*" to your query, Splunk will return every field. You can replace the asterisk with a comma-separated list of fields to only return specific fields.<br><br>Finally, some searches (such as those based on data models) can contain name-spaced fields. If a data model called "my_model" with a search "my_search" has a field "hash" then the field will be named "my_search.hash" and that is what must be used in the Splunk fields command and the display parameter. If using a non-global lookup file that is only accessible by a specific Splunk App, make sure to note the specific Splunk App in your asset configuration. The <b>parse_only</b> parameter, if <b>True</b>, it disables the expansion of search due to evaluation of sub-searches, time term expansion, lookups, tags, eventtypes, and sourcetype alias. This parameter is used for the validation of the Splunk query before fetching the results.<br><br>Learn more below:<ul><li><a href='https://docs.splunk.com/Documentation/Splunk/8.2.5/SearchReference/SearchTimeModifiers' target='_blank'>Time modifiers</a></li><li><a href='https://docs.splunk.com/Documentation/Splunk/latest/RESTREF/RESTsearch#search.2Fjobs' target='_blank'>Splunk REST APIs</a></li><li><a href='https://dev.splunk.com/enterprise/docs/devtools/python/sdk-python/howtousesplunkpython/howtorunsearchespython/' target='_blank'>Splunk SDK</a></li></ul>
@@ -513,7 +513,7 @@ action_result.parameter.add_raw_field | boolean | | |
 
 Update a notable event
 
-Type: **generic** \
+Type: **generic** <br>
 Read only: **False**
 
 The <b>event_ids</b> parameter takes a single event_id (which has the format: 68E08B8B-A853-3A20-9768-231C97B7EE76@@notable@@a4bd78810ae8e03e285e552fac0ddb23) or an adaptive response SID + RID combo (which has the format: scheduler\_\_admin\_\_SplunkEnterpriseSecuritySuite\_\_RMD515d4671130158e57_at_1532441220_4982+0).<br><br>NOTE: This action only works with a notable event from Splunk ES.<br><br>Second Note: The <b>status</b> parameter takes a string value, but custom status values are unique to installation and not available at app creation. The <b>integer_status</b> parameter takes a positive integer denoting the custom value desired. This integer must be determined by the customer on-site. If set it will override <b>status</b>.
@@ -560,7 +560,7 @@ summary.total_objects_successful | numeric | | 1 |
 
 Post data to Splunk
 
-Type: **generic** \
+Type: **generic** <br>
 Read only: **False**
 
 This action creates an event on Splunk with the data included in the <b>data</b> parameter. If not specified the parameters will default to the following:<ul><li><b>host</b> - The IP of the Splunk SOAR instance running the action.</li><li><b>index</b> - The default index configured on the Splunk instance.</li><li><b>source</b> - "Phantom".</li><li><b>source_type</b> - "Automation/Orchestration Platform".</li></ul>
