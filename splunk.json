@@ -48,7 +48,7 @@
     "product_version_regex": ".*",
     "min_phantom_version": "6.3.0",
     "fips_compliant": true,
-    "python_version": "3",
+    "python_version": "3.9, 3.13",
     "latest_tested_versions": [
         "On-premise, Splunk Enterprise Security v9.0.0, Jan 8 2024",
         "Cloud, Splunk Cloud Platform v9.0.2303.202, Jan 8 2024"
@@ -1298,7 +1298,23 @@
             },
             {
                 "module": "packaging",
-                "input_file": "wheels/py3/packaging-24.2-py3-none-any.whl"
+                "input_file": "wheels/py3/packaging-25.0-py3-none-any.whl"
+            },
+            {
+                "module": "splunk_sdk",
+                "input_file": "wheels/py3/splunk_sdk-2.1.0-py3-none-any.whl"
+            }
+        ]
+    },
+    "pip313_dependencies": {
+        "wheel": [
+            {
+                "module": "deprecation",
+                "input_file": "wheels/shared/deprecation-2.1.0-py2.py3-none-any.whl"
+            },
+            {
+                "module": "packaging",
+                "input_file": "wheels/py3/packaging-25.0-py3-none-any.whl"
             },
             {
                 "module": "splunk_sdk",
