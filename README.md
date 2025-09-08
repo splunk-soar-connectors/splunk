@@ -1,7 +1,7 @@
 # Splunk
 
 Publisher: Splunk <br>
-Connector Version: 2.20.1 <br>
+Connector Version: 2.20.2 <br>
 Product Vendor: Splunk Inc. <br>
 Product Name: Splunk Enterprise <br>
 Minimum Product Version: 6.3.0
