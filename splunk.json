@@ -1302,7 +1302,7 @@
             },
             {
                 "module": "splunk_sdk",
-                "input_file": "wheels/py3/splunk_sdk-2.1.0-py3-none-any.whl"
+                "input_file": "wheels/py3/splunk_sdk-2.1.1-py3-none-any.whl"
             }
         ]
     },
@@ -1318,7 +1318,7 @@
             },
             {
                 "module": "splunk_sdk",
-                "input_file": "wheels/py3/splunk_sdk-2.1.0-py3-none-any.whl"
+                "input_file": "wheels/py3/splunk_sdk-2.1.1-py3-none-any.whl"
             }
         ]
     }
