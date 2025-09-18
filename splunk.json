@@ -484,6 +484,11 @@
                     ],
                     "default": "smart",
                     "order": 8
+                },
+                "time_format": {
+                    "description": "Custom timestamp format",
+                    "data_type": "string",
+                    "order": 9
                 }
             },
             "render": {
