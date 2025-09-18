@@ -484,6 +484,11 @@
                     ],
                     "default": "smart",
                     "order": 8
+                },
+                "time_format": {
+                    "description": "Custom timestamp format",
+                    "data_type": "string",
+                    "order": 9
                 }
             },
             "render": {
@@ -913,6 +918,10 @@
                 {
                     "data_path": "action_result.parameter.add_raw_field",
                     "data_type": "boolean"
+                },
+                {
+                    "data_path": "action_result.parameter.time_format",
+                    "data_type": "string"
                 }
             ],
             "versions": "EQ(*)"
