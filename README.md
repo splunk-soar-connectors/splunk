@@ -440,6 +440,7 @@ PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 **start_time** | optional | Earliest time modifier | string | |
 **end_time** | optional | Latest time modifier | string | |
 **search_mode** | optional | Search mode | string | |
+**time_format** | optional | Custom timestamp format | string | |
 
 #### Action Output
 
@@ -508,6 +509,7 @@ action_result.message | string | | Sid: 1612177958.977510, Total events: 2 |
 summary.total_objects | numeric | | 1 |
 summary.total_objects_successful | numeric | | 1 |
 action_result.parameter.add_raw_field | boolean | | |
+action_result.parameter.time_format | string | | |
 
 ## action: 'update event'
 

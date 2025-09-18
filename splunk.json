@@ -918,6 +918,10 @@
                 {
                     "data_path": "action_result.parameter.add_raw_field",
                     "data_type": "boolean"
+                },
+                {
+                    "data_path": "action_result.parameter.time_format",
+                    "data_type": "string"
                 }
             ],
             "versions": "EQ(*)"

@@ -655,7 +655,7 @@ class SplunkConnector(BaseConnector):
             get_params["index"] = index
 
         endpoint = "receivers/simple"
-        ret_val, resp_data = self._make_rest_call_retry(action_result, endpoint, post_data, params=get_params)
+        ret_val, _resp_data = self._make_rest_call_retry(action_result, endpoint, post_data, params=get_params)
 
         if phantom.is_fail(ret_val):
             return ret_val
@@ -1408,7 +1408,7 @@ class SplunkConnector(BaseConnector):
         return True, job
 
     def add_json_result(self, action_result):
-        fd, path = tempfile.mkstemp(dir=Vault.get_vault_tmp_dir(), text=True)
+        _fd, path = tempfile.mkstemp(dir=Vault.get_vault_tmp_dir(), text=True)
         vault_attach_dict = {}
 
         vault_attach_dict[phantom.APP_JSON_ACTION_NAME] = self.get_action_name()
