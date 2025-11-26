@@ -311,7 +311,6 @@ VARIABLE | REQUIRED | TYPE | DESCRIPTION
 **api_token** | optional | password | API token |
 **splunk_owner** | optional | string | The owner context of the namespace |
 **splunk_app** | optional | string | The app context of the namespace |
-**timezone** | required | timezone | Splunk Server Timezone |
 **verify_server_cert** | optional | boolean | Verify Server Certificate |
 **on_poll_command** | optional | string | Command for query to use with On Poll |
 **on_poll_query** | optional | string | Query to use with On Poll |

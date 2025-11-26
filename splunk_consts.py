@@ -49,7 +49,6 @@ SPLUNK_ERR_SPLUNK_JOB_HAS_TIMED_OUT = "Failed to retrieve splunk job results. Th
 
 # Progress messages
 SPLUNK_PROG_GOT_JOB_ID = "Got job id '{job_id}'"
-SPLUNK_PROG_TIME_RANGE = "Using range '{range}'"
 SPLUNK_PROG_CREATED_QUERY = "Created query '{query}'"
 SPLUNK_PROG_CREATING_SEARCH_JOB = "Creating search job"
 SPLUNK_PROG_WAITING_ON_JOB_ID = "Waiting for job (id:{job_id}) to finish"
@@ -70,9 +69,7 @@ SPLUNK_JSON_SOURCE = "source"
 SPLUNK_JSON_STATUS = "status"
 SPLUNK_JSON_URGENCY = "urgency"
 SPLUNK_JSON_COMMENT = "comment"
-SPLUNK_JSON_ALERT_NAME = "alert"
 SPLUNK_JSON_END_TIME = "end_time"
-SPLUNK_JSON_TIMEZONE = "timezone"
 SPLUNK_JSON_EVENT_IDS = "event_ids"
 SPLUNK_JSON_START_TIME = "start_time"
 SPLUNK_JSON_SOURCE_TYPE = "source_type"
@@ -86,13 +83,10 @@ SPLUNK_JSON_TIME_FORMAT = "time_format"
 
 # Default values
 SPLUNK_DEFAULT_EVENT_COUNT = 10
-SPLUNK_DEFAULT_ALERT_COUNT = 100
 SPLUNK_DEFAULT_SOURCE = "Phantom"
 SPLUNK_DEFAULT_SOURCE_TYPE = "Automation/Orchestration Platform"
 
 # Numeric constants
-SPLUNK_MILLISECONDS_IN_A_DAY = 86400000
-SPLUNK_NUMBER_OF_DAYS_BEFORE_ENDTIME = 10
 
 # Dictionaries
 SPLUNK_SEVERITY_MAP = {"informational": "low", "low": "low", "medium": "medium", "high": "high", "critical": "high"}
@@ -163,8 +157,6 @@ SPLUNK_RID_SID_NOTABLE_QUERY += r' | rex field=myfield "^(?<sid>.*)\+(?<rid>\d*(
 SPLUNK_RID_SID_NOTABLE_QUERY += r' | eval search = "( (sid::" . sid . " OR orig_sid::" . sid . ")'
 SPLUNK_RID_SID_NOTABLE_QUERY += r' (rid::" . rid . " OR orig_rid::" . rid . ") )"'
 SPLUNK_RID_SID_NOTABLE_QUERY += r" | table search] `notable` | table event_id"
-SPLUNK_SEARCH_AUDIT_INDEX_QUERY = "search index=_audit action=alert_fired {0} | head {1} | \
-            fields ss_name sid trigger_time severity"
 
 SPLUNK_DEFAULT_REQUEST_TIMEOUT = 60  # in seconds
 
