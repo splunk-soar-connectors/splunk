@@ -82,6 +82,7 @@ SPLUNK_JSON_UPDATED_EVENT_ID = "updated_event_id"
 SPLUNK_JSON_ATTACH_RESULT = "attach_result"
 SPLUNK_JSON_SEARCH_MODE = "search_mode"
 SPLUNK_JSON_API_KEY = "api_token"  # pragma: allowlist secret
+SPLUNK_JSON_TIME_FORMAT = "time_format"
 
 # Default values
 SPLUNK_DEFAULT_EVENT_COUNT = 10

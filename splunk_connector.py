@@ -655,7 +655,7 @@ class SplunkConnector(BaseConnector):
             get_params["index"] = index
 
         endpoint = "receivers/simple"
-        ret_val, resp_data = self._make_rest_call_retry(action_result, endpoint, post_data, params=get_params)
+        ret_val, _resp_data = self._make_rest_call_retry(action_result, endpoint, post_data, params=get_params)
 
         if phantom.is_fail(ret_val):
             return ret_val
@@ -1135,6 +1135,7 @@ class SplunkConnector(BaseConnector):
         attach_result = param.get(consts.SPLUNK_JSON_ATTACH_RESULT, False)
         search_mode = param.get(consts.SPLUNK_JSON_SEARCH_MODE, consts.SPLUNK_SEARCH_MODE_SMART)
         add_raw = param.get(consts.SPLUNK_JSON_ADD_RAW_DATA)
+        time_format = param.get(consts.SPLUNK_JSON_TIME_FORMAT)
 
         # More info on valid time modifier at https://docs.splunk.com/Documentation/Splunk/8.2.5/SearchReference/SearchTimeModifiers
         start_time = phantom.get_value(param, consts.SPLUNK_JSON_START_TIME)
@@ -1145,6 +1146,8 @@ class SplunkConnector(BaseConnector):
             kwargs["earliest_time"] = start_time
         if end_time:
             kwargs["latest_time"] = end_time
+        if time_format:
+            kwargs["time_format"] = time_format
 
         kwargs["adhoc_search_level"] = search_mode
 
@@ -1405,7 +1408,7 @@ class SplunkConnector(BaseConnector):
         return True, job
 
     def add_json_result(self, action_result):
-        fd, path = tempfile.mkstemp(dir=Vault.get_vault_tmp_dir(), text=True)
+        _fd, path = tempfile.mkstemp(dir=Vault.get_vault_tmp_dir(), text=True)
         vault_attach_dict = {}
 
         vault_attach_dict[phantom.APP_JSON_ACTION_NAME] = self.get_action_name()
