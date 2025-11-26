@@ -23,12 +23,11 @@ import sys
 import tempfile
 import time
 import traceback
-from datetime import datetime, timezone
+from datetime import timezone
 from io import BytesIO
 from typing import Optional
 from urllib.error import HTTPError as UrllibHTTPError, URLError
 from urllib.request import ProxyHandler, Request, build_opener, install_opener, urlopen
-from zoneinfo import ZoneInfo
 
 import phantom.app as phantom
 import phantom.rules as soar_vault
@@ -1166,82 +1165,6 @@ class SplunkConnector(BaseConnector):
         return self._run_query(
             search_query, action_result, attach_result=attach_result, kwargs_create=kwargs, parse_only=po, add_raw_field=add_raw
         )
-
-    def _get_tz_str_from_epoch(self, time_format_str, epoch_milli):
-        # Need to convert from UTC to the device's timezone, get the device's tz from config
-        config = self.get_config()
-        device_tz_sting = config[consts.SPLUNK_JSON_TIMEZONE]
-
-        to_tz = ZoneInfo(device_tz_sting)
-
-        utc_dt = datetime.fromtimestamp(epoch_milli // 1000, tz=timezone.utc)
-        to_dt = utc_dt.astimezone(to_tz)
-
-        # return utc_dt.strftime('%Y-%m-%d %H:%M:%S')
-        return to_dt.strftime(time_format_str)
-
-    def _list_alerts(self, param, action_result=None):
-        if not action_result:
-            # Create a action result to represent this action
-            action_result = self.add_action_result(phantom.ActionResult(dict(param)))
-
-        # If end_time is not given, then end_time is 'now'
-        # If start_time is not given, then start_time is SPLUNK_NUMBER_OF_DAYS_BEFORE_ENDTIME
-        # days behind end_time
-        curr_epoch_msecs = int(time.time()) * 1000
-        start_time_msecs = 0
-        end_time_msecs = int(phantom.get_value(param, consts.SPLUNK_JSON_END_TIME, curr_epoch_msecs))
-        start_time_msecs = int(
-            phantom.get_value(
-                param,
-                consts.SPLUNK_JSON_START_TIME,
-                end_time_msecs - (consts.SPLUNK_MILLISECONDS_IN_A_DAY * consts.SPLUNK_NUMBER_OF_DAYS_BEFORE_ENDTIME),
-            )
-        )
-
-        if end_time_msecs < start_time_msecs:
-            return action_result.set_status(phantom.APP_ERROR, consts.SPLUNK_ERR_INVALID_TIME_RANGE)
-
-        # From splunk documentation
-        # To search with an exact date as boundary, such as from November 5 at 8 PM to November 12 at 8 PM,
-        # use the timeformat: %m/%d/%Y:%H:%M:%S
-        # TODO, We need not convert the epoch to formatted and then pass the format string also to splunk
-        # We should be able to work off of just epoch, however not too sure what the input epoch UTC format
-        # is to splunk and the doc is not that clear.
-        time_format_str = "%m/%d/%Y:%H:%M:%S"
-        earliest_time = f"{self._get_tz_str_from_epoch(time_format_str, start_time_msecs)}"
-        latest_time = f"{self._get_tz_str_from_epoch(time_format_str, end_time_msecs)}"
-
-        kwargs_create = {"earliest_time": earliest_time, "latest_time": latest_time, "time_format": time_format_str}
-        # kwargs_create = {"time_format": "%m/%d/%Y:%H:%M:%S",
-        #         "latest_time": "03/21/2015:14:29:25",
-        #         "earliest_time": "03/21/2015:14:24:25"}
-
-        self.save_progress(consts.SPLUNK_PROG_TIME_RANGE, range=json.dumps(kwargs_create))
-
-        count = int(phantom.get_value(param, phantom.APP_JSON_CONTAINER_COUNT, consts.SPLUNK_DEFAULT_ALERT_COUNT))
-
-        # Work of the saved search name, if given
-        ss_name = phantom.get_value(self.get_config(), consts.SPLUNK_JSON_ALERT_NAME, None)
-
-        # default to blank
-        ss_query = ""
-
-        if ss_name:
-            # create a list of query's is easier then just replacing the ',' with 'OR ss_name=
-            #  that way we can work on each one of them seperately, like strip them or add quotes
-            #  if not present etc.
-            ss_names = ['"{}"'.format(x.strip(' "')) for x in ss_name.split(",") if len(x.strip()) > 0]
-            self.debug_print("ss_names", ss_names)
-            ss_query = "ss_name = {}".format(" OR ss_name = ".join(ss_names))
-
-        query = consts.SPLUNK_SEARCH_AUDIT_INDEX_QUERY.format(ss_query, count)
-
-        self.debug_print("query", query)
-
-        self._run_query(query, action_result, kwargs_create=kwargs_create)
-
-        return action_result.get_status()
 
     def _test_asset_connectivity(self, param):
         action_result = self.add_action_result(phantom.ActionResult(dict(param)))
