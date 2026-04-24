@@ -1,79 +1,135 @@
-# Ruff linting
+[project]
+name = "splunk"
+version = "3.0.5"
+description = "This app integrates with Splunk to update data on the device, in addition to investigate and ingestion actions"
+license = "Copyright (c) 2016-2026 Splunk Inc."
+requires-python = ">=3.13, <3.15"
+authors = []
+dependencies = [
+    "splunk-sdk>=2.1.1",
+    "splunk-soar-sdk>=3.18.1",
+    "beautifulsoup4>=4.12.0",
+    "python-dateutil>=2.9.0",
+    "requests>=2.31.0",
+    "xmltodict>=0.13.0",
+]
+
+
+[tool.soar.app]
+main_module = "src.app:app"
+
+### YOU SHOULD NOT NEED TO TOUCH ANYTHING BELOW THIS LINE ###
+
+[dependency-groups]
+dev = [
+    "coverage>=7.6.7,<8",
+    "mypy>=1.2.0,<2",
+    "pre-commit>=4.2.0,<5",
+    "pytest>=7.4.2,<8",
+    "pytest-mock>=3.14.0,<4",
+    "pytest-watch>=4.2.0,<5",
+    "ruff>=0.11.6,<1",
+]
+
+[[tool.uv.index]]
+url = "https://pypi.python.org/simple"
+
+[tool.uv]
+environments = [
+    "sys_platform == 'linux' and platform_machine == 'x86_64' and python_version == '3.13'",
+    "sys_platform == 'linux' and platform_machine == 'aarch64' and python_version == '3.13'",
+    "sys_platform == 'darwin' and platform_machine == 'x86_64' and python_version == '3.13'",
+    "sys_platform == 'darwin' and platform_machine == 'arm64' and python_version == '3.13'",
+    "sys_platform == 'linux' and platform_machine == 'x86_64' and python_version == '3.14'",
+    "sys_platform == 'linux' and platform_machine == 'aarch64' and python_version == '3.14'",
+    "sys_platform == 'darwin' and platform_machine == 'x86_64' and python_version == '3.14'",
+    "sys_platform == 'darwin' and platform_machine == 'arm64' and python_version == '3.14'",
+]
+required-environments = [
+    "sys_platform == 'linux' and platform_machine == 'x86_64' and python_version == '3.13'",
+    "sys_platform == 'linux' and platform_machine == 'x86_64' and python_version == '3.14'",
+]
+
 [tool.ruff]
-line-length = 145
-target-version = "py39"
+output-format = "full"
+fix = true
+target-version = "py313"
 
 [tool.ruff.lint]
-select = [ # Auto-fixable rules only
-    "I",    # isort
-    "UP",   # pyupgrade
-    "F401", # unused imports
-    "RUF"   # ruff rules
+select = [
+    "ERA",
+    "YTT",
+    "S",
+    "B",
+    "A",
+    "DTZ",
+    "T10",
+    "ISC",
+    "PT",
+    "SIM",
+    "PTH",
+    "E",
+    "F",
+    "W",
+    "PL",
+    "UP",
+    "RUF",
+]
+ignore = [
+    "E402",
+    "E501",
+    "PT006",
+    "PT007",
+    "PTH123",
+    "PLR",
 ]
 
-ignore = [
-    "RUF012", # Not auto-fixable (remove eventually)
-    "RUF001" # Not auto-fixable (remove eventually)
-]
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 
 [tool.ruff.lint.per-file-ignores]
-"__init__.py" = ["F401", "UP035"]  # __init__.py file exceptions
+"tests/**/*" = [
+    "ANN",
+    "S",
+]
+"src/**/*" = [
+    "PT",
+]
 
-# Keep complexity below 28
-[tool.ruff.lint.mccabe]
-max-complexity = 28
-
-[tool.ruff.lint.isort]
-combine-as-imports = true
-lines-after-imports = 2
+[tool.ruff.lint.pyupgrade]
+keep-runtime-typing = true
 
 [tool.ruff.format]
-quote-style = "double"
-indent-style = "space"
-skip-magic-trailing-comma = false
-line-ending = "auto"
+docstring-code-format = true
 
-# HTML linting
 [tool.djlint]
 profile = "django"
 extension = "html"
 indent = 2
-
-# Auto-fixable rules only
 include = "H008,H009,H010,H014,H024,H026,H033,T028,T034"
-
-# Ignore troublesome rules that aren't auto-fixable or causing issues
 ignore = "D004,D018,H005,H006,H007,H011,H012,H013,H015,H016,H017,H019,H020,H021,H022,H023,H025,H029,H030,H031,H035,H036,H037,J004,J018,T001,T002,T003,T027,T032"
 
-# Markdown linting
 [tool.mdformat]
 wrap = true
 number = true
 
-# Semgrep configuration
 [tool.semgrep]
 config = [
-    "p/python", # Built-in Python rules
-    "semgrep", # Look for our other rules
-    "r/typescript.react.security.audit.react-dangerouslysetinnerhtml.react-dangerouslysetinnerhtml" # TypeScript React security rule
+    "p/python",
+    "semgrep",
+    "r/typescript.react.security.audit.react-dangerouslysetinnerhtml.react-dangerouslysetinnerhtml",
 ]
 ignore-patterns = [
-    "node_modules/",
-    "build/",
     "dist/",
     "vendor/",
     "env/",
     ".env/",
     "venv/",
     ".venv/",
-    ".tox/",
-    "*.min.js",
     "test/",
     "tests/",
-    "*_test.go",
     ".semgrep",
     "wheels/",
     ".html",
-    "*.md",
-    "*.svg"
+    ".md",
+    ".svg",
 ]
