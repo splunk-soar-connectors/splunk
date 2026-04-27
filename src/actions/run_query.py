@@ -18,7 +18,7 @@ class RunQueryParams(Params):
         description="Beginning command (in Splunk Processing Language)",
         required=False,
         value_list=["search", "eval", "savedsearch", "stats", "table", "tstats"],
-        default="search",
+        default="",
     )
     query: str = Param(
         description="Query to run (in Splunk Processing Language)",
