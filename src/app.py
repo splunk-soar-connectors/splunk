@@ -264,18 +264,31 @@ class SplunkHelper:
         return value
 
     def validate_asset(self):
-        if not self.asset.api_token and (not self.asset.username or not self.asset.password):
+        if not self.asset.api_token and (
+            not self.asset.username or not self.asset.password
+        ):
             raise ValueError(SPLUNK_ERR_REQUIRED_CONFIG_PARAMS)
 
         self.validate_integer(self.asset.retry_count, "'retry_count' configuration")
         self.validate_integer(self.asset.port, "'port' configuration")
-        self.validate_integer(self.asset.max_container, "'max_container' configuration", allow_zero=True)
-        self.validate_integer(self.asset.container_update_state, "'Container count to update the state file' configuration")
-        self.validate_integer(self.asset.splunk_job_timeout, "'splunk_job_timeout' configuration")
-        self.validate_integer(self.asset.sleeptime_in_requests, "'sleeptime_in_requests' configuration")
+        self.validate_integer(
+            self.asset.max_container, "'max_container' configuration", allow_zero=True
+        )
+        self.validate_integer(
+            self.asset.container_update_state,
+            "'Container count to update the state file' configuration",
+        )
+        self.validate_integer(
+            self.asset.splunk_job_timeout, "'splunk_job_timeout' configuration"
+        )
+        self.validate_integer(
+            self.asset.sleeptime_in_requests, "'sleeptime_in_requests' configuration"
+        )
 
         if self.asset.sleeptime_in_requests > 120:
-            raise ValueError(SPLUNK_ERR_INVALID_SLEEP_TIME.format(param="'sleeptime_in_requests'"))
+            raise ValueError(
+                SPLUNK_ERR_INVALID_SLEEP_TIME.format(param="'sleeptime_in_requests'")
+            )
 
     # -- proxy handler for splunklib ----------------------------------------
     def _proxy_request(self, url, message, **kwargs):
@@ -344,11 +357,17 @@ class SplunkHelper:
         except splunk_binding.HTTPError as e:
             error_text = str(e)
             if "405 Method Not Allowed" in error_text:
-                raise ConnectionError("Error occurred while connecting to the Splunk server") from e
-            raise ConnectionError(f"Error occurred while connecting to the Splunk server. Details: {error_text}") from e
+                raise ConnectionError(
+                    "Error occurred while connecting to the Splunk server"
+                ) from e
+            raise ConnectionError(
+                f"Error occurred while connecting to the Splunk server. Details: {error_text}"
+            ) from e
         except Exception as e:
             raise ConnectionError(
-                SPLUNK_EXCEPTION_ERR_MESSAGE.format(msg=SPLUNK_ERR_CONNECTIVITY_FAILED, error_text=e)
+                SPLUNK_EXCEPTION_ERR_MESSAGE.format(
+                    msg=SPLUNK_ERR_CONNECTIVITY_FAILED, error_text=e
+                )
             ) from e
 
     @property
@@ -358,7 +377,9 @@ class SplunkHelper:
         return self._service
 
     # -- REST calls ----------------------------------------------------------
-    def make_rest_call(self, endpoint: str, data, params: dict | None = None, method=requests.post) -> dict:
+    def make_rest_call(
+        self, endpoint: str, data, params: dict | None = None, method=requests.post
+    ) -> dict:
         url = f"{self._base_url}services/{endpoint}"
         logger.debug("Making REST call to %s", url)
 
@@ -380,12 +401,16 @@ class SplunkHelper:
             )
         except Exception as e:
             raise ConnectionError(
-                SPLUNK_EXCEPTION_ERR_MESSAGE.format(msg=SPLUNK_ERR_CONNECTIVITY_FAILED, error_text=e)
+                SPLUNK_EXCEPTION_ERR_MESSAGE.format(
+                    msg=SPLUNK_ERR_CONNECTIVITY_FAILED, error_text=e
+                )
             ) from e
 
         return self._process_response(r)
 
-    def make_rest_call_retry(self, endpoint: str, data, params: dict | None = None, method=requests.post) -> dict:
+    def make_rest_call_retry(
+        self, endpoint: str, data, params: dict | None = None, method=requests.post
+    ) -> dict:
         last_err = None
         for _ in range(self.asset.retry_count):
             try:
@@ -427,13 +452,29 @@ class SplunkHelper:
         if 200 <= r.status_code < 400:
             return resp_json or {}
 
-        error_type = resp_json.get("response", {}).get("messages", {}).get("msg", {}).get("@type") if resp_json else None
-        error_message = resp_json.get("response", {}).get("messages", {}).get("msg", {}).get("#text") if resp_json else None
+        error_type = (
+            resp_json.get("response", {})
+            .get("messages", {})
+            .get("msg", {})
+            .get("@type")
+            if resp_json
+            else None
+        )
+        error_message = (
+            resp_json.get("response", {})
+            .get("messages", {})
+            .get("msg", {})
+            .get("#text")
+            if resp_json
+            else None
+        )
         if error_type or error_message:
             error = f"ErrorType: {error_type} ErrorMessage: {error_message}"
         else:
             error = "Unable to parse xml response"
-        raise RuntimeError(f"Error from server. Status Code: {r.status_code} Data from server: {error}")
+        raise RuntimeError(
+            f"Error from server. Status Code: {r.status_code} Data from server: {error}"
+        )
 
     @staticmethod
     def _process_html_response(r: requests.Response) -> dict:
@@ -441,7 +482,9 @@ class SplunkHelper:
             soup = BeautifulSoup(r.text, "html.parser")
             for element in soup(["script", "style", "footer", "nav"]):
                 element.extract()
-            error_text = "\n".join(line.strip() for line in soup.text.split("\n") if line.strip())
+            error_text = "\n".join(
+                line.strip() for line in soup.text.split("\n") if line.strip()
+            )
         except Exception as e:
             error_text = SPLUNK_ERR_UNABLE_TO_PARSE_HTML_RESPONSE.format(error=e)
 
@@ -458,7 +501,9 @@ class SplunkHelper:
         try:
             resp_json = r.json()
         except Exception as e:
-            raise RuntimeError(SPLUNK_ERR_UNABLE_TO_PARSE_JSON_RESPONSE.format(error=e)) from e
+            raise RuntimeError(
+                SPLUNK_ERR_UNABLE_TO_PARSE_JSON_RESPONSE.format(error=e)
+            ) from e
 
         if 200 <= r.status_code < 399:
             return resp_json
@@ -474,10 +519,14 @@ class SplunkHelper:
         if resp_json.get("messages") and resp_json["messages"]:
             msg = resp_json["messages"][0]
             error = f"ErrorType: {msg.get('type')} ErrorMessage: {msg.get('text')}"
-            raise RuntimeError(f"Error from server. Status Code: {r.status_code} Data from server: {error}")
+            raise RuntimeError(
+                f"Error from server. Status Code: {r.status_code} Data from server: {error}"
+            )
 
         error_text = r.text.replace("{", "{{").replace("}", "}}")
-        raise RuntimeError(f"Error from server. Status Code: {r.status_code}. Data from server: {error_text}")
+        raise RuntimeError(
+            f"Error from server. Status Code: {r.status_code}. Data from server: {error_text}"
+        )
 
     # -- server info ---------------------------------------------------------
     def get_server_version(self) -> str:
@@ -508,7 +557,9 @@ class SplunkHelper:
                 logger.debug("Attempt %d to create splunk job failed: %s", attempt, e)
                 last_err = e
         raise RuntimeError(
-            SPLUNK_EXCEPTION_ERR_MESSAGE.format(msg=SPLUNK_ERR_UNABLE_TO_CREATE_JOB, error_text=last_err)
+            SPLUNK_EXCEPTION_ERR_MESSAGE.format(
+                msg=SPLUNK_ERR_UNABLE_TO_CREATE_JOB, error_text=last_err
+            )
         )
 
     def wait_for_job(self, job: splunk_client.Job):
@@ -528,16 +579,26 @@ class SplunkHelper:
                 logger.debug("Attempt %d to wait for job failed: %s", attempt, e)
                 last_err = e
         raise RuntimeError(
-            SPLUNK_EXCEPTION_ERR_MESSAGE.format(msg=SPLUNK_ERR_CONNECTIVITY_FAILED, error_text=last_err)
+            SPLUNK_EXCEPTION_ERR_MESSAGE.format(
+                msg=SPLUNK_ERR_CONNECTIVITY_FAILED, error_text=last_err
+            )
         )
 
     def get_job_stats(self, job) -> dict:
         return {
-            "is_done": job["isDone"] if "isDone" in job else "Unknown status",
-            "progress": float(job["doneProgress"]) * 100 if "doneProgress" in job else SPLUNK_JOB_FIELD_NOT_FOUND_MESSAGE.format(field="Done progress"),
-            "scan_count": int(job["scanCount"]) if "scanCount" in job else SPLUNK_JOB_FIELD_NOT_FOUND_MESSAGE.format(field="Scan count"),
-            "event_count": int(job["eventCount"]) if "eventCount" in job else SPLUNK_JOB_FIELD_NOT_FOUND_MESSAGE.format(field="Event count"),
-            "result_count": int(job["resultCount"]) if "resultCount" in job else SPLUNK_JOB_FIELD_NOT_FOUND_MESSAGE.format(field="Result count"),
+            "is_done": job.get("isDone", "Unknown status"),
+            "progress": float(job["doneProgress"]) * 100
+            if "doneProgress" in job
+            else SPLUNK_JOB_FIELD_NOT_FOUND_MESSAGE.format(field="Done progress"),
+            "scan_count": int(job["scanCount"])
+            if "scanCount" in job
+            else SPLUNK_JOB_FIELD_NOT_FOUND_MESSAGE.format(field="Scan count"),
+            "event_count": int(job["eventCount"])
+            if "eventCount" in job
+            else SPLUNK_JOB_FIELD_NOT_FOUND_MESSAGE.format(field="Event count"),
+            "result_count": int(job["resultCount"])
+            if "resultCount" in job
+            else SPLUNK_JOB_FIELD_NOT_FOUND_MESSAGE.format(field="Result count"),
         }
 
     def validate_query(self, search_query: str, parse_only: bool = True):
@@ -550,17 +611,27 @@ class SplunkHelper:
                 self.connect()
                 if attempt == self.asset.retry_count - 1:
                     raise ValueError(
-                        SPLUNK_EXCEPTION_ERR_MESSAGE.format(msg=f"Query invalid '{search_query}'", error_text=e)
+                        SPLUNK_EXCEPTION_ERR_MESSAGE.format(
+                            msg=f"Query invalid '{search_query}'", error_text=e
+                        )
                     ) from e
             except Exception as e:
                 self._service = None
                 self.connect()
                 if attempt == self.asset.retry_count - 1:
                     raise RuntimeError(
-                        SPLUNK_EXCEPTION_ERR_MESSAGE.format(msg=SPLUNK_ERR_CONNECTIVITY_FAILED, error_text=e)
+                        SPLUNK_EXCEPTION_ERR_MESSAGE.format(
+                            msg=SPLUNK_ERR_CONNECTIVITY_FAILED, error_text=e
+                        )
                     ) from e
 
-    def run_query(self, search_query: str, kwargs_create: dict | None = None, parse_only: bool = True, add_raw_field: bool = True) -> tuple[str, list[dict]]:
+    def run_query(
+        self,
+        search_query: str,
+        kwargs_create: dict | None = None,
+        parse_only: bool = True,
+        add_raw_field: bool = True,
+    ) -> tuple[str, list[dict]]:
         if kwargs_create is None:
             kwargs_create = {}
 
@@ -587,7 +658,9 @@ class SplunkHelper:
             )
         except Exception as e:
             raise RuntimeError(
-                SPLUNK_EXCEPTION_ERR_MESSAGE.format(msg="Error retrieving results", error_text=e)
+                SPLUNK_EXCEPTION_ERR_MESSAGE.format(
+                    msg="Error retrieving results", error_text=e
+                )
             ) from e
 
         for result in results:
@@ -612,7 +685,9 @@ class SplunkHelper:
         splunk_dict: dict[str, int] = {}
         try:
             resp = self.make_rest_call_retry(
-                "alerts/reviewstatuses?count=-1&output_mode=json", {}, method=requests.get
+                "alerts/reviewstatuses?count=-1&output_mode=json",
+                {},
+                method=requests.get,
             )
         except Exception:
             return splunk_dict
@@ -653,7 +728,9 @@ def test_connectivity(soar: SOARClient, asset: Asset) -> None:
         raise RuntimeError(SPLUNK_ERR_CONNECTIVITY_TEST)
 
     is_es = helper.check_for_es()
-    logger.progress("Detected Splunk %sserver version %s", "ES " if is_es else "", version)
+    logger.progress(
+        "Detected Splunk %sserver version %s", "ES " if is_es else "", version
+    )
     soar.set_message(SPLUNK_SUCCESS_CONNECTIVITY_TEST)
     logger.info(SPLUNK_SUCCESS_CONNECTIVITY_TEST)
 

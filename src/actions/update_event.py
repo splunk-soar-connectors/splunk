@@ -27,34 +27,60 @@ class UpdateEventParams(Params):
         primary=True,
         cef_types=["splunk notable event id"],
     )
-    owner: str = Param(description="New owner for the event", required=False, default="")
+    owner: str = Param(
+        description="New owner for the event", required=False, default=""
+    )
     status: str = Param(
         description="New status for the event",
         required=False,
         default="",
-        value_list=["", "unassigned", "new", "in progress", "pending", "resolved", "closed"],
+        value_list=[
+            "",
+            "unassigned",
+            "new",
+            "in progress",
+            "pending",
+            "resolved",
+            "closed",
+        ],
     )
-    integer_status: str = Param(description="Integer representing custom status value", required=False, default="")
+    integer_status: str = Param(
+        description="Integer representing custom status value",
+        required=False,
+        default="",
+    )
     urgency: str = Param(
         description="New urgency for the event",
         required=False,
         default="",
         value_list=["", "informational", "low", "medium", "high", "critical"],
     )
-    comment: str = Param(description="New comment for the event", required=False, default="")
+    comment: str = Param(
+        description="New comment for the event", required=False, default=""
+    )
     disposition: str = Param(
         description="New disposition field",
         required=False,
         default="",
         value_list=[
-            "", "Unassigned", "True Positive - Suspicious Activity",
+            "",
+            "Unassigned",
+            "True Positive - Suspicious Activity",
             "Benign Positive - Suspicious But Expected",
             "False Positive - Incorrect Analytic Logic",
-            "False Positive - Inaccurate Data", "Undetermined", "Other",
+            "False Positive - Inaccurate Data",
+            "Undetermined",
+            "Other",
         ],
     )
-    integer_disposition: str = Param(description="Integer representing custom disposition value", required=False, default="")
-    wait_for_confirmation: bool = Param(description="Validate event_ids", required=False, default=False)
+    integer_disposition: str = Param(
+        description="Integer representing custom disposition value",
+        required=False,
+        default="",
+    )
+    wait_for_confirmation: bool = Param(
+        description="Validate event_ids", required=False, default=False
+    )
 
 
 class UpdateEventOutput(ActionOutput):
@@ -77,7 +103,9 @@ class UpdateEventSummary(ActionOutput):
     render_as="table",
     summary_type=UpdateEventSummary,
 )
-def update_event(params: UpdateEventParams, soar: SOARClient, asset: Asset) -> list[UpdateEventOutput]:
+def update_event(
+    params: UpdateEventParams, soar: SOARClient, asset: Asset
+) -> list[UpdateEventOutput]:
     helper = SplunkHelper(asset)
     helper.validate_asset()
 
@@ -99,7 +127,11 @@ def update_event(params: UpdateEventParams, soar: SOARClient, asset: Asset) -> l
         params.integer_disposition, "'integer_disposition' action", allow_zero=True
     )
 
-    if not any([comment, status, urgency, owner, disposition]) and integer_status is None and integer_disposition is None:
+    if (
+        not any([comment, status, urgency, owner, disposition])
+        and integer_status is None
+        and integer_disposition is None
+    ):
         raise ValueError(SPLUNK_ERR_NEED_PARAM)
 
     splunk_status_dict: dict[str, int] = {}
@@ -124,7 +156,9 @@ def update_event(params: UpdateEventParams, soar: SOARClient, asset: Asset) -> l
         try:
             ids = helper.resolve_event_id(ids)
         except Exception:
-            raise RuntimeError("Unable to find underlying event_id from SID + RID combo") from None
+            raise RuntimeError(
+                "Unable to find underlying event_id from SID + RID combo"
+            ) from None
 
     if wait_for_confirmation:
         search_query = f"search `notable_by_id({ids})`"
@@ -157,14 +191,20 @@ def update_event(params: UpdateEventParams, soar: SOARClient, asset: Asset) -> l
                 "Please provide a valid value in 'integer_disposition' action parameter. "
                 f"Valid values: {', '.join(map(str, splunk_disposition_dict.values()))}"
             )
-        request_body["disposition"] = SPLUNK_DISPOSITION_QUERY_FORMAT.format(integer_disposition)
+        request_body["disposition"] = SPLUNK_DISPOSITION_QUERY_FORMAT.format(
+            integer_disposition
+        )
     elif disposition:
         if disposition not in splunk_disposition_dict:
             if not disposition.isdigit():
                 raise ValueError(SPLUNK_ERR_BAD_DISPOSITION)
-            request_body["disposition"] = SPLUNK_DISPOSITION_QUERY_FORMAT.format(disposition)
+            request_body["disposition"] = SPLUNK_DISPOSITION_QUERY_FORMAT.format(
+                disposition
+            )
         else:
-            request_body["disposition"] = SPLUNK_DISPOSITION_QUERY_FORMAT.format(splunk_disposition_dict[disposition])
+            request_body["disposition"] = SPLUNK_DISPOSITION_QUERY_FORMAT.format(
+                splunk_disposition_dict[disposition]
+            )
 
     param_mapping = {"urgency": urgency, "comment": comment, "newOwner": owner}
     request_body.update({k: v for k, v in param_mapping.items() if v})

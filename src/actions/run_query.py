@@ -26,19 +26,31 @@ class RunQueryParams(Params):
         primary=True,
         cef_types=["splunk query"],
     )
-    display: str = Param(description="Display fields (comma-separated)", required=False, default="")
+    display: str = Param(
+        description="Display fields (comma-separated)", required=False, default=""
+    )
     parse_only: bool = Param(description="Parse only", required=False, default=False)
-    add_raw_field: bool = Param(description="Ingest _raw field data", required=False, default=True)
-    attach_result: bool = Param(description="Attach result to the vault", required=False, default=False)
-    start_time: str = Param(description="Earliest time modifier", required=False, default="")
-    end_time: str = Param(description="Latest time modifier", required=False, default="")
+    add_raw_field: bool = Param(
+        description="Ingest _raw field data", required=False, default=True
+    )
+    attach_result: bool = Param(
+        description="Attach result to the vault", required=False, default=False
+    )
+    start_time: str = Param(
+        description="Earliest time modifier", required=False, default=""
+    )
+    end_time: str = Param(
+        description="Latest time modifier", required=False, default=""
+    )
     search_mode: str = Param(
         description="Search mode",
         required=False,
         value_list=["fast", "verbose", "smart"],
         default="smart",
     )
-    time_format: str = Param(description="Custom timestamp format", required=False, default="")
+    time_format: str = Param(
+        description="Custom timestamp format", required=False, default=""
+    )
 
 
 class RunQueryOutput(PermissiveActionOutput):
@@ -67,7 +79,11 @@ def display_view(outputs: list[RunQueryOutput]) -> dict:
 
     all_data = []
     for output in outputs:
-        data = {k: v for k, v in output.model_dump(exclude_none=True).items() if not k.startswith("_")}
+        data = {
+            k: v
+            for k, v in output.model_dump(exclude_none=True).items()
+            if not k.startswith("_")
+        }
         all_data.append(data)
 
     if display_fields:
@@ -80,12 +96,14 @@ def display_view(outputs: list[RunQueryOutput]) -> dict:
     processed_data = [{h: item.get(h) for h in headers} for item in all_data]
 
     return {
-        "results": [{
-            "param": param,
-            "data": all_data or {},
-            "processed_data": processed_data,
-            "headers": headers,
-        }],
+        "results": [
+            {
+                "param": param,
+                "data": all_data or {},
+                "processed_data": processed_data,
+                "headers": headers,
+            }
+        ],
     }
 
 
@@ -96,7 +114,9 @@ def display_view(outputs: list[RunQueryOutput]) -> dict:
     view_handler=display_view,
     summary_type=RunQuerySummary,
 )
-def run_query(params: RunQueryParams, soar: SOARClient, asset: Asset) -> list[RunQueryOutput]:
+def run_query(
+    params: RunQueryParams, soar: SOARClient, asset: Asset
+) -> list[RunQueryOutput]:
     helper = SplunkHelper(asset)
     helper.validate_asset()
     helper.connect()

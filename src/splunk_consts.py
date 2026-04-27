@@ -19,27 +19,41 @@ SPLUNK_ERR_CONNECTIVITY_TEST = "Connectivity test failed"
 SPLUNK_SUCCESS_CONNECTIVITY_TEST = "Connectivity test passed"
 SPLUNK_ERR_CONNECTIVITY_FAILED = "Failed to connect to splunk server"
 SPLUNK_ERR_UNABLE_TO_CREATE_JOB = "Failed to get a job id from splunk server"
-SPLUNK_ERR_NOT_ES = "This instance does not seem to be Splunk ES. This action cannot be run"
-SPLUNK_ERR_INVALID_TIME_RANGE = "Invalid Time range specified, where the end time is less than start time"
+SPLUNK_ERR_NOT_ES = (
+    "This instance does not seem to be Splunk ES. This action cannot be run"
+)
+SPLUNK_ERR_INVALID_TIME_RANGE = (
+    "Invalid Time range specified, where the end time is less than start time"
+)
 SPLUNK_ERR_NEED_PARAM = (
     "One of comment, status, integer_status, disposition, integer_disposition, "
     "urgency, or owner parameters needs to be supplied to run this action"
 )
-SPLUNK_ERR_INVALID_INTEGER = "Please provide a valid integer value in the {param} parameter"
-SPLUNK_ERR_NON_NEGATIVE_INTEGER = "Please provide a valid non-negative integer value in the {param} parameter"
+SPLUNK_ERR_INVALID_INTEGER = (
+    "Please provide a valid integer value in the {param} parameter"
+)
+SPLUNK_ERR_NON_NEGATIVE_INTEGER = (
+    "Please provide a valid non-negative integer value in the {param} parameter"
+)
 SPLUNK_ERR_INVALID_PARAM = "Please provide non-zero positive integer in {param}"
 SPLUNK_ERR_MESSAGE_UNAVAILABLE = "Error message unavailable. Please check the asset configuration and|or action parameters."
 SPLUNK_EXCEPTION_ERR_MESSAGE = "{msg}. {error_text}"
 SPLUNK_JOB_FIELD_NOT_FOUND_MESSAGE = "{field} not found"
-SPLUNK_ERR_INVALID_SLEEP_TIME = "Please provide a value <= 120 seconds in the {param} parameter"
+SPLUNK_ERR_INVALID_SLEEP_TIME = (
+    "Please provide a value <= 120 seconds in the {param} parameter"
+)
 SPLUNK_ERR_REQUIRED_CONFIG_PARAMS = (
     "Please provide either API token or username and password in the asset "
     "configuration parameters for authentication"
 )
-SPLUNK_ERR_SPLUNK_JOB_HAS_TIMED_OUT = "Failed to retrieve splunk job results. The splunk job has timed out."
+SPLUNK_ERR_SPLUNK_JOB_HAS_TIMED_OUT = (
+    "Failed to retrieve splunk job results. The splunk job has timed out."
+)
 SPLUNK_ERR_UNABLE_TO_PARSE_JSON_RESPONSE = "Unable to parse response as JSON. {error}"
 SPLUNK_ERR_UNABLE_TO_PARSE_HTML_RESPONSE = "Unable to parse HTML response. {error}"
-SPLUNK_ERR_EMPTY_RESPONSE = "Status Code {code}. Empty response and no information in the header."
+SPLUNK_ERR_EMPTY_RESPONSE = (
+    "Status Code {code}. Empty response and no information in the header."
+)
 
 # Progress messages
 SPLUNK_PROG_CREATED_QUERY = "Created query '{query}'"
@@ -108,8 +122,12 @@ CIM_CEF_MAP = {
 
 # Queries
 SPLUNK_RID_SID_NOTABLE_QUERY = r'search [| makeresults | eval myfield = "{}"'
-SPLUNK_RID_SID_NOTABLE_QUERY += r' | rex field=myfield "^(?<sid>.*)\+(?<rid>\d*(\.\d+)?)"'
-SPLUNK_RID_SID_NOTABLE_QUERY += r' | eval search = "( (sid::" . sid . " OR orig_sid::" . sid . ")'
+SPLUNK_RID_SID_NOTABLE_QUERY += (
+    r' | rex field=myfield "^(?<sid>.*)\+(?<rid>\d*(\.\d+)?)"'
+)
+SPLUNK_RID_SID_NOTABLE_QUERY += (
+    r' | eval search = "( (sid::" . sid . " OR orig_sid::" . sid . ")'
+)
 SPLUNK_RID_SID_NOTABLE_QUERY += r' (rid::" . rid . " OR orig_rid::" . rid . ") )"'
 SPLUNK_RID_SID_NOTABLE_QUERY += r" | table search] `notable` | table event_id"
 

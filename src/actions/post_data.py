@@ -22,7 +22,9 @@ class PostDataParams(Params):
         cef_types=["ip", "host name"],
     )
     index: str = Param(description="Index to send event to", required=False, default="")
-    source: str = Param(description="Source for event", required=False, default="Phantom")
+    source: str = Param(
+        description="Source for event", required=False, default="Phantom"
+    )
     source_type: str = Param(
         description="Type of source for event",
         required=False,
@@ -41,7 +43,9 @@ class PostDataOutput(ActionOutput):
     read_only=False,
     render_as="table",
 )
-def post_data(params: PostDataParams, soar: SOARClient, asset: Asset) -> list[PostDataOutput]:
+def post_data(
+    params: PostDataParams, soar: SOARClient, asset: Asset
+) -> list[PostDataOutput]:
     helper = SplunkHelper(asset)
     helper.validate_asset()
 

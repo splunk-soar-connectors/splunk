@@ -3,7 +3,7 @@
 import hashlib
 import json
 from collections.abc import Iterator
-from datetime import UTC, datetime
+from datetime import UTC
 
 from bs4.dammit import UnicodeDammit
 from soar_sdk.abstract import SOARClient
@@ -23,6 +23,7 @@ def _get_event_start(start_time: str | None) -> str | None:
         return None
     try:
         from dateutil.parser import ParserError, parse as dateutil_parse
+
         datetime_obj = dateutil_parse(start_time)
         return datetime_obj.astimezone(UTC).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
     except ParserError as e:
@@ -35,7 +36,8 @@ def _get_event_start(start_time: str | None) -> str | None:
 
 def _get_fips_enabled() -> bool:
     try:
-        from phantom_common.install_info import is_fips_enabled  # noqa: PLC0415
+        from phantom_common.install_info import is_fips_enabled
+
         return is_fips_enabled()
     except ImportError:
         return False
@@ -81,7 +83,9 @@ def _get_splunk_title(item: dict, prefix: str, name_values: list[str]) -> str:
 
 
 @app.on_poll()
-def on_poll(params: OnPollParams, soar: SOARClient, asset: Asset) -> Iterator[Container | Artifact]:
+def on_poll(
+    params: OnPollParams, soar: SOARClient, asset: Asset
+) -> Iterator[Container | Artifact]:
     helper = SplunkHelper(asset)
     helper.validate_asset()
     helper.connect()
@@ -122,11 +126,16 @@ def on_poll(params: OnPollParams, soar: SOARClient, asset: Asset) -> Iterator[Co
         search_params.pop("max_count")
 
     try:
-        _sid, results_list = helper.run_query(search_query, kwargs_create=search_params, parse_only=po)
+        _sid, results_list = helper.run_query(
+            search_query, kwargs_create=search_params, parse_only=po
+        )
     except Exception as e:
         msg = str(e)
         if "Invalid index_earliest" in msg:
-            logger.debug("Invalid start_time %s, retrying without it", search_params.get("index_earliest"))
+            logger.debug(
+                "Invalid start_time %s, retrying without it",
+                search_params.get("index_earliest"),
+            )
             state.pop("start_time", None)
         raise
 
@@ -140,7 +149,9 @@ def on_poll(params: OnPollParams, soar: SOARClient, asset: Asset) -> Iterator[Co
 
     container_name_prefix = asset.container_name_prefix or ""
     raw_values = asset.container_name_values
-    container_name_values = [x.strip() for x in raw_values.split(",")] if raw_values else []
+    container_name_values = (
+        [x.strip() for x in raw_values.split(",")] if raw_values else []
+    )
 
     count = 1
     for item in data:
@@ -168,8 +179,12 @@ def on_poll(params: OnPollParams, soar: SOARClient, asset: Asset) -> Iterator[Co
                 sdi = item["event_id"]
             else:
                 if use_event_id_sdi and "event_id" not in item:
-                    logger.warning("use_event_id_sdi enabled but event_id missing, using hash")
-                input_str = UnicodeDammit(json.dumps(item)).unicode_markup.encode("utf-8")
+                    logger.warning(
+                        "use_event_id_sdi enabled but event_id missing, using hash"
+                    )
+                input_str = UnicodeDammit(json.dumps(item)).unicode_markup.encode(
+                    "utf-8"
+                )
                 if _get_fips_enabled():
                     sdi = hashlib.sha256(input_str).hexdigest()
                 else:
@@ -177,7 +192,9 @@ def on_poll(params: OnPollParams, soar: SOARClient, asset: Asset) -> Iterator[Co
 
             severity = _get_splunk_severity(item)
             spl_event_start = _get_event_start(item.get("_time"))
-            container_name = _get_splunk_title(item, container_name_prefix, container_name_values)
+            container_name = _get_splunk_title(
+                item, container_name_prefix, container_name_values
+            )
 
             yield Container(
                 name=container_name,

@@ -14,7 +14,9 @@ class GetHostEventsParams(Params):
         primary=True,
         cef_types=["ip", "host name"],
     )
-    last_n_days: str = Param(description="Number of days ago", required=False, default="")
+    last_n_days: str = Param(
+        description="Number of days ago", required=False, default=""
+    )
 
 
 class GetHostEventsOutput(PermissiveActionOutput):
@@ -35,13 +37,17 @@ class GetHostEventsSummary(ActionOutput):
     render_as="table",
     summary_type=GetHostEventsSummary,
 )
-def get_host_events(params: GetHostEventsParams, soar: SOARClient, asset: Asset) -> list[GetHostEventsOutput]:
+def get_host_events(
+    params: GetHostEventsParams, soar: SOARClient, asset: Asset
+) -> list[GetHostEventsOutput]:
     helper = SplunkHelper(asset)
     helper.validate_asset()
     helper.connect()
 
     ip_hostname = params.ip_hostname
-    last_n_days = SplunkHelper.validate_integer(params.last_n_days, "'last_n_days' action")
+    last_n_days = SplunkHelper.validate_integer(
+        params.last_n_days, "'last_n_days' action"
+    )
 
     search_query = f'search host="{ip_hostname}"'
     if last_n_days:
