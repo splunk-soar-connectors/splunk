@@ -586,7 +586,7 @@ class SplunkHelper:
 
     def get_job_stats(self, job) -> dict:
         return {
-            "is_done": job.get("isDone", "Unknown status"),
+            "is_done": job["isDone"] if "isDone" in job else "Unknown status",  # noqa: SIM401 - job is a splunklib Entity, not a dict
             "progress": float(job["doneProgress"]) * 100
             if "doneProgress" in job
             else SPLUNK_JOB_FIELD_NOT_FOUND_MESSAGE.format(field="Done progress"),
