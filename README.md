@@ -42,6 +42,7 @@ VARIABLE | REQUIRED | TYPE | DESCRIPTION
 
 [test connectivity](#action-test-connectivity) - test connectivity <br>
 [get host events](#action-get-host-events) - Get events pertaining to a host that have occurred in the last 'N' days <br>
+[make request](#action-make-request) - make request <br>
 [on poll](#action-on-poll) - on poll <br>
 [post data](#action-post-data) - Post data to Splunk <br>
 [run query](#action-run-query) - Run a search query on the Splunk device. Please escape any quotes that are part of the query string <br>
@@ -96,6 +97,45 @@ action_result.data.\*.\_time | string | | |
 action_result.data.\*.\_raw | string | | |
 action_result.summary.sid | string | | |
 action_result.summary.total_events | numeric | | |
+summary.total_objects | numeric | | 1 |
+summary.total_objects_successful | numeric | | 1 |
+
+## action: 'make request'
+
+make request
+
+Type: **generic** <br>
+Read only: **False**
+
+'make request' action for the app. Used to handle arbitrary HTTP requests with the app's asset
+
+#### Action Parameters
+
+PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
+--------- | -------- | ----------- | ---- | --------
+**http_method** | required | The HTTP method to use for the request. | string | |
+**endpoint** | required | Splunk REST API endpoint to call, appended to https://<device>:<port>/. Example: 'services/search/jobs' | string | |
+**headers** | optional | The headers to send with the request (JSON object). An example is {'Content-Type': 'application/json'} | string | |
+**query_parameters** | optional | Parameters to append to the URL (JSON object or query string). An example is ?key=value&key2=value2 | string | |
+**body** | optional | The body to send with the request (JSON object). An example is {'key': 'value', 'key2': 'value2'} | string | |
+**timeout** | optional | The timeout for the request in seconds. | numeric | |
+**verify_ssl** | optional | Whether to verify the SSL certificate. Defaults to the asset's 'Verify Server Certificate' setting. | boolean | |
+
+#### Action Output
+
+DATA PATH | TYPE | CONTAINS | EXAMPLE VALUES
+--------- | ---- | -------- | --------------
+action_result.status | string | | success failure |
+action_result.message | string | | |
+action_result.parameter.http_method | string | | |
+action_result.parameter.endpoint | string | | |
+action_result.parameter.headers | string | | |
+action_result.parameter.query_parameters | string | | |
+action_result.parameter.body | string | | |
+action_result.parameter.timeout | numeric | | |
+action_result.parameter.verify_ssl | boolean | | |
+action_result.data.\*.status_code | numeric | | 200 |
+action_result.data.\*.response_body | string | | {} |
 summary.total_objects | numeric | | 1 |
 summary.total_objects_successful | numeric | | 1 |
 

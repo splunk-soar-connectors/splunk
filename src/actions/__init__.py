@@ -11,4 +11,4 @@
 # either express or implied. See the License for the specific language governing permissions
 # and limitations under the License.
 
-from . import get_host_events, on_poll, post_data, run_query, update_event  # noqa: F401
+from . import get_host_events, make_request, on_poll, post_data, run_query, update_event  # noqa: F401
