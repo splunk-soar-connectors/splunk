@@ -168,6 +168,21 @@ For sending events to Splunk Platform, the User configured in the asset would re
 
 - Use the integer status field to set custom status values (e.g., 1 for 'New', 2 for 'In Progress', etc.). Similarly, use the integer disposition field for custom disposition values (e.g., 0 for 'Undetermined').
 
+## Make Request
+
+- This action allows executing arbitrary Splunk REST API calls using the asset's configured
+  credentials and connection settings.
+
+- The **endpoint** parameter is appended to the base URL derived from the asset's device and port
+  (e.g., `https://<device>:<port>/`). Do not include the base URL in the endpoint parameter.
+  Example: `services/search/jobs`, `services/server/info`
+
+- The **verify_ssl** parameter defaults to the asset's **Verify Server Certificate** setting if
+  not explicitly provided.
+
+- Authentication uses the asset's API token (Bearer) or username/password, consistent with all
+  other actions in this app.
+
 ## On Poll
 
 - There are two approaches to polling as mentioned below.
@@ -175,7 +190,7 @@ For sending events to Splunk Platform, the User configured in the asset would re
   - POLL NOW (Manual polling)
 
     - It will fetch the data every time as per the corresponding asset configuration
-      parameters. It doesn’t store the last run context of the fetched data.
+      parameters. It doesn't store the last run context of the fetched data.
 
   - Scheduled/Interval Polling
 
@@ -281,9 +296,9 @@ There can exist more such characters apart from the ones listed above.
 The app uses HTTP/ HTTPS protocol for communicating with the Splunk server. Below are the default
 ports used by Splunk SOAR.
 
-|         SERVICE NAME | TRANSPORT PROTOCOL | PORT |
+| SERVICE NAME | TRANSPORT PROTOCOL | PORT |
 |----------------------|--------------------|------|
-|         http | tcp | 80 |
-|         https | tcp | 443 |
+| http | tcp | 80 |
+| https | tcp | 443 |
 
 8089 is the default port used by Splunk Server.

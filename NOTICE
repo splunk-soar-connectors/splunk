@@ -1,12 +1,3 @@
-Splunk SOAR App: Splunk
-Copyright (c) 2016-2025 Splunk Inc.
+Splunk SOAR App: splunk
+Copyright (c) 2016-2026 Splunk Inc.
 Third Party Software Attributions:
-
-@@@@============================================================================
-
-Library: splunk-sdk - 2.1.0
-Homepage: http://github.com/splunk/splunk-sdk-python
-License: Apache Software License
-License Text:
-
-Please navigate to http://github.com/splunk/splunk-sdk-python to obtain a copy of the license.
