@@ -31,10 +31,13 @@ from bs4 import BeautifulSoup
 from soar_sdk.abstract import SOARClient
 from soar_sdk.app import App
 from soar_sdk.asset import AssetField, BaseAsset, FieldCategory
+from soar_sdk.exceptions import ActionFailure
 from soar_sdk.logging import getLogger
 
 from .splunk_consts import (
     SPLUNK_DEFAULT_REQUEST_TIMEOUT,
+    SPLUNK_ERR_API_AUTH_FAILED,
+    SPLUNK_ERR_BASIC_AUTH_FAILED,
     SPLUNK_ERR_CONNECTIVITY_FAILED,
     SPLUNK_ERR_CONNECTIVITY_TEST,
     SPLUNK_ERR_EMPTY_RESPONSE,
@@ -415,6 +418,8 @@ class SplunkHelper:
         for _ in range(self.asset.retry_count):
             try:
                 return self.make_rest_call(endpoint, data, params, method)
+            except ActionFailure:
+                raise
             except Exception as e:
                 last_err = e
         raise last_err  # type: ignore[misc]
@@ -422,6 +427,8 @@ class SplunkHelper:
     # -- response processing -------------------------------------------------
     def _process_response(self, r: requests.Response) -> dict:
         content_type = r.headers.get("Content-Type", "")
+        if r.status_code in (401, 403):
+            self._handle_auth_error_response(r)
         if "json" in content_type:
             return self._process_json_response(r)
         if "html" in content_type:
@@ -435,6 +442,14 @@ class SplunkHelper:
         raise RuntimeError(
             f"Can't process response from server. Status Code: {r.status_code} Data from server: {error_text}"
         )
+
+    def _handle_auth_error_response(self, r: requests.Response) -> None:
+        msg = (
+            SPLUNK_ERR_API_AUTH_FAILED
+            if self.asset.api_token
+            else SPLUNK_ERR_BASIC_AUTH_FAILED
+        )
+        raise ActionFailure(msg)
 
     @staticmethod
     def _process_empty_response(r: requests.Response) -> dict:
@@ -534,6 +549,8 @@ class SplunkHelper:
             resp = self.make_rest_call_retry(
                 "authentication/users?output_mode=json", {}, method=requests.get
             )
+        except ActionFailure:
+            raise
         except Exception:
             return "FAILURE"
         return resp.get("generator", {}).get("version", "UNKNOWN")
@@ -544,6 +561,8 @@ class SplunkHelper:
                 "apps/local/SplunkEnterpriseSecuritySuite", {}, method=requests.get
             )
             return bool(resp)
+        except ActionFailure:
+            raise
         except Exception:
             return False
 
@@ -719,15 +738,27 @@ def test_connectivity(soar: SOARClient, asset: Asset) -> None:
     try:
         helper.connect()
     except Exception as e:
-        soar.set_message(SPLUNK_ERR_CONNECTIVITY_TEST)
-        raise RuntimeError(f"{SPLUNK_ERR_CONNECTIVITY_TEST}: {e}") from e
+        msg = f"{SPLUNK_ERR_CONNECTIVITY_TEST}: {e}"
+        soar.set_message(msg)
+        raise ActionFailure(msg) from e
 
-    version = helper.get_server_version()
+    try:
+        version = helper.get_server_version()
+    except ActionFailure as e:
+        soar.set_message(e.message)
+        raise
     if version == "FAILURE":
         soar.set_message(SPLUNK_ERR_CONNECTIVITY_TEST)
-        raise RuntimeError(SPLUNK_ERR_CONNECTIVITY_TEST)
+        raise ActionFailure(SPLUNK_ERR_CONNECTIVITY_TEST)
 
-    is_es = helper.check_for_es()
+    try:
+        is_es = helper.check_for_es()
+    except ActionFailure as e:
+        soar.set_message(e.message)
+        raise
+    except Exception as e:
+        soar.set_message(str(e))
+        raise ActionFailure(str(e)) from e
     logger.progress(
         "Detected Splunk %sserver version %s", "ES " if is_es else "", version
     )

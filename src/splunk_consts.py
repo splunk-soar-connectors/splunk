@@ -18,6 +18,10 @@ SPLUNK_ERR_BAD_DISPOSITION = "The supplied disposition is invalid"
 SPLUNK_ERR_CONNECTIVITY_TEST = "Connectivity test failed"
 SPLUNK_SUCCESS_CONNECTIVITY_TEST = "Connectivity test passed"
 SPLUNK_ERR_CONNECTIVITY_FAILED = "Failed to connect to splunk server"
+SPLUNK_ERR_API_AUTH_FAILED = "Authentication failed using the Splunk API token"
+SPLUNK_ERR_BASIC_AUTH_FAILED = (
+    "Authentication failed using the Splunk username/password"
+)
 SPLUNK_ERR_UNABLE_TO_CREATE_JOB = "Failed to get a job id from splunk server"
 SPLUNK_ERR_NOT_ES = (
     "This instance does not seem to be Splunk ES. This action cannot be run"
