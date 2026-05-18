@@ -1,3 +1,2 @@
 **Unreleased**
-
-* Improved Splunk authentication error handling during connectivity checks.
+* Fixed the issue where playbooks were not executing when the app was ingesting new containers

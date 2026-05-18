@@ -211,6 +211,7 @@ def on_poll(
                 source_data_identifier=sdi,
                 severity=severity,
                 start_time=spl_event_start,
+                run_automation=True,
             )
 
             if count == asset.container_update_state and not is_poll_now:
