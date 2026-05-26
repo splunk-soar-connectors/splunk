@@ -55,7 +55,7 @@ def http_action(
     if params.endpoint.startswith(("http://", "https://")):
         raise ActionFailure(
             f"Invalid endpoint: {params.endpoint}. Do not include the base URL — "
-            "it is derived from the asset configuration."
+            "it is derived from the asset configuration!"
         )
 
     base_url = f"https://{asset.device}:{asset.port}/"
