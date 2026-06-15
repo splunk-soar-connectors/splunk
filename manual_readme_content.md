@@ -1,6 +1,9 @@
 ## App's Token-Based Authentication Workflow
 
-- This app also supports API token based authentication.
+- API token-based authentication is the recommended authentication method for this app.
+
+- Basic authentication with username and password remains supported for existing assets, but use
+  token authentication for new assets whenever possible.
 
 - Please follow the steps mentioned in this
   [documentation](https://docs.splunk.com/Documentation/Splunk/9.0.0/Security/CreateAuthTokens) to
@@ -35,11 +38,14 @@ Please check the permissions for the state file as mentioned below.
 
 The endpoint used by the post data action is not supported on Splunk Cloud Platform. Hence, the following steps are not applicable for Splunk Cloud Platform.
 
-For sending events to Splunk Platform, the User configured in the asset would require **edit_tcp** capability. Follow the below steps to configure
+For sending events to Splunk Platform, the user associated with the asset's API token, or the
+username when using basic authentication, requires **edit_tcp** capability. Follow these steps to
+configure it:
 
 - Login to the Splunk Platform
 - Go to **Setting > Roles**
-- Click on role of the user configured in the asset(example: user) and go to **Capabilities**
+- Click the role for the user associated with the API token or username configured in the asset
+  (example: user) and go to **Capabilities**
 - Search for '**edit_tcp**' in the capabilities enable it for the particular role
 - To check if the capability is given to your user, go to **Settings > Users** and in the **Edit dropdown** and select **View Capabilities**
 - Search for '**edit_tcp**' and if a tick besides it appears then the permission has been enabled for the user
@@ -180,8 +186,8 @@ For sending events to Splunk Platform, the User configured in the asset would re
 - The **verify_ssl** parameter defaults to the asset's **Verify Server Certificate** setting if
   not explicitly provided.
 
-- Authentication uses the asset's API token (Bearer) or username/password, consistent with all
-  other actions in this app.
+- Authentication uses the asset's API token (Bearer) when configured, otherwise it falls back to
+  username/password basic authentication. Token authentication is the recommended configuration.
 
 ## On Poll
 

@@ -77,20 +77,20 @@ class Asset(BaseAsset):
         category=FieldCategory.CONNECTIVITY,
     )
     username: str = AssetField(
-        description="Username",
+        description="Username for basic auth (API token preferred)",
         required=False,
         default="",
         category=FieldCategory.CONNECTIVITY,
     )
     password: str = AssetField(
-        description="Password",
+        description="Password for basic auth (API token preferred)",
         required=False,
         default="",
         sensitive=True,
         category=FieldCategory.CONNECTIVITY,
     )
     api_token: str = AssetField(
-        description="API token",
+        description="API token (preferred authentication method)",
         required=False,
         default="",
         sensitive=True,
