@@ -1,6 +1,6 @@
 [project]
 name = "splunk"
-version = "3.0.2"
+version = "3.0.3"
 description = "This app integrates with Splunk to update data on the device, in addition to investigate and ingestion actions"
 license = "Copyright (c) 2016-2026 Splunk Inc."
 requires-python = ">=3.13, <3.15"
