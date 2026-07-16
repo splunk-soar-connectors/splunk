@@ -2,6 +2,8 @@
 
 from unittest.mock import Mock
 
+import pytest
+
 from src import app as app_module
 from src.app import Asset, SplunkHelper, escape_spl_string
 
@@ -21,3 +23,19 @@ def test_xml_parser_explicitly_disables_entities(monkeypatch):
 
     assert SplunkHelper._process_xml_response(response) == {"response": {}}
     parse.assert_called_once_with("<response />", disable_entities=True)
+
+
+def test_job_completion_has_a_single_total_deadline(monkeypatch):
+    helper = object.__new__(SplunkHelper)
+    helper.asset = Mock(splunk_job_timeout=1, retry_count=1, sleeptime_in_requests=0)
+    job = Mock()
+    job.is_ready.return_value = True
+    job.__contains__ = Mock(side_effect=lambda key: key in {"isDone", "doneProgress"})
+    job.__getitem__ = Mock(
+        side_effect=lambda key: {"isDone": "0", "doneProgress": "0"}[key]
+    )
+    monotonic = Mock(side_effect=[10, 11])
+    monkeypatch.setattr(app_module.time, "monotonic", monotonic)
+
+    with pytest.raises(TimeoutError, match="timed out"):
+        helper.wait_for_job_completion(job)
