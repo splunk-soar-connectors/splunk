@@ -117,7 +117,7 @@ class Asset(BaseAsset):
     verify_server_cert: bool = AssetField(
         description="Verify Server Certificate",
         required=False,
-        default=False,
+        default=True,
         category=FieldCategory.CONNECTIVITY,
     )
 

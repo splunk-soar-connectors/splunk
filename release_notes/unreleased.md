@@ -1,3 +1,3 @@
 **Unreleased**
 
-* - Updated repository checks for the connector development workflow.
+* Enabled TLS certificate verification by default for new Splunk assets.
