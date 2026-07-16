@@ -5,3 +5,4 @@
 * Preferred Enterprise Security urgency when assigning severity to polled notable events.
 * Disabled XML entity processing explicitly when parsing Splunk server responses.
 * Bounded each Splunk search job to the configured total job timeout.
+* Escaped host values before embedding them in the run query widget's JavaScript context.
