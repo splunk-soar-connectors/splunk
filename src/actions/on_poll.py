@@ -22,7 +22,7 @@ def _get_event_start(start_time: str | None) -> str | None:
     if not start_time:
         return None
     try:
-        from dateutil.parser import ParserError, parse as dateutil_parse
+        from dateutil.parser import ParserError, parse as dateutil_parse  # noqa: PLC0415
 
         datetime_obj = dateutil_parse(start_time)
         return datetime_obj.astimezone(UTC).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
@@ -36,7 +36,7 @@ def _get_event_start(start_time: str | None) -> str | None:
 
 def _get_fips_enabled() -> bool:
     try:
-        from phantom_common.install_info import is_fips_enabled
+        from phantom_common.install_info import is_fips_enabled  # noqa: PLC0415
 
         return is_fips_enabled()
     except ImportError:
