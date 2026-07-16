@@ -61,6 +61,11 @@ from .splunk_consts import (
 logger = getLogger()
 
 
+def escape_spl_string(value: str) -> str:
+    """Escape an untrusted value for an SPL double-quoted string literal."""
+    return str(value).replace("\\", "\\\\").replace('"', '\\"')
+
+
 # ---------------------------------------------------------------------------
 # Asset
 # ---------------------------------------------------------------------------
@@ -117,7 +122,7 @@ class Asset(BaseAsset):
     verify_server_cert: bool = AssetField(
         description="Verify Server Certificate",
         required=False,
-        default=False,
+        default=True,
         category=FieldCategory.CONNECTIVITY,
     )
 
@@ -460,7 +465,9 @@ class SplunkHelper:
     @staticmethod
     def _process_xml_response(r: requests.Response) -> dict:
         try:
-            resp_json = xmltodict.parse(r.text) if r.text else None
+            resp_json = (
+                xmltodict.parse(r.text, disable_entities=True) if r.text else None
+            )
         except Exception as e:
             raise RuntimeError(f"Unable to parse XML response. Error: {e}") from e
 
@@ -581,13 +588,13 @@ class SplunkHelper:
             )
         )
 
-    def wait_for_job(self, job: splunk_client.Job):
+    def wait_for_job(self, job: splunk_client.Job, deadline: float | None = None):
         last_err = None
+        deadline = deadline or time.monotonic() + self.asset.splunk_job_timeout
         for attempt in range(1, self.asset.retry_count + 1):
             try:
-                max_wait = time.time() + self.asset.splunk_job_timeout
                 while not job.is_ready():
-                    if time.time() > max_wait:
+                    if time.monotonic() >= deadline:
                         raise TimeoutError(SPLUNK_ERR_SPLUNK_JOB_HAS_TIMED_OUT)
                     time.sleep(self.asset.sleeptime_in_requests)
                 job.refresh()
@@ -602,6 +609,17 @@ class SplunkHelper:
                 msg=SPLUNK_ERR_CONNECTIVITY_FAILED, error_text=last_err
             )
         )
+
+    def wait_for_job_completion(self, job: splunk_client.Job) -> dict:
+        deadline = time.monotonic() + self.asset.splunk_job_timeout
+        while True:
+            self.wait_for_job(job, deadline)
+            stats = self.get_job_stats(job)
+            if stats["is_done"] == "1":
+                return stats
+            if time.monotonic() >= deadline:
+                raise TimeoutError(SPLUNK_ERR_SPLUNK_JOB_HAS_TIMED_OUT)
+            time.sleep(self.asset.sleeptime_in_requests)
 
     def get_job_stats(self, job) -> dict:
         return {
@@ -662,12 +680,7 @@ class SplunkHelper:
         job = self.create_job(search_query, kwargs_create)
         sid = job.__dict__.get("sid", "")
 
-        while True:
-            self.wait_for_job(job)
-            stats = self.get_job_stats(job)
-            if stats["is_done"] == "1":
-                break
-            time.sleep(self.asset.sleeptime_in_requests)
+        self.wait_for_job_completion(job)
 
         results_list: list[dict] = []
 
@@ -693,7 +706,7 @@ class SplunkHelper:
 
     def resolve_event_id(self, sidandrid: str) -> str:
         logger.progress("Resolving SID+RID to event_id")
-        search_query = SPLUNK_RID_SID_NOTABLE_QUERY.format(sidandrid)
+        search_query = SPLUNK_RID_SID_NOTABLE_QUERY.format(escape_spl_string(sidandrid))
         _sid, results = self.run_query(search_query)
         for row in results:
             if "event_id" in row:

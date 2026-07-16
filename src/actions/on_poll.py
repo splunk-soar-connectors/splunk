@@ -22,7 +22,7 @@ def _get_event_start(start_time: str | None) -> str | None:
     if not start_time:
         return None
     try:
-        from dateutil.parser import ParserError, parse as dateutil_parse
+        from dateutil.parser import ParserError, parse as dateutil_parse  # noqa: PLC0415
 
         datetime_obj = dateutil_parse(start_time)
         return datetime_obj.astimezone(UTC).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
@@ -36,25 +36,34 @@ def _get_event_start(start_time: str | None) -> str | None:
 
 def _get_fips_enabled() -> bool:
     try:
-        from phantom_common.install_info import is_fips_enabled
+        from phantom_common.install_info import is_fips_enabled  # noqa: PLC0415
 
         return is_fips_enabled()
     except ImportError:
         return False
 
 
-def _get_splunk_severity(item: dict) -> str:
-    severity = item.get("severity")
-    if isinstance(severity, list):
+def _map_splunk_severity(value: object) -> str | None:
+    if isinstance(value, list):
         for key in ["critical", "high", "medium", "low", "informational"]:
-            if key in severity:
+            normalized_values = [
+                item.strip().lower() if isinstance(item, str) else item
+                for item in value
+            ]
+            if key in normalized_values:
                 return SPLUNK_SEVERITY_MAP[key]
-        return ""
-    severity = SPLUNK_SEVERITY_MAP.get(severity) if severity else None
-    if not severity:
-        urgency = item.get("urgency")
-        severity = SPLUNK_SEVERITY_MAP.get(urgency, "medium")
-    return severity
+        return None
+    if isinstance(value, str):
+        return SPLUNK_SEVERITY_MAP.get(value.strip().lower())
+    return None
+
+
+def _get_splunk_severity(item: dict) -> str:
+    return (
+        _map_splunk_severity(item.get("urgency"))
+        or _map_splunk_severity(item.get("severity"))
+        or "medium"
+    )
 
 
 def _get_splunk_title(item: dict, prefix: str, name_values: list[str]) -> str:
