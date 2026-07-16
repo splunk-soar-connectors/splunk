@@ -465,7 +465,9 @@ class SplunkHelper:
     @staticmethod
     def _process_xml_response(r: requests.Response) -> dict:
         try:
-            resp_json = xmltodict.parse(r.text) if r.text else None
+            resp_json = (
+                xmltodict.parse(r.text, disable_entities=True) if r.text else None
+            )
         except Exception as e:
             raise RuntimeError(f"Unable to parse XML response. Error: {e}") from e
 
