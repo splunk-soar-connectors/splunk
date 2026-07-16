@@ -8,7 +8,7 @@ from soar_sdk.action_results import ActionOutput, OutputField
 from soar_sdk.logging import getLogger
 from soar_sdk.params import Param, Params
 
-from ..app import Asset, SplunkHelper, app
+from ..app import Asset, SplunkHelper, app, escape_spl_string
 from ..splunk_consts import (
     SPLUNK_DISPOSITION_QUERY_FORMAT,
     SPLUNK_ERR_BAD_DISPOSITION,
@@ -161,7 +161,7 @@ def update_event(
             ) from None
 
     if wait_for_confirmation:
-        search_query = f"search `notable_by_id({ids})`"
+        search_query = f'search `notable` | search event_id="{escape_spl_string(ids)}"'
         _sid, validate_results = helper.run_query(search_query)
         if not validate_results:
             raise ValueError("Please provide a valid event ID")

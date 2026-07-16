@@ -61,6 +61,11 @@ from .splunk_consts import (
 logger = getLogger()
 
 
+def escape_spl_string(value: str) -> str:
+    """Escape an untrusted value for an SPL double-quoted string literal."""
+    return str(value).replace("\\", "\\\\").replace('"', '\\"')
+
+
 # ---------------------------------------------------------------------------
 # Asset
 # ---------------------------------------------------------------------------
@@ -693,7 +698,7 @@ class SplunkHelper:
 
     def resolve_event_id(self, sidandrid: str) -> str:
         logger.progress("Resolving SID+RID to event_id")
-        search_query = SPLUNK_RID_SID_NOTABLE_QUERY.format(sidandrid)
+        search_query = SPLUNK_RID_SID_NOTABLE_QUERY.format(escape_spl_string(sidandrid))
         _sid, results = self.run_query(search_query)
         for row in results:
             if "event_id" in row:
