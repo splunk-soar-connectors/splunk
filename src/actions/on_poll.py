@@ -2,6 +2,7 @@
 
 import hashlib
 import json
+import unicodedata
 from collections.abc import Iterator
 from datetime import UTC
 
@@ -16,6 +17,21 @@ from ..app import Asset, SplunkHelper, app
 from ..splunk_consts import CIM_CEF_MAP, SPLUNK_SEVERITY_MAP
 
 logger = getLogger()
+
+
+def _sanitize_ingested_value(value):
+    """Remove invisible controls from untrusted values before SOAR stores them."""
+    if isinstance(value, str):
+        return "".join(
+            char
+            for char in value
+            if char != "\x00" and unicodedata.category(char) != "Cf"
+        )
+    if isinstance(value, list):
+        return [_sanitize_ingested_value(item) for item in value]
+    if isinstance(value, dict):
+        return {key: _sanitize_ingested_value(item) for key, item in value.items()}
+    return value
 
 
 def _get_event_start(start_time: str | None) -> str | None:
@@ -163,8 +179,9 @@ def on_poll(
     )
 
     count = 1
-    for item in data:
+    for raw_item in data:
         try:
+            item = _sanitize_ingested_value(raw_item)
             cef: dict = {}
             if "_serial" in item:
                 item.pop("_serial")

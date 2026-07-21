@@ -419,6 +419,9 @@ class SplunkHelper:
     def make_rest_call_retry(
         self, endpoint: str, data, params: dict | None = None, method=requests.post
     ) -> dict:
+        if method is not requests.get:
+            return self.make_rest_call(endpoint, data, params, method)
+
         last_err = None
         for _ in range(self.asset.retry_count):
             try:

@@ -1,3 +1,4 @@
 **Unreleased**
 
-* - Updated repository quality checks.
+* - Stopped retrying non-idempotent Splunk REST operations.
+* - Removed invisible Unicode format controls from ingested event values.

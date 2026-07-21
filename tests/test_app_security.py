@@ -25,6 +25,32 @@ def test_xml_parser_explicitly_disables_entities(monkeypatch):
     parse.assert_called_once_with("<response />", disable_entities=True)
 
 
+def test_non_idempotent_rest_calls_are_not_retried():
+    helper = object.__new__(SplunkHelper)
+    helper.asset = Mock(retry_count=3)
+    helper.make_rest_call = Mock(side_effect=ConnectionError("response lost"))
+
+    with pytest.raises(ConnectionError, match="response lost"):
+        helper.make_rest_call_retry("notable_update", {"comment": "once"})
+
+    helper.make_rest_call.assert_called_once()
+
+
+def test_get_rest_calls_remain_retryable():
+    helper = object.__new__(SplunkHelper)
+    helper.asset = Mock(retry_count=3)
+    helper.make_rest_call = Mock(
+        side_effect=[ConnectionError("temporary"), {"entry": []}]
+    )
+
+    result = helper.make_rest_call_retry(
+        "authentication/users", {}, method=app_module.requests.get
+    )
+
+    assert result == {"entry": []}
+    assert helper.make_rest_call.call_count == 2
+
+
 def test_job_completion_has_a_single_total_deadline(monkeypatch):
     helper = object.__new__(SplunkHelper)
     helper.asset = Mock(splunk_job_timeout=1, retry_count=1, sleeptime_in_requests=0)
