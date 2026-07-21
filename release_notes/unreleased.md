@@ -1,4 +1,4 @@
 **Unreleased**
 
-* - Stopped retrying non-idempotent Splunk REST operations.
-* - Removed invisible Unicode format controls from ingested event values.
+* Stopped retrying non-idempotent Splunk REST operations.
+* Removed invisible Unicode format controls from ingested event values.
