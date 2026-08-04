@@ -100,6 +100,28 @@ def test_proxy_request_returns_http_error_from_unverified_retry(monkeypatch):
     assert response["reason"] == "Unavailable"
 
 
+def test_proxy_request_applies_timeout_to_every_urlopen_call(monkeypatch):
+    success = Mock(code=200, msg="OK", headers={"Content-Type": "text/xml"})
+    success.read.return_value = b"<response />"
+    open_url = Mock(side_effect=[URLError("certificate verify failed"), success])
+    monkeypatch.setattr(app_module, "urlopen", open_url)
+    helper = object.__new__(SplunkHelper)
+    helper.asset = Mock(verify_server_cert=False)
+
+    helper._proxy_request(
+        "https://splunk.example/services/search/jobs",
+        {"method": "GET", "headers": []},
+    )
+
+    assert open_url.call_args_list[0].kwargs == {
+        "timeout": app_module.SPLUNK_DEFAULT_REQUEST_TIMEOUT
+    }
+    assert open_url.call_args_list[1].kwargs["timeout"] == (
+        app_module.SPLUNK_DEFAULT_REQUEST_TIMEOUT
+    )
+    assert "context" in open_url.call_args_list[1].kwargs
+
+
 def test_job_completion_has_a_single_total_deadline(monkeypatch):
     helper = object.__new__(SplunkHelper)
     helper.asset = Mock(splunk_job_timeout=1, retry_count=1, sleeptime_in_requests=0)

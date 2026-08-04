@@ -305,14 +305,18 @@ class SplunkHelper:
         headers = dict(message.get("headers", []))
         req = Request(url, data, headers)  # noqa: S310
         try:
-            response = urlopen(req)  # noqa: S310
+            response = urlopen(req, timeout=SPLUNK_DEFAULT_REQUEST_TIMEOUT)  # noqa: S310
         except UrllibHTTPError as http_error:
             logger.warning("Check the proxy settings")
             response = http_error
         except URLError:
             if sys.version_info >= (2, 7, 9) and not self.asset.verify_server_cert:
                 try:
-                    response = urlopen(req, context=ssl._create_unverified_context())  # noqa: S310, S323
+                    response = urlopen(  # noqa: S310
+                        req,
+                        context=ssl._create_unverified_context(),  # noqa: S323
+                        timeout=SPLUNK_DEFAULT_REQUEST_TIMEOUT,
+                    )
                 except UrllibHTTPError as http_error:
                     response = http_error
             else:
