@@ -27,6 +27,23 @@ def test_xml_parser_explicitly_disables_entities(monkeypatch):
     parse.assert_called_once_with("<response />", disable_entities=True)
 
 
+def test_xml_error_parser_handles_repeated_splunk_messages():
+    response = Mock(
+        text=(
+            "<response><messages>"
+            '<msg type="WARN">first message</msg>'
+            '<msg type="ERROR">second message</msg>'
+            "</messages></response>"
+        ),
+        status_code=400,
+    )
+
+    with pytest.raises(
+        RuntimeError, match="ErrorType: WARN ErrorMessage: first message"
+    ):
+        SplunkHelper._process_xml_response(response)
+
+
 def test_non_idempotent_rest_calls_are_not_retried():
     helper = object.__new__(SplunkHelper)
     helper.asset = Mock(retry_count=3)

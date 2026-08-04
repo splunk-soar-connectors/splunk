@@ -5,3 +5,5 @@
 * Preserved Splunk HTTP error responses through proxied SDK connections so authentication and server errors retain their normal handling.
 
 * Applied the connector request timeout to proxied Splunk SDK connections so stalled endpoints no longer wait indefinitely.
+
+* Handled repeated Splunk REST XML error messages without leaking raw parser exceptions from connector actions.

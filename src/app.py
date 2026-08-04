@@ -484,22 +484,16 @@ class SplunkHelper:
         if 200 <= r.status_code < 400:
             return resp_json or {}
 
-        error_type = (
-            resp_json.get("response", {})
-            .get("messages", {})
-            .get("msg", {})
-            .get("@type")
-            if resp_json
-            else None
-        )
-        error_message = (
-            resp_json.get("response", {})
-            .get("messages", {})
-            .get("msg", {})
-            .get("#text")
-            if resp_json
-            else None
-        )
+        response = resp_json.get("response", {}) if isinstance(resp_json, dict) else {}
+        messages = response.get("messages", {}) if isinstance(response, dict) else {}
+        message = messages.get("msg", {}) if isinstance(messages, dict) else {}
+        if isinstance(message, list):
+            message = next((item for item in message if isinstance(item, dict)), {})
+        if not isinstance(message, dict):
+            message = {}
+
+        error_type = message.get("@type")
+        error_message = message.get("#text")
         if error_type or error_message:
             error = f"ErrorType: {error_type} ErrorMessage: {error_message}"
         else:
