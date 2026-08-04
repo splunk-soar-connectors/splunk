@@ -1,6 +1,8 @@
 # Copyright (c) 2016-2026 Splunk Inc.
 
+from io import BytesIO
 from unittest.mock import Mock
+from urllib.error import HTTPError as UrllibHTTPError, URLError
 
 import pytest
 
@@ -49,6 +51,53 @@ def test_get_rest_calls_remain_retryable():
 
     assert result == {"entry": []}
     assert helper.make_rest_call.call_count == 2
+
+
+def test_proxy_request_returns_http_errors_to_splunk_sdk(monkeypatch):
+    error = UrllibHTTPError(
+        "https://splunk.example/services/search/jobs",
+        401,
+        "Unauthorized",
+        {"Content-Type": "text/xml"},
+        BytesIO(b"<response />"),
+    )
+    monkeypatch.setattr(app_module, "urlopen", Mock(side_effect=error))
+    helper = object.__new__(SplunkHelper)
+    helper.asset = Mock(verify_server_cert=True)
+
+    response = helper._proxy_request(
+        "https://splunk.example/services/search/jobs",
+        {"method": "GET", "headers": []},
+    )
+
+    assert response["status"] == 401
+    assert response["reason"] == "Unauthorized"
+    assert response["body"].read() == b"<response />"
+
+
+def test_proxy_request_returns_http_error_from_unverified_retry(monkeypatch):
+    error = UrllibHTTPError(
+        "https://splunk.example/services/search/jobs",
+        503,
+        "Unavailable",
+        {"Content-Type": "text/xml"},
+        BytesIO(b"<response />"),
+    )
+    monkeypatch.setattr(
+        app_module,
+        "urlopen",
+        Mock(side_effect=[URLError("certificate verify failed"), error]),
+    )
+    helper = object.__new__(SplunkHelper)
+    helper.asset = Mock(verify_server_cert=False)
+
+    response = helper._proxy_request(
+        "https://splunk.example/services/search/jobs",
+        {"method": "GET", "headers": []},
+    )
+
+    assert response["status"] == 503
+    assert response["reason"] == "Unavailable"
 
 
 def test_job_completion_has_a_single_total_deadline(monkeypatch):

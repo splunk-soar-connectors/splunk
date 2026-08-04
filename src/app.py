@@ -306,18 +306,21 @@ class SplunkHelper:
         req = Request(url, data, headers)  # noqa: S310
         try:
             response = urlopen(req)  # noqa: S310
-        except UrllibHTTPError:
+        except UrllibHTTPError as http_error:
             logger.warning("Check the proxy settings")
-            raise
+            response = http_error
         except URLError:
             if sys.version_info >= (2, 7, 9) and not self.asset.verify_server_cert:
-                response = urlopen(req, context=ssl._create_unverified_context())  # noqa: S310, S323
+                try:
+                    response = urlopen(req, context=ssl._create_unverified_context())  # noqa: S310, S323
+                except UrllibHTTPError as http_error:
+                    response = http_error
             else:
                 raise
         return {
             "status": response.code,
             "reason": response.msg,
-            "headers": response.getheaders(),
+            "headers": list(response.headers.items()),
             "body": BytesIO(response.read()),
         }
 
