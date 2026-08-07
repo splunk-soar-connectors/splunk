@@ -305,19 +305,26 @@ class SplunkHelper:
         headers = dict(message.get("headers", []))
         req = Request(url, data, headers)  # noqa: S310
         try:
-            response = urlopen(req)  # noqa: S310
-        except UrllibHTTPError:
+            response = urlopen(req, timeout=SPLUNK_DEFAULT_REQUEST_TIMEOUT)  # noqa: S310
+        except UrllibHTTPError as http_error:
             logger.warning("Check the proxy settings")
-            raise
+            response = http_error
         except URLError:
             if sys.version_info >= (2, 7, 9) and not self.asset.verify_server_cert:
-                response = urlopen(req, context=ssl._create_unverified_context())  # noqa: S310, S323
+                try:
+                    response = urlopen(  # noqa: S310
+                        req,
+                        context=ssl._create_unverified_context(),  # noqa: S323
+                        timeout=SPLUNK_DEFAULT_REQUEST_TIMEOUT,
+                    )
+                except UrllibHTTPError as http_error:
+                    response = http_error
             else:
                 raise
         return {
             "status": response.code,
             "reason": response.msg,
-            "headers": response.getheaders(),
+            "headers": list(response.headers.items()),
             "body": BytesIO(response.read()),
         }
 
@@ -477,22 +484,16 @@ class SplunkHelper:
         if 200 <= r.status_code < 400:
             return resp_json or {}
 
-        error_type = (
-            resp_json.get("response", {})
-            .get("messages", {})
-            .get("msg", {})
-            .get("@type")
-            if resp_json
-            else None
-        )
-        error_message = (
-            resp_json.get("response", {})
-            .get("messages", {})
-            .get("msg", {})
-            .get("#text")
-            if resp_json
-            else None
-        )
+        response = resp_json.get("response", {}) if isinstance(resp_json, dict) else {}
+        messages = response.get("messages", {}) if isinstance(response, dict) else {}
+        message = messages.get("msg", {}) if isinstance(messages, dict) else {}
+        if isinstance(message, list):
+            message = next((item for item in message if isinstance(item, dict)), {})
+        if not isinstance(message, dict):
+            message = {}
+
+        error_type = message.get("@type")
+        error_message = message.get("#text")
         if error_type or error_message:
             error = f"ErrorType: {error_type} ErrorMessage: {error_message}"
         else:

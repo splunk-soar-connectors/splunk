@@ -1,6 +1,8 @@
 # Copyright (c) 2016-2026 Splunk Inc.
 
+from io import BytesIO
 from unittest.mock import Mock
+from urllib.error import HTTPError as UrllibHTTPError, URLError
 
 import pytest
 
@@ -23,6 +25,23 @@ def test_xml_parser_explicitly_disables_entities(monkeypatch):
 
     assert SplunkHelper._process_xml_response(response) == {"response": {}}
     parse.assert_called_once_with("<response />", disable_entities=True)
+
+
+def test_xml_error_parser_handles_repeated_splunk_messages():
+    response = Mock(
+        text=(
+            "<response><messages>"
+            '<msg type="WARN">first message</msg>'
+            '<msg type="ERROR">second message</msg>'
+            "</messages></response>"
+        ),
+        status_code=400,
+    )
+
+    with pytest.raises(
+        RuntimeError, match="ErrorType: WARN ErrorMessage: first message"
+    ):
+        SplunkHelper._process_xml_response(response)
 
 
 def test_non_idempotent_rest_calls_are_not_retried():
@@ -49,6 +68,75 @@ def test_get_rest_calls_remain_retryable():
 
     assert result == {"entry": []}
     assert helper.make_rest_call.call_count == 2
+
+
+def test_proxy_request_returns_http_errors_to_splunk_sdk(monkeypatch):
+    error = UrllibHTTPError(
+        "https://splunk.example/services/search/jobs",
+        401,
+        "Unauthorized",
+        {"Content-Type": "text/xml"},
+        BytesIO(b"<response />"),
+    )
+    monkeypatch.setattr(app_module, "urlopen", Mock(side_effect=error))
+    helper = object.__new__(SplunkHelper)
+    helper.asset = Mock(verify_server_cert=True)
+
+    response = helper._proxy_request(
+        "https://splunk.example/services/search/jobs",
+        {"method": "GET", "headers": []},
+    )
+
+    assert response["status"] == 401
+    assert response["reason"] == "Unauthorized"
+    assert response["body"].read() == b"<response />"
+
+
+def test_proxy_request_returns_http_error_from_unverified_retry(monkeypatch):
+    error = UrllibHTTPError(
+        "https://splunk.example/services/search/jobs",
+        503,
+        "Unavailable",
+        {"Content-Type": "text/xml"},
+        BytesIO(b"<response />"),
+    )
+    monkeypatch.setattr(
+        app_module,
+        "urlopen",
+        Mock(side_effect=[URLError("certificate verify failed"), error]),
+    )
+    helper = object.__new__(SplunkHelper)
+    helper.asset = Mock(verify_server_cert=False)
+
+    response = helper._proxy_request(
+        "https://splunk.example/services/search/jobs",
+        {"method": "GET", "headers": []},
+    )
+
+    assert response["status"] == 503
+    assert response["reason"] == "Unavailable"
+
+
+def test_proxy_request_applies_timeout_to_every_urlopen_call(monkeypatch):
+    success = Mock(code=200, msg="OK", headers={"Content-Type": "text/xml"})
+    success.read.return_value = b"<response />"
+    open_url = Mock(side_effect=[URLError("certificate verify failed"), success])
+    monkeypatch.setattr(app_module, "urlopen", open_url)
+    helper = object.__new__(SplunkHelper)
+    helper.asset = Mock(verify_server_cert=False)
+
+    helper._proxy_request(
+        "https://splunk.example/services/search/jobs",
+        {"method": "GET", "headers": []},
+    )
+
+    assert open_url.call_args_list[0].kwargs == {
+        "timeout": app_module.SPLUNK_DEFAULT_REQUEST_TIMEOUT
+    }
+    assert open_url.call_args_list[1].kwargs["timeout"] == (
+        app_module.SPLUNK_DEFAULT_REQUEST_TIMEOUT
+    )
+    assert "context" in open_url.call_args_list[1].kwargs
 
 
 def test_job_completion_has_a_single_total_deadline(monkeypatch):

@@ -1,6 +1,7 @@
 # Copyright (c) 2016-2026 Splunk Inc.
 
 from src.actions.on_poll import _get_splunk_severity, _sanitize_ingested_value
+from src.splunk_consts import CIM_CEF_MAP
 
 
 def test_enterprise_security_urgency_takes_precedence_over_event_severity():
@@ -27,3 +28,9 @@ def test_ingested_strings_drop_nul_and_unicode_format_controls_recursively():
         "nested": ["safe", {"user": "mallory"}],
         "count": 2,
     }
+
+
+def test_cim_fields_map_to_canonical_cef_fields():
+    assert CIM_CEF_MAP["bytes_in"] == "bytesIn"
+    assert CIM_CEF_MAP["dest_translated_ip"] == "destinationTranslatedAddress"
+    assert CIM_CEF_MAP["src_user"] == "sourceUserName"
