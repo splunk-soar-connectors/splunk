@@ -1,1 +1,2 @@
 **Unreleased**
+* PAPP-38390: validate device asset config parameter

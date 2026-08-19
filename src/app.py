@@ -11,6 +11,7 @@
 # either express or implied. See the License for the specific language governing permissions
 # and limitations under the License.
 
+import ipaddress
 import os
 import ssl
 import sys
@@ -28,6 +29,7 @@ import splunklib.results as splunk_results
 from splunklib.binding import HTTPError as SplunkHTTPError
 import xmltodict
 from bs4 import BeautifulSoup
+from pydantic import field_validator
 from soar_sdk.abstract import SOARClient
 from soar_sdk.app import App
 from soar_sdk.asset import AssetField, BaseAsset, FieldCategory
@@ -66,6 +68,15 @@ def escape_spl_string(value: str) -> str:
     return str(value).replace("\\", "\\\\").replace('"', '\\"')
 
 
+def format_url_host(device: str) -> str:
+    """Format a normalized device for use as the host portion of a URL."""
+    try:
+        address = ipaddress.ip_address(device)
+    except ValueError:
+        return device
+    return f"[{address.compressed}]" if address.version == 6 else address.compressed
+
+
 # ---------------------------------------------------------------------------
 # Asset
 # ---------------------------------------------------------------------------
@@ -75,6 +86,39 @@ class Asset(BaseAsset):
         description="Device IP/Hostname",
         category=FieldCategory.CONNECTIVITY,
     )
+
+    @field_validator("device")
+    @classmethod
+    def validate_device(cls, value: str) -> str:
+        candidate = value.strip()
+        if not candidate:
+            raise ValueError("Please provide a valid device IP address or hostname")
+
+        if candidate.lower().startswith(("http://", "https://")):
+            raise ValueError("Please provide a valid device IP address or hostname")
+
+        candidate = candidate.rstrip("/")
+        if not candidate or len(candidate) > 253:
+            raise ValueError("Please provide a valid device IP address or hostname")
+
+        ip_candidate = candidate
+        if candidate.startswith("[") and candidate.endswith("]"):
+            ip_candidate = candidate[1:-1]
+
+        try:
+            return ipaddress.ip_address(ip_candidate).compressed
+        except ValueError:
+            pass
+
+        if (
+            not any(char.isalnum() for char in candidate)
+            or any(char.isspace() for char in candidate)
+            or any(char in "/:@?#[]\\" for char in candidate)
+        ):
+            raise ValueError("Please provide a valid device IP address or hostname")
+
+        return candidate.removesuffix(".").lower()
+
     port: int = AssetField(
         description="Port",
         required=False,
@@ -240,7 +284,7 @@ class SplunkHelper:
     def __init__(self, asset: Asset):
         self.asset = asset
         self._service: splunk_client.Service | None = None
-        self._base_url = f"https://{asset.device}:{asset.port}/"
+        self._base_url = f"https://{format_url_host(asset.device)}:{asset.port}/"
         self._proxy: dict[str, str] = {}
 
         if "http_proxy" in os.environ:
