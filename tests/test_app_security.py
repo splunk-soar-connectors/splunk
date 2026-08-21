@@ -7,11 +7,73 @@ from urllib.error import HTTPError as UrllibHTTPError, URLError
 import pytest
 
 from src import app as app_module
-from src.app import Asset, SplunkHelper, escape_spl_string
+from src.app import (
+    Asset,
+    SplunkHelper,
+    escape_spl_string,
+    format_url_host,
+)
 
 
 def test_tls_verification_is_enabled_by_default():
     assert Asset.model_fields["verify_server_cert"].default is True
+
+
+@pytest.mark.parametrize(
+    ("device", "expected"),
+    [
+        (" Splunk.Example.COM. ", "splunk.example.com"),
+        ("splunk.example.com/", "splunk.example.com"),
+        ("splunk.example.com///", "splunk.example.com"),
+        ("192.0.2.10", "192.0.2.10"),
+        ("[2001:0DB8:0:0::1]", "2001:db8::1"),
+        ("splunk", "splunk"),
+        (
+            "m\N{LATIN SMALL LETTER U WITH DIAERESIS}nich.example",
+            "m\N{LATIN SMALL LETTER U WITH DIAERESIS}nich.example",
+        ),
+        ("Bad_Host.Example.", "bad_host.example"),
+    ],
+)
+def test_asset_normalizes_device(device, expected):
+    assert Asset(device=device).device == expected
+
+
+@pytest.mark.parametrize(
+    "device",
+    [
+        "",
+        "https://splunk.example.com",
+        "splunk.example.com:8089",
+        "splunk.example.com/services",
+        "/splunk.example.com",
+        "/",
+        "splunk example.com",
+        "!@#$%",
+        "a" * 254,
+    ],
+)
+def test_asset_rejects_non_host_device_values(device):
+    with pytest.raises(ValueError, match="Please provide a valid device"):
+        Asset(device=device)
+
+
+@pytest.mark.parametrize("device", [None, 123])
+def test_asset_rejects_non_string_device_values(device):
+    with pytest.raises(ValueError, match="Input should be a valid string"):
+        Asset(device=device)
+
+
+def test_url_host_brackets_ipv6_addresses_only():
+    assert format_url_host("2001:db8::1") == "[2001:db8::1]"
+    assert format_url_host("192.0.2.10") == "192.0.2.10"
+    assert format_url_host("splunk.example.com") == "splunk.example.com"
+
+
+def test_splunk_helper_constructs_ipv6_base_url():
+    helper = SplunkHelper(Asset(device="[2001:0db8::1]", port=8089))
+
+    assert helper._base_url == "https://[2001:db8::1]:8089/"
 
 
 def test_escape_spl_string_protects_string_literal_boundaries():

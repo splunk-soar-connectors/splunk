@@ -19,7 +19,7 @@ from soar_sdk.exceptions import ActionFailure
 from soar_sdk.logging import getLogger
 from soar_sdk.params import MakeRequestParams, Param
 
-from ..app import Asset, app
+from ..app import Asset, app, format_url_host
 
 logger = getLogger()
 
@@ -58,7 +58,7 @@ def http_action(
             "it is derived from the asset configuration."
         )
 
-    base_url = f"https://{asset.device}:{asset.port}/"
+    base_url = f"https://{format_url_host(asset.device)}:{asset.port}/"
     endpoint = params.endpoint.lstrip("/")
     url = f"{base_url}{endpoint}"
 
