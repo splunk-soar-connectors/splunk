@@ -13,7 +13,7 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -->
-{% extends 'base/logo_header.html' %}
+{% extends "base/logo_header.html" %}
 {% block widget_content %}
   <style>
     .splunk a:hover {
@@ -131,7 +131,7 @@
                   {% for header in result.headers %}
                     {% for k, v in item.items() %}
                       {% if header == k %}
-                        {% if k == 'splunk_server' or k == 'host' %}
+                        {% if k == "splunk_server" or k == "host" %}
                           <td>
                             <a href="javascript:;"
                                onclick="context_menu(this, [{'contains': ['host name'], 'value': '{{ v|escapejs }}' }], 0, {{ container }}, null, false);">
