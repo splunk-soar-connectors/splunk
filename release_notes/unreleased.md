@@ -1,3 +1,1 @@
 **Unreleased**
-
-* Updated the SOAR SDK to restore internal connections when the SOAR certificate uses the stack's DNS name.
