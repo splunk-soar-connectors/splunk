@@ -94,27 +94,27 @@
         <table class="wf-table-vertical">
           <tr>
             <td>Query</td>
-            <td>{{ result.param.query }}</td>
+            <td>{{ result.summary.query }}</td>
           </tr>
-          {% if result.param.command %}
+          {% if result.summary.command %}
             <tr>
               <td>Command</td>
-              <td>{{ result.param.command }}</td>
+              <td>{{ result.summary.command }}</td>
             </tr>
           {% endif %}
-          {% if result.param.display %}
+          {% if result.summary.display %}
             <tr>
               <td>Display</td>
-              <td>{{ result.param.display }}</td>
+              <td>{{ result.summary.display }}</td>
             </tr>
           {% endif %}
           <tr>
             <td>Parse Only</td>
-            <td>{{ result.param.parse_only }}</td>
+            <td>{{ result.summary.parse_only }}</td>
           </tr>
           <tr>
             <td>Search Mode</td>
-            <td>{{ result.param.search_mode }}</td>
+            <td>{{ result.summary.search_mode }}</td>
           </tr>
         </table>
         <div class="results">

@@ -1,11 +1,13 @@
 # Copyright (c) 2016-2026 Splunk Inc.
 
 import json
+import re
 
 from soar_sdk.abstract import SOARClient
-from soar_sdk.action_results import ActionOutput, PermissiveActionOutput
+from soar_sdk.action_results import ActionOutput, ActionResult, PermissiveActionOutput
 from soar_sdk.logging import getLogger
 from soar_sdk.params import Param, Params
+from soar_sdk.views.template_renderer import get_template_renderer, get_templates_dir
 
 from ..app import Asset, SplunkHelper, app
 from ..splunk_consts import SPLUNK_SEARCH_MODE_SMART
@@ -60,31 +62,22 @@ class RunQueryOutput(PermissiveActionOutput):
 class RunQuerySummary(ActionOutput):
     sid: str | None = None
     total_events: int | None = None
+    query: str = ""
+    command: str = ""
+    display: str = ""
+    parse_only: bool = False
+    search_mode: str = SPLUNK_SEARCH_MODE_SMART
 
 
-@app.view_handler(template="splunk_run_query.html")
-def display_view(outputs: list[RunQueryOutput]) -> dict:
-    if not outputs:
-        return {"results": [{"data": {}, "param": {}}]}
-
-    first = outputs[0].model_dump(exclude_none=True)
-    param = {
-        "query": first.get("_param_query", ""),
-        "command": first.get("_param_command", ""),
-        "display": first.get("_param_display", ""),
-        "parse_only": first.get("_param_parse_only", False),
-        "search_mode": first.get("_param_search_mode", "smart"),
+def _get_context_result(result: ActionResult) -> dict:
+    # Saved results from earlier versions keep these fields in their parameters.
+    summary = {
+        **RunQuerySummary().model_dump(exclude_none=True),
+        **result.get_param(),
+        **result.get_summary(),
     }
-    display_fields = param.get("display", "")
-
-    all_data = []
-    for output in outputs:
-        data = {
-            k: v
-            for k, v in output.model_dump(exclude_none=True).items()
-            if not k.startswith("_")
-        }
-        all_data.append(data)
+    display_fields = summary.get("display", "")
+    all_data = result.get_data()
 
     if display_fields:
         headers = [x.strip() for x in display_fields.split(",") if x.strip()]
@@ -96,15 +89,27 @@ def display_view(outputs: list[RunQueryOutput]) -> dict:
     processed_data = [{h: item.get(h) for h in headers} for item in all_data]
 
     return {
-        "results": [
-            {
-                "param": param,
-                "data": all_data or {},
-                "processed_data": processed_data,
-                "headers": headers,
-            }
-        ],
+        "summary": summary,
+        "data": all_data,
+        "processed_data": processed_data,
+        "headers": headers,
     }
+
+
+def display_view(
+    action: str, all_app_runs: list[tuple[dict, list[ActionResult]]], context: dict
+) -> str:
+    # Use the platform view signature: the SDK's output-only adapter drops summaries.
+    context["results"] = [
+        _get_context_result(result)
+        for _, action_results in all_app_runs
+        for result in action_results
+    ] or [{"data": []}]
+    renderer = get_template_renderer("jinja", get_templates_dir(globals()))
+    html = renderer.render_template("splunk_run_query.html", context)
+    context["prerender"] = True
+    # SOAR expects the widget element before any comments in prerendered HTML.
+    return re.sub(r"\A\s*(?:<!--.*?-->\s*)+", "", html, flags=re.DOTALL)
 
 
 @app.action(
@@ -150,17 +155,20 @@ def run_query(
     if params.attach_result:
         _attach_json_result(soar, results_list)
 
-    soar.set_summary(RunQuerySummary(sid=sid, total_events=len(results_list)))
+    soar.set_summary(
+        RunQuerySummary(
+            sid=sid,
+            total_events=len(results_list),
+            query=params.query,
+            command=params.command,
+            display=params.display,
+            parse_only=params.parse_only,
+            search_mode=search_mode,
+        )
+    )
     soar.set_message(f"Sid: {sid}, Total events: {len(results_list)}")
 
-    param_info = {
-        "_param_query": params.query,
-        "_param_command": params.command,
-        "_param_display": params.display,
-        "_param_parse_only": params.parse_only,
-        "_param_search_mode": search_mode,
-    }
-    return [RunQueryOutput(**{**r, **param_info}) for r in results_list]
+    return [RunQueryOutput(**r) for r in results_list]
 
 
 def _attach_json_result(soar: SOARClient, data: list[dict]):

@@ -540,6 +540,11 @@ action_result.parameter.search_mode | string | | |
 action_result.parameter.time_format | string | | |
 action_result.summary.sid | string | | |
 action_result.summary.total_events | numeric | | |
+action_result.summary.query | string | | |
+action_result.summary.command | string | | |
+action_result.summary.display | string | | |
+action_result.summary.parse_only | boolean | | True False |
+action_result.summary.search_mode | string | | |
 summary.total_objects | numeric | | 1 |
 summary.total_objects_successful | numeric | | 1 |
 
