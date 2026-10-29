@@ -27,18 +27,18 @@ repos:
       - id: check-json
       - id: check-yaml
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.16.9
+    rev: v0.17.3
     hooks:
       - id: ruff
         args: [ "--fix", "--unsafe-fixes"] # Allow unsafe fixes (ruff pretty strict about what it can fix)
       - id: ruff-format
   - repo: https://github.com/djlint/djLint
-    rev: v1.46.3
+    rev: v1.47.1
     hooks:
       - id: djlint-reformat-django
       - id: djlint-django
   - repo: https://github.com/phantomcyber/soar-app-linter
-    rev: 0.1.0
+    rev: 0.1.0  # 0.1.1 rejects SDK apps without a root JSON manifest.
     hooks:
       - id: soar-app-linter
         args: ["--single-repo", "--message-level", "error"]
@@ -61,7 +61,7 @@ repos:
         exclude: "README.md"
   # Central hooks
   - repo: https://github.com/phantomcyber/dev-cicd-tools
-    rev: v2.3.0
+    rev: v2.3.1
     hooks:
       - id: build-docs
         language: python
