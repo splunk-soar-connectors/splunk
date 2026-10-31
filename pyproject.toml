@@ -3,11 +3,11 @@ name = "splunk"
 version = "4.0.6"
 description = "This app integrates with Splunk to update data on the device, in addition to investigate and ingestion actions"
 license = "Copyright (c) 2016-2026 Splunk Inc."
-requires-python = ">=3.13, <3.15"
+requires-python = ">=3.13, <3.16, !=3.14.*"
 authors = []
 dependencies = [
     "splunk-sdk>=2.1.1",
-    "splunk-soar-sdk>=6.1.2",
+    "splunk-soar-sdk>=7.1.0",
     "beautifulsoup4>=4.12.0",
     "pydantic>=2.0.0",
     "python-dateutil>=2.9.0",
@@ -42,14 +42,14 @@ environments = [
     "sys_platform == 'linux' and platform_machine == 'aarch64' and python_version == '3.13'",
     "sys_platform == 'darwin' and platform_machine == 'x86_64' and python_version == '3.13'",
     "sys_platform == 'darwin' and platform_machine == 'arm64' and python_version == '3.13'",
-    "sys_platform == 'linux' and platform_machine == 'x86_64' and python_version == '3.14'",
-    "sys_platform == 'linux' and platform_machine == 'aarch64' and python_version == '3.14'",
-    "sys_platform == 'darwin' and platform_machine == 'x86_64' and python_version == '3.14'",
-    "sys_platform == 'darwin' and platform_machine == 'arm64' and python_version == '3.14'",
+    "sys_platform == 'linux' and platform_machine == 'x86_64' and python_version == '3.15'",
+    "sys_platform == 'linux' and platform_machine == 'aarch64' and python_version == '3.15'",
+    "sys_platform == 'darwin' and platform_machine == 'x86_64' and python_version == '3.15'",
+    "sys_platform == 'darwin' and platform_machine == 'arm64' and python_version == '3.15'",
 ]
 required-environments = [
     "sys_platform == 'linux' and platform_machine == 'x86_64' and python_version == '3.13'",
-    "sys_platform == 'linux' and platform_machine == 'x86_64' and python_version == '3.14'",
+    "sys_platform == 'linux' and platform_machine == 'x86_64' and python_version == '3.15'",
 ]
 
 [tool.ruff]
