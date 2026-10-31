@@ -8,7 +8,7 @@ default_stages: [pre-commit]
 # This is a template for connector pre-commit hooks
 repos:
   - repo: https://github.com/compilerla/conventional-pre-commit
-    rev: v4.4.0
+    rev: v4.5.0
     hooks:
       - id: conventional-pre-commit
         stages: [commit-msg]
@@ -27,20 +27,22 @@ repos:
       - id: check-json
       - id: check-yaml
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.16.9
+    rev: v0.17.3
     hooks:
       - id: ruff
         args: [ "--fix", "--unsafe-fixes"] # Allow unsafe fixes (ruff pretty strict about what it can fix)
       - id: ruff-format
   - repo: https://github.com/djlint/djLint
-    rev: v1.46.3
+    rev: v1.48.0
     hooks:
       - id: djlint-reformat-django
       - id: djlint-django
   - repo: https://github.com/phantomcyber/soar-app-linter
-    rev: 0.1.0
+    rev: 0.1.2
     hooks:
       - id: soar-app-linter
+        # Version 0.1.2 requires an absolute target when walking SDK app roots.
+        entry: bash -c 'exec soar-app-linter "$PWD" "$@"' --
         args: ["--single-repo", "--message-level", "error"]
   - repo: https://github.com/hukkin/mdformat
     rev: 1.0.0
@@ -61,7 +63,7 @@ repos:
         exclude: "README.md"
   # Central hooks
   - repo: https://github.com/phantomcyber/dev-cicd-tools
-    rev: v2.3.0
+    rev: v2.3.1
     hooks:
       - id: build-docs
         language: python
