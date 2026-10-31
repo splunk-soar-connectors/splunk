@@ -38,11 +38,9 @@ repos:
       - id: djlint-reformat-django
       - id: djlint-django
   - repo: https://github.com/phantomcyber/soar-app-linter
-    rev: 0.1.2
+    rev: 0.1.3
     hooks:
       - id: soar-app-linter
-        # Version 0.1.2 requires an absolute target when walking SDK app roots.
-        entry: bash -c 'exec soar-app-linter "$PWD" "$@"' --
         args: ["--single-repo", "--message-level", "error"]
   - repo: https://github.com/hukkin/mdformat
     rev: 1.0.0
