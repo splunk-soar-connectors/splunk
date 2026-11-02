@@ -4,7 +4,7 @@ Third Party Software Attributions:
 
 @@@@============================================================================
 
-Library: Authlib - 1.7.1
+Library: Authlib - 1.9.2
 Homepage: https://github.com/authlib/authlib
 License: BSD License
 License Text:
@@ -116,7 +116,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 @@@@============================================================================
 
-Library: PyJWT - 2.13.0
+Library: PyJWT - 2.15.1
 Homepage: https://github.com/jpadilla/pyjwt
 License: MIT
 License Text:
@@ -384,7 +384,7 @@ SOFTWARE.
 
 @@@@============================================================================
 
-Library: anyio - 4.13.0
+Library: anyio - 4.14.2
 Homepage: https://anyio.readthedocs.io/en/stable/versionhistory.html
 License: MIT
 License Text:
@@ -593,7 +593,7 @@ SOFTWARE.
 
 @@@@============================================================================
 
-Library: cryptography - 46.0.7
+Library: cryptography - 50.0.2
 Homepage: https://github.com/pyca/cryptography
 License: Apache-2.0 OR BSD-3-Clause
 License Text:
@@ -1935,7 +1935,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 @@@@============================================================================
 
-Library: joserfc - 1.6.8
+Library: joserfc - 1.7.7
 Homepage: https://github.com/authlib/joserfc
 License: BSD License
 License Text:
@@ -3689,7 +3689,7 @@ Please navigate to http://github.com/splunk/splunk-sdk-python to obtain a copy o
 
 @@@@============================================================================
 
-Library: splunk-soar-sdk - 6.1.2
+Library: splunk-soar-sdk - 7.1.1
 Homepage: https://github.com/phantomcyber/splunk-soar-sdk
 License: Apache-2.0
 License Text:
