@@ -1,10 +1,12 @@
 # Copyright (c) 2016-2026 Splunk Inc.
 
 import json
+from itertools import groupby
 
 from soar_sdk.abstract import SOARClient
 from soar_sdk.action_results import ActionOutput, PermissiveActionOutput
 from soar_sdk.logging import getLogger
+from soar_sdk.models.view import ViewContext
 from soar_sdk.params import Param, Params
 
 from ..app import Asset, SplunkHelper, app
@@ -62,49 +64,49 @@ class RunQuerySummary(ActionOutput):
     total_events: int | None = None
 
 
-@app.view_handler(template="splunk_run_query.html")
-def display_view(outputs: list[RunQueryOutput]) -> dict:
-    if not outputs:
-        return {"results": [{"data": {}, "param": {}}]}
+def _get_context_result(
+    all_data: list[dict], params: dict, summary: dict, action: str
+) -> dict:
+    result = {"param": params, "action_name": action}
+    if summary:
+        result["summary"] = summary
+    if not all_data:
+        result["data"] = {}
+        return result
 
-    first = outputs[0].model_dump(exclude_none=True)
-    param = {
-        "query": first.get("_param_query", ""),
-        "command": first.get("_param_command", ""),
-        "display": first.get("_param_display", ""),
-        "parse_only": first.get("_param_parse_only", False),
-        "search_mode": first.get("_param_search_mode", "smart"),
-    }
-    display_fields = param.get("display", "")
-
-    all_data = []
-    for output in outputs:
-        data = {
-            k: v
-            for k, v in output.model_dump(exclude_none=True).items()
-            if not k.startswith("_")
-        }
-        all_data.append(data)
+    display_fields = params.get("display", "")
 
     if display_fields:
         headers = [x.strip() for x in display_fields.split(",") if x.strip()]
-    elif all_data:
-        headers = [k for k in all_data[0] if not k.startswith("_")]
     else:
-        headers = []
+        headers = [k for k in all_data[0] if not k.startswith("_")]
 
     processed_data = [{h: item.get(h) for h in headers} for item in all_data]
 
     return {
-        "results": [
-            {
-                "param": param,
-                "data": all_data or {},
-                "processed_data": processed_data,
-                "headers": headers,
-            }
-        ],
+        **result,
+        "data": all_data,
+        "processed_data": processed_data,
+        "headers": headers,
     }
+
+
+@app.view_handler(template="splunk_run_query.html")
+def display_view(
+    _context: ViewContext,
+    action: str,
+    outputs: list[RunQueryOutput],
+    params: list[dict],
+    summary: list[dict],
+) -> dict:
+    results = []
+    rows = zip(outputs, params, summary, strict=True)
+    for (parameters, action_summary), group in groupby(
+        rows, key=lambda row: (row[1], row[2])
+    ):
+        data = [row[0].model_dump() for row in group]
+        results.append(_get_context_result(data, parameters, action_summary, action))
+    return {"results": results or [_get_context_result([], {}, {}, action)]}
 
 
 @app.action(
@@ -153,14 +155,7 @@ def run_query(
     soar.set_summary(RunQuerySummary(sid=sid, total_events=len(results_list)))
     soar.set_message(f"Sid: {sid}, Total events: {len(results_list)}")
 
-    param_info = {
-        "_param_query": params.query,
-        "_param_command": params.command,
-        "_param_display": params.display,
-        "_param_parse_only": params.parse_only,
-        "_param_search_mode": search_mode,
-    }
-    return [RunQueryOutput(**{**r, **param_info}) for r in results_list]
+    return [RunQueryOutput(**r) for r in results_list]
 
 
 def _attach_json_result(soar: SOARClient, data: list[dict]):

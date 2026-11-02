@@ -29,7 +29,9 @@ import splunklib.results as splunk_results
 from splunklib.binding import HTTPError as SplunkHTTPError
 import xmltodict
 from bs4 import BeautifulSoup
-from pydantic import field_validator
+
+# The linter's plugin environment exposes Pydantic 1; the app uses Pydantic 2.
+from pydantic import field_validator  # pylint: disable=no-name-in-module
 from soar_sdk.abstract import SOARClient
 from soar_sdk.app import App
 from soar_sdk.asset import AssetField, BaseAsset, FieldCategory

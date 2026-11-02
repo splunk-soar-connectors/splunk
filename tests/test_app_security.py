@@ -16,7 +16,7 @@ from src.app import (
 
 
 def test_tls_verification_is_enabled_by_default():
-    assert Asset.model_fields["verify_server_cert"].default is True
+    assert Asset(device="splunk.example.com").verify_server_cert is True
 
 
 @pytest.mark.parametrize(

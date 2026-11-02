@@ -79,7 +79,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 @@@@============================================================================
 
-Library: MarkupSafe - 3.0.3
+Library: MarkupSafe - 3.0.4
 Homepage: https://github.com/pallets/markupsafe/
 License: BSD-3-Clause
 License Text:
@@ -464,9 +464,9 @@ DEALINGS IN THE SOFTWARE.
 
 @@@@============================================================================
 
-Library: cffi - 2.0.0
+Library: cffi - 2.1.1
 Homepage: https://cffi.readthedocs.io/en/latest/whatsnew.html
-License: MIT
+License: MIT-0
 License Text:
 
 
@@ -3417,7 +3417,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 @@@@============================================================================
 
-Library: pydantic - 2.13.3
+Library: pydantic - 2.14.2
 Homepage: https://github.com/pydantic/pydantic
 License: MIT
 License Text:
@@ -3447,7 +3447,7 @@ SOFTWARE.
 
 @@@@============================================================================
 
-Library: pydantic_core - 2.46.3
+Library: pydantic_core - 2.50.2
 Homepage: https://github.com/pydantic
 License: MIT
 License Text:
@@ -3689,7 +3689,7 @@ Please navigate to http://github.com/splunk/splunk-sdk-python to obtain a copy o
 
 @@@@============================================================================
 
-Library: splunk-soar-sdk - 6.1.2
+Library: splunk-soar-sdk - 7.1.0
 Homepage: https://github.com/phantomcyber/splunk-soar-sdk
 License: Apache-2.0
 License Text:
@@ -4232,7 +4232,7 @@ THE SOFTWARE.
 
 @@@@============================================================================
 
-Library: typing-inspection - 0.4.2
+Library: typing-inspection - 0.4.4
 Homepage: https://github.com/pydantic/typing-inspection
 License: MIT
 License Text:
@@ -4262,7 +4262,7 @@ SOFTWARE.
 
 @@@@============================================================================
 
-Library: typing_extensions - 4.15.0
+Library: typing_extensions - 4.16.0
 Homepage: https://github.com/python/typing_extensions
 License: PSF-2.0
 License Text:
