@@ -1081,7 +1081,7 @@ wheels = [
 
 [[package]]
 name = "splunk"
-version = "4.0.7"
+version = "4.0.8"
 source = { virtual = "." }
 dependencies = [
     { name = "beautifulsoup4" },
