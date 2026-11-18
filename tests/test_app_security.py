@@ -223,7 +223,7 @@ def test_wait_for_job_reports_progress_while_search_is_not_ready(monkeypatch):
     helper = object.__new__(SplunkHelper)
     helper.asset = Mock(retry_count=1, sleeptime_in_requests=60)
     job = Mock()
-    job.__dict__["sid"] = "search-123"
+    job.sid = "search-123"
     job.is_ready.side_effect = [False, True]
     progress = Mock()
     monkeypatch.setattr(app_module.logger, "progress", progress)
@@ -243,7 +243,7 @@ def test_wait_for_job_completion_reports_progress_while_search_is_running(
     helper.wait_for_job = Mock()
     helper.get_job_stats = Mock(side_effect=[{"is_done": "0"}, {"is_done": "1"}])
     job = Mock()
-    job.__dict__["sid"] = "search-123"
+    job.sid = "search-123"
     progress = Mock()
     monkeypatch.setattr(app_module.logger, "progress", progress)
     monkeypatch.setattr(app_module.time, "sleep", Mock())

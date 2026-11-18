@@ -128,7 +128,7 @@ For sending events to Splunk Platform, the User configured in the asset would re
     "run_query", "update_event", "get host events" and "on poll" action.
 - splunk_job_timeout:
   - The maximum total duration in seconds to wait for a Splunk search job before the connector returns an app-specific timeout.
-  - This is separate from SOAR's connector IPC inactivity limit. The app reports progress while polling so long-running searches can continue beyond five minutes, up to this configured timeout.
+  - This is separate from SOAR's connector IPC inactivity limit. The app reports progress while polling so long-running searches can continue beyond five minutes, up to this user configurable timeout.
 - on_poll_display:
   - Fields to save with On Poll
   - Users can select the fields from the events which the user wants to ingest in the artifact
@@ -340,7 +340,7 @@ VARIABLE | REQUIRED | TYPE | DESCRIPTION
 **remove_empty_cef** | optional | boolean | Remove CEF fields having empty values from the artifact |
 **sleeptime_in_requests** | optional | numeric | The time to wait for next REST call (max 120 seconds) |
 **include_cim_fields** | optional | boolean | Option to keep original Splunk CIM together with SOAR CEF fields |
-**splunk_job_timeout** | optional | numeric | The duration in seconds to wait before a scheduled Splunk job times out |
+**splunk_job_timeout** | optional | numeric | Maximum total duration in seconds to wait for a Splunk search job before timing out |
 **use_event_id_sdi** | optional | boolean | Option to use the event_id field value as the source data identifier instead of the full event hash |
 
 ### Supported Actions
