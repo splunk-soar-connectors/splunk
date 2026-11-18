@@ -58,6 +58,7 @@ from .splunk_consts import (
     SPLUNK_JOB_FIELD_NOT_FOUND_MESSAGE,
     SPLUNK_PROG_CREATED_QUERY,
     SPLUNK_PROG_CREATING_SEARCH_JOB,
+    SPLUNK_PROG_WAITING_FOR_SEARCH_JOB,
     SPLUNK_RID_SID_NOTABLE_QUERY,
     SPLUNK_SUCCESS_CONNECTIVITY_TEST,
 )
@@ -247,7 +248,7 @@ class Asset(BaseAsset):
         category=FieldCategory.INGEST,
     )
     splunk_job_timeout: int = AssetField(
-        description="The duration in seconds to wait before a scheduled Splunk job times out",
+        description="Maximum total duration in seconds to wait for a Splunk search job before timing out",
         required=False,
         default=1200,
         category=FieldCategory.CONNECTIVITY,
@@ -641,11 +642,13 @@ class SplunkHelper:
     def wait_for_job(self, job: splunk_client.Job, deadline: float | None = None):
         last_err = None
         deadline = deadline or time.monotonic() + self.asset.splunk_job_timeout
+        sid = getattr(job, "sid", "unknown")
         for attempt in range(1, self.asset.retry_count + 1):
             try:
                 while not job.is_ready():
                     if time.monotonic() >= deadline:
                         raise TimeoutError(SPLUNK_ERR_SPLUNK_JOB_HAS_TIMED_OUT)
+                    logger.progress(SPLUNK_PROG_WAITING_FOR_SEARCH_JOB.format(sid=sid))
                     time.sleep(self.asset.sleeptime_in_requests)
                 job.refresh()
                 return
@@ -662,6 +665,7 @@ class SplunkHelper:
 
     def wait_for_job_completion(self, job: splunk_client.Job) -> dict:
         deadline = time.monotonic() + self.asset.splunk_job_timeout
+        sid = getattr(job, "sid", "unknown")
         while True:
             self.wait_for_job(job, deadline)
             stats = self.get_job_stats(job)
@@ -669,6 +673,7 @@ class SplunkHelper:
                 return stats
             if time.monotonic() >= deadline:
                 raise TimeoutError(SPLUNK_ERR_SPLUNK_JOB_HAS_TIMED_OUT)
+            logger.progress(SPLUNK_PROG_WAITING_FOR_SEARCH_JOB.format(sid=sid))
             time.sleep(self.asset.sleeptime_in_requests)
 
     def get_job_stats(self, job) -> dict:
@@ -728,7 +733,7 @@ class SplunkHelper:
 
         kwargs_create["exec_mode"] = "normal"
         job = self.create_job(search_query, kwargs_create)
-        sid = job.__dict__.get("sid", "")
+        sid = getattr(job, "sid", "")
 
         self.wait_for_job_completion(job)
 

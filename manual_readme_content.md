@@ -117,8 +117,8 @@ For sending events to Splunk Platform, the User configured in the asset would re
   - It allows the user to add sleep time between the REST calls while performing the
     "run_query", "update_event", "get host events" and "on poll" action.
 - splunk_job_timeout:
-  - The duration in seconds to wait before a scheduled Splunk job times out
-  - It allows the user to configure the duration after which the connector should consider the Splunk job as timed out.
+  - The maximum total duration in seconds to wait for a Splunk search job before the connector returns an app-specific timeout.
+  - This is separate from SOAR's connector IPC inactivity limit. The app reports progress while polling so long-running searches can continue beyond five minutes, up to this user configurable timeout.
 - on_poll_display:
   - Fields to save with On Poll
   - Users can select the fields from the events which the user wants to ingest in the artifact
