@@ -1,2 +1,1 @@
 **Unreleased**
-* Report progress to SOAR while waiting for long-running Splunk search jobs.
