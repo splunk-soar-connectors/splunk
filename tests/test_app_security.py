@@ -201,7 +201,7 @@ def test_proxy_request_applies_timeout_to_every_urlopen_call(monkeypatch):
     assert "context" in open_url.call_args_list[1].kwargs
 
 
-def test_job_completion_has_a_single_total_deadline(monkeypatch):
+def test_job_completion_uses_configured_timeout_and_raises_app_error(monkeypatch):
     helper = object.__new__(SplunkHelper)
     helper.asset = Mock(splunk_job_timeout=1, retry_count=1, sleeptime_in_requests=0)
     job = Mock()
@@ -213,5 +213,43 @@ def test_job_completion_has_a_single_total_deadline(monkeypatch):
     monotonic = Mock(side_effect=[10, 11])
     monkeypatch.setattr(app_module.time, "monotonic", monotonic)
 
-    with pytest.raises(TimeoutError, match="timed out"):
+    with pytest.raises(TimeoutError) as exc_info:
         helper.wait_for_job_completion(job)
+
+    assert str(exc_info.value) == app_module.SPLUNK_ERR_SPLUNK_JOB_HAS_TIMED_OUT
+
+
+def test_wait_for_job_reports_progress_while_search_is_not_ready(monkeypatch):
+    helper = object.__new__(SplunkHelper)
+    helper.asset = Mock(retry_count=1, sleeptime_in_requests=60)
+    job = Mock()
+    job.__dict__["sid"] = "search-123"
+    job.is_ready.side_effect = [False, True]
+    progress = Mock()
+    monkeypatch.setattr(app_module.logger, "progress", progress)
+    monkeypatch.setattr(app_module.time, "sleep", Mock())
+    monkeypatch.setattr(app_module.time, "monotonic", Mock(return_value=1))
+
+    helper.wait_for_job(job, deadline=100)
+
+    progress.assert_called_once_with("Waiting for Splunk search job (SID: search-123)")
+
+
+def test_wait_for_job_completion_reports_progress_while_search_is_running(
+    monkeypatch,
+):
+    helper = object.__new__(SplunkHelper)
+    helper.asset = Mock(splunk_job_timeout=1200, sleeptime_in_requests=60)
+    helper.wait_for_job = Mock()
+    helper.get_job_stats = Mock(side_effect=[{"is_done": "0"}, {"is_done": "1"}])
+    job = Mock()
+    job.__dict__["sid"] = "search-123"
+    progress = Mock()
+    monkeypatch.setattr(app_module.logger, "progress", progress)
+    monkeypatch.setattr(app_module.time, "sleep", Mock())
+    monkeypatch.setattr(app_module.time, "monotonic", Mock(return_value=1))
+
+    stats = helper.wait_for_job_completion(job)
+
+    assert stats == {"is_done": "1"}
+    progress.assert_called_once_with("Waiting for Splunk search job (SID: search-123)")

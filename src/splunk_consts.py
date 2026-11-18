@@ -62,6 +62,7 @@ SPLUNK_ERR_EMPTY_RESPONSE = (
 # Progress messages
 SPLUNK_PROG_CREATED_QUERY = "Created query '{query}'"
 SPLUNK_PROG_CREATING_SEARCH_JOB = "Creating search job"
+SPLUNK_PROG_WAITING_FOR_SEARCH_JOB = "Waiting for Splunk search job (SID: {sid})"
 
 # Default values
 SPLUNK_DEFAULT_SOURCE = "Phantom"
